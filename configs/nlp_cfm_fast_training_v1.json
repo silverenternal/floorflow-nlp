@@ -1,0 +1,26 @@
+{
+  "version": "nlp-cfm-fast-training-v1",
+  "seed": 127,
+  "device": "cuda:1",
+  "steps": 400,
+  "batch_size": 32,
+  "hidden_size": 24,
+  "rank": 8,
+  "learning_rate": 0.01,
+  "warmup_steps": 20,
+  "gradient_clip_norm": 1.0,
+  "ema_decay": 0.99,
+  "arms": [
+    {
+      "id": "uniform",
+      "timestep_sampler": "uniform"
+    },
+    {
+      "id": "logit_normal",
+      "timestep_sampler": "logit_normal",
+      "logit_normal_std": 0.8
+    }
+  ],
+  "evaluation_steps": [0, 25, 50, 100, 200, 399],
+  "evidence_boundary": "Synthetic convergence probe only; no AST or code capability claim."
+}

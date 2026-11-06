@@ -1,0 +1,40 @@
+{
+  "version": "nlp-specialization-v1",
+  "status": "contract_ready",
+  "objectives": {
+    "fim": {
+      "enabled": true,
+      "prefix_sentinel": "<fim_prefix>",
+      "middle_sentinel": "<fim_middle>",
+      "suffix_sentinel": "<fim_suffix>",
+      "minimum_middle_tokens": 1,
+      "seed": 20261101
+    },
+    "diff": {
+      "enabled": true,
+      "format": "unified_patch",
+      "target_lines": [
+        "added",
+        "removed"
+      ],
+      "context_lines": 3
+    },
+    "verifier": {
+      "enabled": true,
+      "signals": [
+        "exit_code",
+        "failed_test_count",
+        "timeout",
+        "stdout_tail_hash"
+      ],
+      "primary_max_attempts": 1,
+      "primary_best_of_n": false
+    }
+  },
+  "leakage_policy": {
+    "middle_tokens_visible_at_inference": false,
+    "patch_target_visible_at_inference": false,
+    "evaluation_targets_in_training_mask": false
+  },
+  "evidence_boundary": "Objective and leakage contracts only; specialization capability requires matched training."
+}

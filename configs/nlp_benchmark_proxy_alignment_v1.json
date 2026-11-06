@@ -1,0 +1,419 @@
+{
+  "version": "nlp-benchmark-proxy-alignment-v2",
+  "status": "proxy_heads_complete_training_labels_pending",
+  "evidence_boundary": "Public benchmark metric definitions and internal proxy design only; no trained-model benchmark result.",
+  "external_benchmarks": [
+    {
+      "id": "humaneval_plus",
+      "metrics": ["pass_at_1", "extra_test_robustness"],
+      "source": "https://arxiv.org/abs/2305.01210"
+    },
+    {
+      "id": "mbpp_plus",
+      "metrics": ["pass_at_1", "extra_test_robustness"],
+      "source": "https://arxiv.org/abs/2305.01210"
+    },
+    {
+      "id": "multipl_e",
+      "metrics": ["pass_at_1", "compile_rate", "runtime_success"],
+      "source": "https://arxiv.org/abs/2208.08227"
+    },
+    {
+      "id": "livecodebench",
+      "metrics": [
+        "pass_at_1",
+        "self_repair_success",
+        "execution_trace_accuracy",
+        "test_output_accuracy"
+      ],
+      "source": "https://arxiv.org/abs/2403.07974"
+    },
+    {
+      "id": "bigcodebench",
+      "metrics": [
+        "pass_at_1",
+        "library_call_correctness",
+        "test_branch_coverage"
+      ],
+      "source": "https://arxiv.org/abs/2406.15877"
+    },
+    {
+      "id": "swe_bench",
+      "metrics": [
+        "resolved_rate",
+        "patch_apply_rate",
+        "fail_to_pass_rate",
+        "pass_to_pass_rate",
+        "file_localization_accuracy"
+      ],
+      "source": "https://arxiv.org/abs/2310.06770"
+    },
+    {
+      "id": "repobench",
+      "metrics": [
+        "retrieval_recall_at_k",
+        "retrieval_mrr",
+        "line_completion_exact_match"
+      ],
+      "source": "https://arxiv.org/abs/2306.03091"
+    },
+    {
+      "id": "cruceval",
+      "metrics": ["input_prediction_exact_match", "output_prediction_exact_match"],
+      "source": "https://arxiv.org/abs/2401.03065"
+    },
+    {
+      "id": "classeval",
+      "metrics": ["class_level_pass_at_1", "method_dependency_correctness"],
+      "source": "https://arxiv.org/abs/2308.01861"
+    },
+    {
+      "id": "ds1000",
+      "metrics": ["execution_pass_at_1", "surface_constraint_accuracy"],
+      "source": "https://arxiv.org/abs/2211.11501"
+    },
+    {
+      "id": "ifeval",
+      "metrics": ["prompt_level_strict_accuracy", "instruction_level_accuracy"],
+      "source": "https://arxiv.org/abs/2311.07911"
+    },
+    {
+      "id": "mmlu_pro",
+      "metrics": [
+        "multiple_choice_accuracy",
+        "calibration_ece",
+        "selective_risk"
+      ],
+      "source": "https://arxiv.org/abs/2406.01574"
+    },
+    {
+      "id": "gpqa",
+      "metrics": ["knowledge_accuracy", "calibration_ece"],
+      "source": "https://arxiv.org/abs/2311.12022"
+    },
+    {
+      "id": "gsm8k",
+      "metrics": ["exact_match", "answer_correctness"],
+      "source": "https://arxiv.org/abs/2110.14168"
+    },
+    {
+      "id": "truthfulqa",
+      "metrics": ["truthfulness", "informativeness"],
+      "source": "https://arxiv.org/abs/2109.07958"
+    },
+    {
+      "id": "safetybench",
+      "metrics": ["attack_success_rate", "refusal_accuracy"],
+      "source": "https://arxiv.org/abs/2309.07045"
+    },
+    {
+      "id": "ruler_long_context",
+      "metrics": ["long_context_retrieval_recall"],
+      "source": "https://arxiv.org/abs/2404.06654"
+    },
+    {
+      "id": "livebench",
+      "metrics": ["objective_accuracy", "contamination_limited_coverage"],
+      "source": "https://arxiv.org/abs/2406.19314"
+    }
+  ],
+  "proxy_map": [
+    {
+      "external_metric": "pass_at_1",
+      "internal_metric": "unit_test_pass_rate",
+      "loss": "L_execution_outcome",
+      "status": "head_implemented_training_wiring_pending"
+    },
+    {
+      "external_metric": "extra_test_robustness",
+      "internal_metric": "metamorphic_test_pass_rate",
+      "loss": "L_metamorphic_consistency",
+      "status": "implemented"
+    },
+    {
+      "external_metric": "compile_rate",
+      "internal_metric": "compilation_rate",
+      "loss": "L_compile_outcome",
+      "status": "head_implemented_training_wiring_pending"
+    },
+    {
+      "external_metric": "runtime_success",
+      "internal_metric": "runtime_success_rate",
+      "loss": "L_execution_outcome",
+      "status": "head_implemented_training_wiring_pending"
+    },
+    {
+      "external_metric": "self_repair_success",
+      "internal_metric": "diagnostic_conditioned_patch_success",
+      "loss": "L_self_repair",
+      "status": "head_implemented_training_wiring_pending"
+    },
+    {
+      "external_metric": "execution_trace_accuracy",
+      "internal_metric": "trace_step_and_result_accuracy",
+      "loss": "L_execution_trace",
+      "status": "head_implemented_training_wiring_pending"
+    },
+    {
+      "external_metric": "test_output_accuracy",
+      "internal_metric": "test_output_accuracy",
+      "loss": "L_test_output",
+      "status": "head_implemented_training_wiring_pending"
+    },
+    {
+      "external_metric": "library_call_correctness",
+      "internal_metric": "library_api_call_accuracy",
+      "loss": "L_library_calls",
+      "status": "head_implemented_training_wiring_pending"
+    },
+    {
+      "external_metric": "test_branch_coverage",
+      "internal_metric": "behavior_branch_coverage",
+      "loss": "L_branch_coverage",
+      "status": "head_implemented_training_wiring_pending"
+    },
+    {
+      "external_metric": "resolved_rate",
+      "internal_metric": "repository_all_tests_pass_rate",
+      "loss": "L_repository_patch",
+      "status": "head_implemented_training_wiring_pending"
+    },
+    {
+      "external_metric": "patch_apply_rate",
+      "internal_metric": "patch_apply_rate",
+      "loss": "L_patch_success",
+      "status": "head_implemented_training_wiring_pending"
+    },
+    {
+      "external_metric": "fail_to_pass_rate",
+      "internal_metric": "fail_to_pass_rate",
+      "loss": "L_repository_patch",
+      "status": "head_implemented_training_wiring_pending"
+    },
+    {
+      "external_metric": "pass_to_pass_rate",
+      "internal_metric": "pass_to_pass_rate",
+      "loss": "L_repository_patch",
+      "status": "head_implemented_training_wiring_pending"
+    },
+    {
+      "external_metric": "file_localization_accuracy",
+      "internal_metric": "file_and_span_localization_accuracy",
+      "loss": "L_file_localization",
+      "status": "head_implemented_training_wiring_pending"
+    },
+    {
+      "external_metric": "retrieval_recall_at_k",
+      "internal_metric": "retrieval_recall_at_k",
+      "loss": "L_retrieval_contrastive",
+      "status": "implemented"
+    },
+    {
+      "external_metric": "retrieval_mrr",
+      "internal_metric": "retrieval_mrr",
+      "loss": "L_retrieval_contrastive",
+      "status": "implemented"
+    },
+    {
+      "external_metric": "line_completion_exact_match",
+      "internal_metric": "line_completion_exact_match",
+      "loss": "L_line_completion",
+      "status": "head_implemented_training_wiring_pending"
+    },
+    {
+      "external_metric": "input_prediction_exact_match",
+      "internal_metric": "input_prediction_exact_match",
+      "loss": "L_inverse_execution",
+      "status": "head_implemented_training_wiring_pending"
+    },
+    {
+      "external_metric": "output_prediction_exact_match",
+      "internal_metric": "output_prediction_exact_match",
+      "loss": "L_inverse_execution",
+      "status": "head_implemented_training_wiring_pending"
+    },
+    {
+      "external_metric": "class_level_pass_at_1",
+      "internal_metric": "class_level_pass_at_1",
+      "loss": "L_class_level",
+      "status": "head_implemented_training_wiring_pending"
+    },
+    {
+      "external_metric": "method_dependency_correctness",
+      "internal_metric": "symbol_dependency_accuracy",
+      "loss": "L_library_calls",
+      "status": "head_implemented_training_wiring_pending"
+    },
+    {
+      "external_metric": "execution_pass_at_1",
+      "internal_metric": "data_science_execution_pass_at_1",
+      "loss": "L_execution_outcome",
+      "status": "head_implemented_training_wiring_pending"
+    },
+    {
+      "external_metric": "surface_constraint_accuracy",
+      "internal_metric": "api_and_format_constraint_accuracy",
+      "loss": "L_instruction_constraints",
+      "status": "implemented"
+    },
+    {
+      "external_metric": "prompt_level_strict_accuracy",
+      "internal_metric": "all_constraints_satisfied_rate",
+      "loss": "L_instruction_constraints",
+      "status": "implemented"
+    },
+    {
+      "external_metric": "instruction_level_accuracy",
+      "internal_metric": "constraint_accuracy",
+      "loss": "L_instruction_constraints",
+      "status": "implemented"
+    },
+    {
+      "external_metric": "objective_accuracy",
+      "internal_metric": "calibrated_answer_accuracy",
+      "loss": "L_calibration",
+      "status": "implemented"
+    },
+    {
+      "external_metric": "multiple_choice_accuracy",
+      "internal_metric": "multiple_choice_accuracy",
+      "loss": "L_multiple_choice",
+      "status": "head_implemented_training_wiring_pending"
+    },
+    {
+      "external_metric": "knowledge_accuracy",
+      "internal_metric": "knowledge_accuracy",
+      "loss": "L_knowledge_answer",
+      "status": "head_implemented_training_wiring_pending"
+    },
+    {
+      "external_metric": "answer_correctness",
+      "internal_metric": "answer_correctness",
+      "loss": "L_answer_correctness",
+      "status": "head_implemented_training_wiring_pending"
+    },
+    {
+      "external_metric": "exact_match",
+      "internal_metric": "exact_match",
+      "loss": "L_answer_correctness",
+      "status": "head_implemented_training_wiring_pending"
+    },
+    {
+      "external_metric": "calibration_ece",
+      "internal_metric": "calibration_ece",
+      "loss": "L_calibration",
+      "status": "implemented"
+    },
+    {
+      "external_metric": "selective_risk",
+      "internal_metric": "selective_risk",
+      "loss": "L_selective_risk",
+      "status": "implemented"
+    },
+    {
+      "external_metric": "truthfulness",
+      "internal_metric": "truthfulness",
+      "loss": "L_truthfulness",
+      "status": "head_implemented_training_wiring_pending"
+    },
+    {
+      "external_metric": "informativeness",
+      "internal_metric": "informativeness",
+      "loss": "L_informativeness",
+      "status": "head_implemented_training_wiring_pending"
+    },
+    {
+      "external_metric": "attack_success_rate",
+      "internal_metric": "attack_success_rate",
+      "loss": "L_safety",
+      "status": "head_implemented_training_wiring_pending"
+    },
+    {
+      "external_metric": "refusal_accuracy",
+      "internal_metric": "refusal_accuracy",
+      "loss": "L_safety",
+      "status": "head_implemented_training_wiring_pending"
+    },
+    {
+      "external_metric": "long_context_retrieval_recall",
+      "internal_metric": "long_context_retrieval_recall",
+      "loss": "L_long_context_retrieval",
+      "status": "implemented"
+    },
+    {
+      "external_metric": "runtime_ratio",
+      "internal_metric": "runtime_ratio",
+      "loss": "L_efficiency_guard",
+      "status": "implemented"
+    },
+    {
+      "external_metric": "memory_ratio",
+      "internal_metric": "memory_ratio",
+      "loss": "L_efficiency_guard",
+      "status": "implemented"
+    },
+    {
+      "external_metric": "latency_ratio",
+      "internal_metric": "latency_ratio",
+      "loss": "L_efficiency_guard",
+      "status": "implemented"
+    },
+    {
+      "external_metric": "contamination_limited_coverage",
+      "internal_metric": "time_holdout_and_contamination_coverage",
+      "loss": "governance_only_no_loss",
+      "status": "governance_gate"
+    }
+  ],
+  "required_joint_loss_components": [
+    "L_compile_outcome",
+    "L_execution_outcome",
+    "L_execution_trace",
+    "L_test_output",
+    "L_retrieval_contrastive",
+    "L_file_localization",
+    "L_patch_success",
+    "L_repository_patch",
+    "L_instruction_constraints",
+    "L_metamorphic_consistency",
+    "L_calibration",
+    "L_self_repair",
+    "L_line_completion",
+    "L_class_level",
+    "L_library_calls",
+    "L_branch_coverage",
+    "L_inverse_execution",
+    "L_efficiency_guard",
+    "L_knowledge_answer",
+    "L_answer_correctness",
+    "L_multiple_choice",
+    "L_selective_risk",
+    "L_truthfulness",
+    "L_informativeness",
+    "L_safety",
+    "L_long_context_retrieval"
+  ],
+  "alignment_checks": {
+    "unit": "benchmark family",
+    "minimum_cases": 24,
+    "statistics": [
+      "spearman_rank_correlation",
+      "kendall_tau",
+      "pairwise_sign_agreement",
+      "coverage"
+    ],
+    "pass": [
+      "every non-governance external metric has an internal proxy",
+      "every required proxy loss is finite on deterministic fixtures",
+      "proxy-to-external Spearman rho is at least 0.7",
+      "pairwise sign agreement is at least 0.75",
+      "no internal proxy uses final-test labels at inference"
+    ],
+    "fail_if": [
+      "a benchmark metric has no proxy or governance explanation",
+      "proxy loss is disconnected from the joint objective",
+      "proxy rank correlation is below the frozen gate",
+      "proxy quality is reported as external benchmark quality"
+    ]
+  }
+}

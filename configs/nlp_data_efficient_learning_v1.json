@@ -1,0 +1,112 @@
+{
+  "version": "nlp-data-efficient-learning-v1",
+  "status": "cpu_probe_then_gpu_extension",
+  "corpora": {
+    "p5m": {
+      "manifest": ".data/nlp/p5m_v2/manifest.json",
+      "train": [
+        ".data/nlp/mixed_v1/corpus_v1/train.jsonl",
+        ".data/nlp/p5m_v2/delta_train.jsonl"
+      ],
+      "validation": [
+        ".data/nlp/mixed_v1/corpus_v1/validation.jsonl",
+        ".data/nlp/p5m_v2/delta_validation.jsonl"
+      ],
+      "test": [
+        ".data/nlp/mixed_v1/corpus_v1/test.jsonl",
+        ".data/nlp/p5m_v2/delta_test.jsonl"
+      ],
+      "tokens": 97911597
+    },
+    "p12m": {
+      "manifest": ".data/nlp/p12m_v2/manifest.json",
+      "train": [
+        ".data/nlp/mixed_v1/corpus_v1/train.jsonl",
+        ".data/nlp/p5m_v2/delta_train.jsonl",
+        ".data/nlp/p12m_v2/delta_train.jsonl"
+      ],
+      "validation": [
+        ".data/nlp/mixed_v1/corpus_v1/validation.jsonl",
+        ".data/nlp/p5m_v2/delta_validation.jsonl",
+        ".data/nlp/p12m_v2/delta_validation.jsonl"
+      ],
+      "test": [
+        ".data/nlp/mixed_v1/corpus_v1/test.jsonl",
+        ".data/nlp/p5m_v2/delta_test.jsonl",
+        ".data/nlp/p12m_v2/delta_test.jsonl"
+      ],
+      "tokens": 230012566
+    }
+  },
+  "probe": {
+    "corpus": "p12m",
+    "device": "cpu",
+    "seed": 91,
+    "max_train_rows_per_family": 500,
+    "max_validation_rows_per_family": 100,
+    "max_train_code_rows_per_language": {
+      "python": 400,
+      "rust": 250,
+      "cpp": 500,
+      "c": 100,
+      "mixed": 250
+    },
+    "max_scan_rows": 200000,
+    "near_duplicate_hamming_threshold": 3,
+    "max_near_copies": 1,
+    "warmup_examples": 300,
+    "late_examples": 150,
+    "curriculum_progress": [
+      0.15,
+      0.8
+    ],
+    "hard_memory_capacity": 128
+  },
+  "generated_only_gaps": [
+    "json_validity",
+    "compositional_emergence"
+  ],
+  "arms": [
+    {
+      "name": "uniform",
+      "sampler": "uniform"
+    },
+    {
+      "name": "family_balanced",
+      "sampler": "family_balanced"
+    },
+    {
+      "name": "curriculum_efficient",
+      "sampler": "curriculum_efficient"
+    }
+  ],
+  "gap_training": {
+    "reuse_isolated_primary_rows": true,
+    "default_replay_fraction": 0.1,
+    "cross_gap_replay_must_be_masked_as_auxiliary": true,
+    "test_split_forbidden": true
+  },
+  "metrics": {
+    "primary": [
+      "heldout_byte_bigram_nll",
+      "gain_per_seen_token",
+      "family_gap_coverage",
+      "duplicate_exposure",
+      "python_ast_source_parse_rate",
+      "strict_json_source_rate"
+    ],
+    "deferred_to_gpu_extension": [
+      "executable_generation_rate",
+      "family_forgetting",
+      "validation_loss_after_equal_steps",
+      "wall_clock_time_per_solved_task"
+    ]
+  },
+  "forbidden": [
+    "test split reads during selection",
+    "repair or parser fallback",
+    "retry or best-of-N",
+    "using validation loss to choose per-example final-test labels"
+  ],
+  "evidence_boundary": "Corpus sampling and byte-level smoke only; no coding-capability or SOTA claim."
+}

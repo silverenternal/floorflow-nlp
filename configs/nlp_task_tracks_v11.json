@@ -1,0 +1,20 @@
+{
+  "version": "nlp-task-tracks-v11",
+  "status": "implementation_contract",
+  "tracks": {
+    "user_task_generation": {
+      "allowed_origins": ["user_available"],
+      "forbidden_origins": ["target_derived", "training_only", "evaluation_only"]
+    },
+    "reconstruction_recovery": {
+      "allowed_origins": ["user_available", "target_derived", "training_only"],
+      "forbidden_origins": ["evaluation_only"],
+      "claim_scope": "internal reconstruction only"
+    }
+  },
+  "source_registry": "Origins are independently established by an audited source registry, not by field names or claimed field labels.",
+  "hidden_benchmark_tests": "evaluation_only",
+  "canonical_solutions": "evaluation_only",
+  "field_binding": "A nonempty field must be a verbatim substring of its registered evidence, whose UTF-8 SHA-256 is verified.",
+  "evidence_boundary": "Prompt provenance contract only; production inference and data integration are separate tasks."
+}

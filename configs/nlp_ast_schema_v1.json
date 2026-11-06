@@ -1,0 +1,113 @@
+{
+  "version": "nlp-ast-schema-v1",
+  "status": "frozen",
+  "parser_binding": {
+    "python": {
+      "package": "tree-sitter-python",
+      "version": "0.25.0",
+      "abi_version": 15,
+      "grammar_sha256": "2880af292af6b7b25cc73fc860b72fe5e46b4bce286520d50dfec5791c55cc7a",
+      "native_sha256": "edf0862b2fda605a9c439955b2f60b248941c9af709222e7b1566bc603a0aa04"
+    },
+    "rust": {
+      "package": "tree-sitter-rust",
+      "version": "0.24.2",
+      "abi_version": 15,
+      "grammar_sha256": "9e5292c882a1785401253035cb3ca95771c42cc86aa9ed318cef418793c8ed39",
+      "native_sha256": "a965112037009c8264531395977cfa236f8e8486d3d0af841f0145d22b43affa"
+    },
+    "cpp": {
+      "package": "tree-sitter-cpp",
+      "version": "0.23.4",
+      "abi_version": 14,
+      "grammar_sha256": "7394a3fe96453f3b6aa19da5446f3859e01546f696c0f6632b16c9a2eff1a7b1",
+      "native_sha256": "99d80b33712cb43559cd5d35d59c57f0c323bae496c863e5e3a2a8746824fe5c"
+    }
+  },
+  "languages": {
+    "python": {
+      "grammar_package": "tree-sitter-python",
+      "root": "module",
+      "scope_node_types": [
+        "module",
+        "class_definition",
+        "function_definition",
+        "lambda"
+      ],
+      "symbol_fields": [
+        "name"
+      ],
+      "edge_fields": [
+        "name",
+        "body",
+        "parameters",
+        "return_type",
+        "value"
+      ]
+    },
+    "rust": {
+      "grammar_package": "tree-sitter-rust",
+      "root": "source_file",
+      "scope_node_types": [
+        "source_file",
+        "function_item",
+        "impl_item",
+        "mod_item",
+        "trait_item",
+        "closure_expression"
+      ],
+      "symbol_fields": [
+        "name"
+      ],
+      "edge_fields": [
+        "name",
+        "body",
+        "parameters",
+        "return_type",
+        "type",
+        "value"
+      ]
+    },
+    "cpp": {
+      "grammar_package": "tree-sitter-cpp",
+      "root": "translation_unit",
+      "scope_node_types": [
+        "translation_unit",
+        "class_specifier",
+        "function_definition",
+        "namespace_definition",
+        "struct_specifier",
+        "lambda_expression"
+      ],
+      "symbol_fields": [
+        "declarator"
+      ],
+      "edge_fields": [
+        "declarator",
+        "body",
+        "parameters",
+        "type",
+        "value"
+      ]
+    }
+  },
+  "node_contract": {
+    "include_anonymous_tokens": true,
+    "preserve_byte_spans": true,
+    "edge_type": "tree-sitter field name or child",
+    "lexical_values": "UTF-8 leaf text",
+    "scope_relation": "nearest enclosing canonical scope path",
+    "symbol_relation": "declaration node to canonical name/declarator field"
+  },
+  "metrics": [
+    "parse_validity",
+    "node_type_f1",
+    "lexical_f1",
+    "typed_edge_f1",
+    "scope_relation_f1",
+    "scope_accuracy",
+    "normalized_tree_edit_distance"
+  ],
+  "evidence_boundary": "AST codec and structural metrics only; no semantic correctness claim.",
+  "failure_contract": "Malformed source, unknown language, unknown node type, or invalid byte span fails validation."
+}

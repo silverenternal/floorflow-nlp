@@ -1,0 +1,45 @@
+{
+  "version": "nlp-dynamic-stack-audit-v1",
+  "name": "parameter-shared-dynamic-encoder-decoder",
+  "runtime": {
+    "device": "cuda:1",
+    "deterministic": true,
+    "seed": 73
+  },
+  "model": {
+    "vocab_size": 8192,
+    "hidden_size": 224,
+    "num_layers": 5,
+    "num_heads": 4,
+    "num_kv_heads": 2,
+    "intermediate_size": 512,
+    "max_seq_len": 512,
+    "parameter_cap": 4830000,
+    "tie_embeddings": true,
+    "enable_dynamic_stack": true,
+    "dynamic_min_steps": 1,
+    "dynamic_max_steps": 8,
+    "dynamic_parallel_lanes": 2,
+    "dynamic_parallel_top_k": 1,
+    "dynamic_lane_rank": 8
+  },
+  "audit": {
+    "serial_depths": [1, 2, 4, 8],
+    "batch_size": 2,
+    "sequence_length": 64,
+    "padding_length": 13,
+    "delayed_halt_bias": -20.0
+  },
+  "claim_gate": {
+    "proves": [
+      "physical parameter count is independent of configured maximum serial depth",
+      "decoder causality and encoder bidirectional behavior",
+      "padding invariance and compute diagnostics"
+    ],
+    "does_not_prove": [
+      "small-model equivalence to a large model",
+      "capability gain over matched fixed-depth controls",
+      "SOTA coding or engineering performance"
+    ]
+  }
+}

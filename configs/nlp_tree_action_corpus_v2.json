@@ -1,0 +1,11 @@
+{
+  "version": "nlp-tree-action-corpus-v2-train-only-rebuild",
+  "status": "implementation_ready_cpu_build_only",
+  "ast_corpus": ".data/nlp/ast_core_v1/corpus.jsonl",
+  "grammar": "configs/nlp_ast_transition_grammar_v2.json",
+  "prompt_contract": "configs/nlp_tree_action_corpus_v1.json",
+  "output": ".data/nlp/tree_action_v2/train_corpus.jsonl",
+  "report": "outputs/reports/nlp_tree_action_corpus_audit_v2.json",
+  "split_policy": "Parse train rows only; never JSON-decode validation or test rows.",
+  "evidence_boundary": "Corrected train-only teacher-action supervision; no model training or capability claim."
+}

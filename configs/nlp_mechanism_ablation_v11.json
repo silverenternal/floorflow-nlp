@@ -1,0 +1,29 @@
+{
+  "version": "nlp-mechanism-ablation-v11",
+  "status": "queue_frozen_no_experiments",
+  "seed_set": [11, 17, 23],
+  "split": "validation",
+  "run_one_mechanism_at_a_time": true,
+  "controls": [
+    {"id": "disabled", "dynamic_enabled": false, "generated_e_enabled": false, "policy": "none"},
+    {"id": "fixed_competence", "dynamic_enabled": true, "generated_e_enabled": false, "policy": "fixed_competence_cells"},
+    {"id": "random_competence", "dynamic_enabled": true, "generated_e_enabled": false, "policy": "seeded_random_cell"},
+    {"id": "fixed_pool", "dynamic_enabled": true, "generated_e_enabled": false, "policy": "fixed_pool_selection"},
+    {"id": "generated_e", "dynamic_enabled": true, "generated_e_enabled": true, "policy": "bounded_generated_expert"}
+  ],
+  "holdout": {
+    "required": true,
+    "case_identity_hash_required": true,
+    "reuse_training_cases_for_novelty": false
+  },
+  "emergence_objective": {
+    "novelty_credit_requires": ["supported", "holdout", "ast_valid", "native_schema_valid", "application_valid", "execution_valid"],
+    "invalid_output_novelty_credit": 0.0,
+    "unsupported_output_novelty_credit": 0.0
+  },
+  "execution": {
+    "run_enabled": false,
+    "gpu_enabled": false,
+    "required_before_experiment": "NLP-074-IMPLEMENTATION-INTEGRATION"
+  }
+}

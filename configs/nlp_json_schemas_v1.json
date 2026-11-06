@@ -1,0 +1,73 @@
+{
+  "version": "nlp-json-schemas-v1",
+  "root_schema": "schema/nlp_json_output_v1.schema.json",
+  "outputs": {
+    "ast": {
+      "required": [
+        "schema_version",
+        "kind",
+        "payload"
+      ],
+      "payload_required": [
+        "language",
+        "nodes",
+        "edges"
+      ]
+    },
+    "patch": {
+      "required": [
+        "schema_version",
+        "kind",
+        "payload"
+      ],
+      "payload_required": [
+        "files",
+        "summary"
+      ]
+    },
+    "tool_action": {
+      "required": [
+        "schema_version",
+        "kind",
+        "payload"
+      ],
+      "payload_required": [
+        "tool",
+        "arguments"
+      ]
+    },
+    "diagnostic": {
+      "required": [
+        "schema_version",
+        "kind",
+        "payload"
+      ],
+      "payload_required": [
+        "diagnosis",
+        "recommended_action",
+        "evidence"
+      ]
+    },
+    "engineering_result": {
+      "required": [
+        "schema_version",
+        "kind",
+        "payload"
+      ],
+      "payload_required": [
+        "status",
+        "tests",
+        "measurements"
+      ]
+    }
+  },
+  "numeric_policy": {
+    "finite_only": true,
+    "allow_nan": false,
+    "allow_infinity": false
+  },
+  "object_policy": {
+    "duplicate_keys": "reject",
+    "additional_root_fields": "reject"
+  }
+}

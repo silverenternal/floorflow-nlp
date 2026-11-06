@@ -1,0 +1,56 @@
+{
+  "version": "nlp-multilingual-supplement-v11",
+  "status": "candidate_manifest_materialized_near_overlap_partial",
+  "existing_recovery_suite": "Frozen 60 validation fragments; 39 Python, 21 Rust and 0 C++; do not alter cases or thresholds.",
+  "minimum_validation_cases_per_language": 20,
+  "languages": ["python", "rust", "cpp"],
+  "required_constructs_by_language": {
+    "python": ["function_definition", "assignment", "if_statement", "for_statement", "call", "return", "literal"],
+    "rust": ["function_item", "let_declaration", "match_expression", "for_expression", "call_expression", "return_expression", "literal", "type_item"],
+    "cpp": ["function_definition", "declaration", "if_statement", "for_statement", "call_expression", "return_statement", "literal", "type_declaration"]
+  },
+  "required_complexity_bins": ["basic", "intermediate", "advanced"],
+  "required_action_length_bins": ["short", "medium", "long"],
+  "complexity_definition": {
+    "basic": "AST node count <= 40 and depth <= 5",
+    "intermediate": "Not basic; node count <= 150 and depth <= 10",
+    "advanced": "Neither basic nor intermediate"
+  },
+  "action_length_definition": {
+    "short": "1-128 actions",
+    "medium": "129-512 actions",
+    "long": ">512 actions"
+  },
+  "metadata_manifest": ".data/nlp/multilingual_supplement_v11/metadata.jsonl",
+  "source_registry": "configs/nlp_multilingual_source_registry_v11.json",
+  "audit_command": "uv run python scripts/audit_nlp_multilingual_supplement.py",
+  "required_coverage": ["language", "source_repository", "construct", "complexity", "action_length", "source_lineage"],
+  "required_fragment_lineage": [
+    "parent_case_id",
+    "parent_source_sha256",
+    "fragment_start_byte",
+    "fragment_end_byte",
+    "source_url"
+  ],
+  "required_source_registry_identity": [
+    "repository",
+    "revision",
+    "license",
+    "license_url",
+    "source_url",
+    "clone_family",
+    "clone_family_evidence_url",
+    "usage",
+    "redistribution"
+  ],
+  "revision_policy": "Every admitted source revision must be a full immutable Git commit ID (40-64 lowercase hexadecimal characters); branch names and abbreviated commits are rejected.",
+  "clone_family_policy": "Each case clone_family must match the independently curated source registry. Case-local clone labels do not establish lineage.",
+  "split_rules": [
+    "Freeze approved source revision and license before acquisition.",
+    "Keep repository, file and verified clone-family groups disjoint across splits.",
+    "Run exact and near-duplicate benchmark contamination checks against fingerprinted training sources.",
+    "Treat missing source lineage, clone-family evidence or language coverage as unknown and block the multilingual claim."
+  ],
+  "test_access": "No test content or predictions are used for model selection.",
+  "evidence_boundary": "Pinned Python/Rust/C++ validation repositories are materialized, parser/action replayed, and coverage-audited. Exact and substring matches are excluded and recorded. Near-overlap is unassessed for fragments shorter than 64 characters; external benchmark scanning remains deferred until candidate identity freeze. This is not model capability evidence."
+}

@@ -1,0 +1,256 @@
+{
+  "version": "nlp-corpus-plan-v1",
+  "status": "planned",
+  "objective": "Build a provenance-controlled general-language, code, model-architecture, and engineering-acceleration corpus with an explicit token-to-parameter budget.",
+  "coding_target": {
+    "config": "configs/nlp_coding_target_v1.json",
+    "documentation": "docs/nlp_coding_sota_plan_v1.md",
+    "capability_extension_tiers": [
+      {
+        "id": "P23M",
+        "parameters": 23000000,
+        "corpus_tokens": 460000000
+      },
+      {
+        "id": "P46M",
+        "parameters": 46000000,
+        "corpus_tokens": 920000000
+      }
+    ],
+    "rule": "Open an extension tier only after the smaller matched model fails a frozen capability gate."
+  },
+  "ratio_contract": {
+    "tokens_per_parameter": 20,
+    "total_tokens_scope": "train_plus_validation_plus_test",
+    "parameter_scope": [
+      "token_embedding",
+      "tied_output_projection",
+      "transformer_blocks",
+      "typed_channel_adapters",
+      "hierarchy_flow_heads",
+      "language_decoder_heads"
+    ],
+    "unique_trainable_parameters_only": true,
+    "tied_weights_counted_once": true,
+    "tolerance_relative": 0.02,
+    "measurement": "tokenizer-native non-padding tokens after splitting, including EOS"
+  },
+  "tiers": [
+    {
+      "id": "pilot",
+      "total_tokens": 46000000,
+      "target_parameters": 2300000,
+      "max_context_tokens": 512,
+      "vocab_size": 8192,
+      "splits": {
+        "train": 40000000,
+        "validation": 4000000,
+        "test": 2000000
+      }
+    },
+    {
+      "id": "screen",
+      "total_tokens": 92000000,
+      "target_parameters": 4600000,
+      "max_context_tokens": 1024,
+      "vocab_size": 8192,
+      "splits": {
+        "train": 80000000,
+        "validation": 8000000,
+        "test": 4000000
+      }
+    },
+    {
+      "id": "full",
+      "total_tokens": 230000000,
+      "target_parameters": 11500000,
+      "max_context_tokens": 1024,
+      "vocab_size": 16384,
+      "splits": {
+        "train": 200000000,
+        "validation": 20000000,
+        "test": 10000000
+      }
+    }
+  ],
+  "mix": [
+    {
+      "family": "general_language",
+      "share_percent": 25,
+      "role": "English fluency, narrative structure, and anti-forgetting replay",
+      "sources": [
+        "roneneldan/TinyStories",
+        "optional permissive public-domain prose"
+      ]
+    },
+    {
+      "family": "code",
+      "share_percent": 35,
+      "role": "source-code structure, API documentation, identifier usage, and execution-oriented constraints",
+      "languages": [
+        {
+          "name": "python",
+          "share_percent": 12,
+          "content": [
+            "official language reference",
+            "standard-library documentation",
+            "selected permissively licensed source files"
+          ]
+        },
+        {
+          "name": "rust",
+          "share_percent": 12,
+          "content": [
+            "The Rust Book and language reference",
+            "standard-library documentation",
+            "selected permissively licensed source files"
+          ]
+        },
+        {
+          "name": "cpp",
+          "share_percent": 11,
+          "content": [
+            "C++ Core Guidelines",
+            "selected permissively licensed documentation and source files"
+          ]
+        }
+      ]
+    },
+    {
+      "family": "model_architecture",
+      "share_percent": 20,
+      "role": "architecture names, components, training objectives, and model-family comparisons",
+      "topics": [
+        "transformer and attention",
+        "flow matching and diffusion language models",
+        "state-space and recurrent models",
+        "mixture-of-experts and routing",
+        "tokenization and decoding",
+        "evaluation and inference"
+      ]
+    },
+    {
+      "family": "engineering_acceleration",
+      "share_percent": 20,
+      "role": "compiler, GPU kernel, operating-system, profiling, and systems terminology",
+      "systems": [
+        {
+          "name": "triton",
+          "share_percent": 10,
+          "content": [
+            "language and compiler documentation",
+            "tutorial kernels",
+            "selected permissively licensed source files"
+          ]
+        },
+        {
+          "name": "linux",
+          "share_percent": 10,
+          "content": [
+            "kernel documentation",
+            "scheduler, memory, I/O, tracing, and eBPF documentation",
+            "selected man pages with provenance"
+          ]
+        }
+      ]
+    }
+  ],
+  "source_policy": {
+    "preferred_licenses": [
+      "CC0-1.0",
+      "MIT",
+      "Apache-2.0",
+      "BSD-2-Clause",
+      "BSD-3-Clause",
+      "PSF-2.0"
+    ],
+    "conditional_licenses": [
+      "CC-BY-4.0",
+      "CC-BY-SA-4.0",
+      "GPL-2.0-only",
+      "GPL-2.0-or-later",
+      "LGPL"
+    ],
+    "required_metadata": [
+      "source_url",
+      "upstream_revision",
+      "retrieved_at",
+      "license",
+      "license_url",
+      "content_sha256",
+      "split",
+      "language",
+      "family"
+    ],
+    "rules": [
+      "No unlicensed source may enter training.",
+      "Conditional-license material stays separately indexed and is not redistributed with the package.",
+      "Model weights are a derived artifact, not permission to redistribute source text.",
+      "Every source manifest is reviewed before tokenization."
+    ]
+  },
+  "cleaning_policy": {
+    "exact_dedup": "normalized whole document",
+    "near_dedup": "5-gram MinHash with deterministic bands",
+    "secret_scan": "quarantine files matching private keys, access tokens, or credential patterns",
+    "pii_scan": "remove obvious personal contact data",
+    "code_filters": [
+      "remove generated and minified files",
+      "remove vendored third-party copies",
+      "cap repeated boilerplate and license headers",
+      "preserve code blocks in documentation"
+    ],
+    "documentation_filters": [
+      "remove navigation, cookie banners, and repeated site chrome",
+      "preserve headings, code fences, formulas, and API signatures",
+      "retain source URL and revision for every document"
+    ]
+  },
+  "split_policy": {
+    "unit": "source snapshot, repository file, or document family",
+    "random_line_split_allowed": false,
+    "repository_cross_split_allowed": false,
+    "near_duplicate_cross_split_allowed": false,
+    "tokenizer_fit_split": "train",
+    "frozen_before_model_screen": true
+  },
+  "curriculum": [
+    {
+      "stage": "base",
+      "data": "general_language",
+      "goal": "stable token prediction and language coverage"
+    },
+    {
+      "stage": "structure",
+      "data": "code plus model_architecture",
+      "goal": "symbolic structure and architecture concepts"
+    },
+    {
+      "stage": "systems",
+      "data": "engineering_acceleration",
+      "goal": "hardware/software performance terminology"
+    },
+    {
+      "stage": "replay",
+      "data": "all families at the frozen target mix",
+      "goal": "retain broad language quality and prevent domain collapse"
+    }
+  ],
+  "promotion_gates": {
+    "source_integrity": "Every training token traces to a hashed source record and an explicit license.",
+    "split_integrity": "No exact or near-duplicate content crosses train/validation/test.",
+    "parameter_ratio": "abs(unique_trainable_parameters - total_tokens / 20) / target <= 0.02.",
+    "tokenizer": "The tokenizer is fitted on train only and has a frozen hash.",
+    "mixture": "Every declared family has its planned token share, and code covers Python, Rust, and C++.",
+    "contamination": "Public benchmark tasks are quarantined before tokenization.",
+    "claims": "A mixed-corpus gain is not claimed until the matched arm comparison is complete."
+  },
+  "current_seed_corpus": {
+    "dataset": "roneneldan/TinyStories",
+    "revision": "f54c09fd23315a6f9c86f9dc80f725de7d8f9c64",
+    "manifest": ".data/nlp/tinystories_small_v1/manifest.json",
+    "report": "outputs/reports/nlp_dataset_download_v1.json",
+    "scope": "general-language seed only; not yet a mixed-corpus experiment"
+  },
+  "evidence_boundary": "This config defines acquisition, mixing, and parameter-budget policies. It contains no mixed-corpus quality evidence."
+}

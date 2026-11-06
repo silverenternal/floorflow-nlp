@@ -1,0 +1,75 @@
+{
+  "version": "nlp-structure-matched-v12",
+  "status": "cpu_preflight_passed_gpu_queue_registered",
+  "experiment_id": "nlp-structure-matched-v12",
+  "gpu_queue": "configs/nlp_gpu_experiment_queue_v13.json",
+  "shared": {
+    "train_actions": ".data/nlp/tree_action_v2/train_corpus.jsonl",
+    "ast_corpus": ".data/nlp/ast_core_v1/corpus.jsonl",
+    "transition_grammar": "configs/nlp_ast_transition_grammar_v2.json",
+    "prompt_contract": "configs/nlp_tree_action_corpus_v1.json",
+    "languages": ["python", "rust", "cpp"],
+    "seeds": [17, 29, 43],
+    "epochs": 4,
+    "batch_rows": 8,
+    "optimizer": "ScheduleFreeAdamW",
+    "learning_rate": 0.0025,
+    "training_order": "same frozen row order and seed-controlled batch permutation per arm",
+    "hidden_size": 128,
+    "decoder_layers": 4,
+    "attention_heads": 8,
+    "maximum_action_steps": 768,
+    "maximum_nodes": 256,
+    "validation_split": "validation",
+    "validation_use": "metrics only; never used for model selection or prompt derivation",
+    "test_use": "closed; test rows are never parsed by this runner"
+  },
+  "arms": [
+    {
+      "id": "flat",
+      "local_transition_mask": false,
+      "lexical_candidate_mask": false,
+      "terminalizable_completion_mask": false,
+      "blueprint_conditioning": false,
+      "train_only_rollout": false
+    },
+    {
+      "id": "local_mask",
+      "local_transition_mask": true,
+      "lexical_candidate_mask": false,
+      "terminalizable_completion_mask": false,
+      "blueprint_conditioning": false,
+      "train_only_rollout": false
+    },
+    {
+      "id": "lexical_mask",
+      "local_transition_mask": true,
+      "lexical_candidate_mask": true,
+      "terminalizable_completion_mask": false,
+      "blueprint_conditioning": false,
+      "train_only_rollout": false
+    },
+    {
+      "id": "hierarchical",
+      "local_transition_mask": true,
+      "lexical_candidate_mask": true,
+      "terminalizable_completion_mask": true,
+      "blueprint_conditioning": true,
+      "train_only_rollout": true
+    }
+  ],
+  "rollout_curriculum": {
+    "warmup_steps": 100,
+    "decay_steps": 1000,
+    "initial_teacher_probability": 1.0,
+    "final_teacher_probability": 0.25
+  },
+  "report": "outputs/reports/nlp_ast_recovery_ablation_v12.json",
+  "checkpoint_dir": ".data/nlp/structure_ablation_v12",
+  "selection_policy": {
+    "winner_selection": false,
+    "validation_selection": false,
+    "rule": "Report every arm and seed; no checkpoint or arm is promoted by this package."
+  },
+  "evidence_boundary": "Train-only fitted models and frozen validation metrics; no test content, retries, or checkpoint selection."
+}

@@ -1,0 +1,14 @@
+{
+  "version": "nlp-benchmark-contamination-v1",
+  "shingle_characters": 512,
+  "exact_overlap_limit": 0,
+  "near_overlap_limit": 0,
+  "near_overlap_threshold": 0.8,
+  "training_sources": [
+    ".data/nlp/mixed_v1/corpus_v1/train.jsonl"
+  ],
+  "future_training_manifests": [
+    ".data/nlp/mixed_v1/manifest.json"
+  ],
+  "evidence_boundary": "Current seed-corpus scan only; rerun after every mixed-corpus expansion."
+}

@@ -1,0 +1,93 @@
+{
+  "version": "nlp-json-contract-v1",
+  "status": "architecture_contract",
+  "scope": "all machine-actionable JSON emitted by nlp_flow, including AST payloads, patches, tool actions, diagnostics, and engineering results",
+  "validity_contract": {
+    "strict_json_parse_validity": 1.0,
+    "schema_compliance": 1.0,
+    "duplicate_key_count": 0,
+    "nonfinite_number_count": 0,
+    "guarantee": "valid_by_construction",
+    "guarantee_level": "model_structure",
+    "training_only_guarantee_possible": false,
+    "why_training_only_is_insufficient": "An unconstrained token decoder can assign nonzero probability to an invalid transition; finite loss optimization cannot prove zero invalid probability over all reachable outputs."
+  },
+  "native_generation": {
+    "json_ast": "The output target is represented as a typed JSON tree before surface serialization.",
+    "grammar_state": "The decoder carries an explicit JSON grammar and schema state stack.",
+    "typed_heads": [
+      "object_open_close",
+      "property_key",
+      "array_open_close",
+      "string_value",
+      "number_value",
+      "boolean_value",
+      "null_value",
+      "schema_reference"
+    ],
+    "transition_rule": "Invalid grammar or schema transitions have structurally zero probability in the native typed head.",
+    "training_native": true,
+    "posthoc_repair": false,
+    "retry": false
+  },
+  "training_objectives": [
+    "schema-conditioned next-structure loss",
+    "grammar-state transition cross-entropy",
+    "typed value head loss",
+    "object/array close prediction",
+    "string escaping and unicode correctness",
+    "finite number generation",
+    "duplicate-key prevention",
+    "malformed negative contrast"
+  ],
+  "curriculum": [
+    {
+      "stage": "flat-object",
+      "content": "flat objects with scalar values"
+    },
+    {
+      "stage": "nested-schema",
+      "content": "nested objects, arrays, required/optional fields"
+    },
+    {
+      "stage": "engineering-actions",
+      "content": "AST payloads, patches, tool actions, test and diagnostics reports"
+    },
+    {
+      "stage": "adversarial",
+      "content": "quotes, unicode, escapes, long arrays, numeric boundaries, schema switching"
+    }
+  ],
+  "forbidden_implementations": [
+    "regex extraction from free-form text",
+    "post-hoc brace or bracket insertion",
+    "JSON parser fallback that rewrites content",
+    "semantic default-value injection",
+    "retry until parsing succeeds",
+    "best-of-N selection by parser success",
+    "truncating or auto-closing nested structures",
+    "repair through a separate constrained-decoding service"
+  ],
+  "required_tests": [
+    "strict parser success on every generated structured output",
+    "schema validation success on every output",
+    "duplicate-key rejection attack",
+    "NaN/Infinity rejection attack",
+    "quote, newline, unicode, and escape tests",
+    "deeply nested object/array tests",
+    "invalid-transition probability zero test",
+    "AST payload schema round trip",
+    "generated JSON to Stage-B result consistency"
+  ],
+  "hard_gates": {
+    "train_strict_json_validity": 1.0,
+    "validation_strict_json_validity": 1.0,
+    "test_strict_json_validity": 1.0,
+    "engineering_strict_json_validity": 1.0,
+    "schema_compliance_all_suites": 1.0,
+    "posthoc_repair_count": 0,
+    "retry_count": 0,
+    "claim_rule": "Any structured-output parse or schema failure blocks C1-C4 and every coding/engineering headline claim."
+  },
+  "evidence_boundary": "This is a validity architecture contract. No model output has yet been evaluated."
+}

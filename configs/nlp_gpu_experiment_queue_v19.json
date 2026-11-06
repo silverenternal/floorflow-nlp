@@ -1,0 +1,326 @@
+{
+  "version": "nlp-gpu-experiment-queue-v19",
+  "status": "v18_interrupted_external_gpu_conflict",
+  "concurrency": 1,
+  "lock_path": "outputs/.locks/nlp_gpu_training.lock",
+  "experiments": [
+    {
+      "task_id": "NLP-068-STRICT-AST-CLOSURE",
+      "work_package_id": "WP-068-B",
+      "experiment_id": "nlp-structure-matched-v12",
+      "config": "configs/nlp_structure_matched_v12.json",
+      "status": "budget_stopped_incomplete",
+      "seed_set": [
+        17,
+        29,
+        43
+      ],
+      "arms": [
+        "flat",
+        "local_mask",
+        "lexical_mask",
+        "hierarchical"
+      ],
+      "budget": {
+        "max_gpu_hours_total": 18,
+        "max_gpu_hours_per_seed": 6,
+        "max_training_examples": 60000,
+        "max_optimizer_steps": 7500,
+        "max_action_tokens": 13000000,
+        "max_attempts_per_arm_seed": 1,
+        "minimum_free_memory_mib": 24000,
+        "failure_policy": "stop_and_report_without_retry_or_best_of_n"
+      },
+      "training_split": "train",
+      "metrics_split": "validation",
+      "test_content_allowed": false,
+      "validation_selection_allowed": false,
+      "retry_allowed": false,
+      "winner_selection_allowed": false,
+      "attempt_summary": {
+        "completed_arm_seed_runs": 11,
+        "registered_arm_seed_runs": 12,
+        "stopped_seed": "hierarchical:43",
+        "reason": "cumulative six-hour per-seed budget; interrupt traceback in recursive completion accounting",
+        "report_written": false,
+        "retry_allowed": false
+      }
+    },
+    {
+      "task_id": "NLP-068-STRICT-AST-CLOSURE",
+      "work_package_id": "WP-068-B",
+      "experiment_id": "nlp-structure-matched-v13",
+      "config": "configs/nlp_structure_matched_v13.json",
+      "status": "externally_interrupted_incomplete",
+      "seed_set": [
+        17,
+        29,
+        43
+      ],
+      "arms": [
+        "flat",
+        "local_mask",
+        "lexical_mask",
+        "hierarchical"
+      ],
+      "budget": {
+        "max_gpu_hours_total": 18,
+        "max_gpu_hours_per_seed": 6,
+        "max_training_examples": 60000,
+        "max_optimizer_steps": 7500,
+        "max_action_tokens": 13000000,
+        "max_attempts_per_arm_seed": 1,
+        "minimum_free_memory_mib": 24000,
+        "failure_policy": "stop_and_report_without_retry_or_best_of_n"
+      },
+      "training_split": "train",
+      "metrics_split": "validation",
+      "test_content_allowed": false,
+      "validation_selection_allowed": false,
+      "retry_allowed": false,
+      "winner_selection_allowed": false,
+      "registration_reason": "Complete a fresh four-arm matched attempt after fixing recursive completion-accounting runtime and cooperative in-run budget stops; old incomplete results remain separate.",
+      "attempt_summary": {
+        "completed_arm_seed_runs": 10,
+        "registered_arm_seed_runs": 12,
+        "completed": [
+          "flat:17",
+          "flat:29",
+          "flat:43",
+          "local_mask:17",
+          "local_mask:29",
+          "local_mask:43",
+          "lexical_mask:17",
+          "lexical_mask:29",
+          "lexical_mask:43",
+          "hierarchical:17"
+        ],
+        "partial_seed": "hierarchical:29",
+        "not_attempted": [
+          "hierarchical:43"
+        ],
+        "reason": "External raster training began on cuda:0; NLP run was interrupted for project-line isolation.",
+        "report": "outputs/reports/nlp_ast_recovery_ablation_v13_interrupted.json",
+        "retry_allowed": false,
+        "checkpoint_reuse_allowed": false
+      }
+    },
+    {
+      "task_id": "NLP-068-STRICT-AST-CLOSURE",
+      "work_package_id": "WP-068-B",
+      "experiment_id": "nlp-structure-matched-v14",
+      "config": "configs/nlp_structure_matched_v14.json",
+      "status": "externally_interrupted_incomplete",
+      "seed_set": [
+        17,
+        29,
+        43
+      ],
+      "arms": [
+        "flat",
+        "local_mask",
+        "lexical_mask",
+        "hierarchical"
+      ],
+      "budget": {
+        "max_gpu_hours_total": 18,
+        "max_gpu_hours_per_seed": 6,
+        "max_training_examples": 60000,
+        "max_optimizer_steps": 7500,
+        "max_action_tokens": 13000000,
+        "max_attempts_per_arm_seed": 1,
+        "minimum_free_memory_mib": 24000,
+        "failure_policy": "stop_and_report_without_retry_or_best_of_n"
+      },
+      "training_split": "train",
+      "metrics_split": "validation",
+      "test_content_allowed": false,
+      "validation_selection_allowed": false,
+      "retry_allowed": false,
+      "winner_selection_allowed": false,
+      "checkpoint_reuse_allowed": false,
+      "registration_reason": "Fresh full matched attempt after v13 was externally interrupted by GPU conflict. All arms and seeds start in clean v14 directories; activation waits until cuda:0 has no other active compute process.",
+      "interruption_report": "outputs/reports/nlp_ast_recovery_ablation_v14.json"
+    },
+    {
+      "task_id": "NLP-068-STRICT-AST-CLOSURE",
+      "work_package_id": "WP-068-B",
+      "experiment_id": "nlp-structure-matched-v15",
+      "config": "configs/nlp_structure_matched_v15.json",
+      "status": "externally_interrupted_incomplete",
+      "seed_set": [
+        71,
+        73,
+        79
+      ],
+      "arms": [
+        "flat",
+        "local_mask",
+        "lexical_mask",
+        "hierarchical"
+      ],
+      "budget": {
+        "max_gpu_hours_total": 18,
+        "max_gpu_hours_per_seed": 6,
+        "max_training_examples": 60000,
+        "max_optimizer_steps": 7500,
+        "max_action_tokens": 13000000,
+        "max_attempts_per_arm_seed": 1,
+        "minimum_free_memory_mib": 24000,
+        "failure_policy": "stop_and_report_without_retry_or_best_of_n"
+      },
+      "training_split": "train",
+      "metrics_split": "validation",
+      "test_content_allowed": false,
+      "validation_selection_allowed": false,
+      "retry_allowed": false,
+      "winner_selection_allowed": false,
+      "checkpoint_reuse_allowed": false,
+      "registration_reason": "Fresh full matched replacement after v14 was interrupted by an external project-line cuda:0 process. Uses new seeds, a clean checkpoint directory, and no checkpoint reuse; one attempt per arm/seed.",
+      "interruption_report": "outputs/reports/nlp_ast_recovery_ablation_v15.json",
+      "cpu_replay_report": "outputs/reports/nlp_ast_recovery_ablation_v15_cpu_replay.json"
+    },
+    {
+      "task_id": "NLP-068-STRICT-AST-CLOSURE",
+      "work_package_id": "WP-068-B",
+      "experiment_id": "nlp-structure-matched-v16",
+      "config": "configs/nlp_structure_matched_v16.json",
+      "status": "externally_interrupted_incomplete",
+      "seed_set": [
+        83,
+        89,
+        97
+      ],
+      "arms": [
+        "flat",
+        "local_mask",
+        "lexical_mask",
+        "hierarchical"
+      ],
+      "budget": {
+        "max_gpu_hours_total": 18,
+        "max_gpu_hours_per_seed": 6,
+        "max_training_examples": 60000,
+        "max_optimizer_steps": 7500,
+        "max_action_tokens": 13000000,
+        "max_attempts_per_arm_seed": 1,
+        "minimum_free_memory_mib": 24000,
+        "failure_policy": "stop_and_report_without_retry_or_best_of_n"
+      },
+      "training_split": "train",
+      "metrics_split": "validation",
+      "test_content_allowed": false,
+      "validation_selection_allowed": false,
+      "retry_allowed": false,
+      "winner_selection_allowed": false,
+      "checkpoint_reuse_allowed": false,
+      "registration_reason": "Fresh full matched registration after v14 and v15 were interrupted by other project-line GPU work. Uses new seeds 83/89/97, a clean v16 directory, one attempt per arm/seed, and no checkpoint reuse. Launch only after exclusive cuda:0 availability.",
+      "interruption_report": "outputs/reports/nlp_ast_recovery_ablation_v16.json",
+      "cpu_replay_report": null,
+      "preflight_report": "outputs/reports/nlp_structure_matched_preflight_v16.json",
+      "device": "cuda:0",
+      "counts": {
+        "completed_checkpoints": 9,
+        "partial_checkpoints": 1,
+        "unavailable_runs": 2,
+        "registered_runs": 12
+      }
+    },
+    {
+      "task_id": "NLP-068-STRICT-AST-CLOSURE",
+      "work_package_id": "WP-068-B",
+      "experiment_id": "nlp-structure-matched-v17",
+      "config": "configs/nlp_structure_matched_v17.json",
+      "status": "externally_interrupted_incomplete",
+      "seed_set": [
+        101,
+        103,
+        107
+      ],
+      "arms": [
+        "flat",
+        "local_mask",
+        "lexical_mask",
+        "hierarchical"
+      ],
+      "budget": {
+        "max_gpu_hours_total": 18,
+        "max_gpu_hours_per_seed": 6,
+        "max_training_examples": 60000,
+        "max_optimizer_steps": 7500,
+        "max_action_tokens": 13000000,
+        "max_attempts_per_arm_seed": 1,
+        "minimum_free_memory_mib": 24000,
+        "failure_policy": "stop_and_report_without_retry_or_best_of_n"
+      },
+      "training_split": "train",
+      "metrics_split": "validation",
+      "test_content_allowed": false,
+      "validation_selection_allowed": false,
+      "retry_allowed": false,
+      "winner_selection_allowed": false,
+      "checkpoint_reuse_allowed": false,
+      "registration_reason": "Fresh full matched registration after v16 was automatically interrupted when another project-line compute process appeared on cuda:0. Uses new seeds 101/103/107, a clean v17 directory, one attempt per arm/seed, and no checkpoint reuse.",
+      "interruption_report": "outputs/reports/nlp_ast_recovery_ablation_v17.json",
+      "cpu_replay_report": "outputs/reports/nlp_ast_recovery_ablation_v17_cpu_replay.json",
+      "preflight_report": "outputs/reports/nlp_structure_matched_preflight_v17.json",
+      "device": "cuda:0",
+      "counts": {
+        "completed_checkpoints": 7,
+        "partial_checkpoints": 1,
+        "unavailable_runs": 4,
+        "registered_runs": 12
+      }
+    },
+    {
+      "task_id": "NLP-068-STRICT-AST-CLOSURE",
+      "work_package_id": "WP-068-B",
+      "experiment_id": "nlp-structure-matched-v18",
+      "config": "configs/nlp_structure_matched_v18.json",
+      "status": "externally_interrupted_incomplete",
+      "seed_set": [
+        109,
+        113,
+        127
+      ],
+      "arms": [
+        "flat",
+        "local_mask",
+        "lexical_mask",
+        "hierarchical"
+      ],
+      "budget": {
+        "max_gpu_hours_total": 18,
+        "max_gpu_hours_per_seed": 6,
+        "max_training_examples": 60000,
+        "max_optimizer_steps": 7500,
+        "max_action_tokens": 13000000,
+        "max_attempts_per_arm_seed": 1,
+        "minimum_free_memory_mib": 24000,
+        "failure_policy": "stop_and_report_without_retry_or_best_of_n"
+      },
+      "training_split": "train",
+      "metrics_split": "validation",
+      "test_content_allowed": false,
+      "validation_selection_allowed": false,
+      "retry_allowed": false,
+      "winner_selection_allowed": false,
+      "checkpoint_reuse_allowed": false,
+      "registration_reason": "Fresh full matched attempt with new seeds after v17 was interrupted by a foreign project-line compute process. Uses clean v18 directory, one attempt per arm/seed, and no checkpoint reuse.",
+      "interruption_report": "outputs/reports/nlp_ast_recovery_ablation_v18.json",
+      "cpu_replay_report": "outputs/reports/nlp_ast_recovery_ablation_v18_cpu_replay.json",
+      "preflight_report": "outputs/reports/nlp_structure_matched_preflight_v18.json",
+      "device": "cuda:0",
+      "counts": {
+        "completed_checkpoints": 4,
+        "partial_checkpoints": 1,
+        "unavailable_runs": 7,
+        "registered_runs": 12
+      }
+    }
+  ],
+  "activation_rule": "Preflight must pass; execute only when cuda:0 has no other active compute process, the shared NLP lock is available, and at least 24000 MiB is free. Never interrupt or compete with another project line.",
+  "training_allowed_now": false,
+  "quality_evaluation_allowed_now": false,
+  "dry_run_may_allocate_gpu": false
+}

@@ -1,0 +1,46 @@
+{
+  "version": "nlp-engineering-p2m-v1",
+  "name": "nlp-p2m-control-cpu-smoke",
+  "arm": "control",
+  "tier": "P2M",
+  "seed": 19,
+  "status": "bounded_cpu_smoke",
+  "data": {
+    "train": ".data/nlp/mixed_v1/corpus_v1/train.jsonl",
+    "validation": ".data/nlp/mixed_v1/corpus_v1/validation.jsonl",
+    "test": ".data/nlp/mixed_v1/corpus_v1/test.jsonl",
+    "manifest": ".data/nlp/mixed_v1/corpus_v1/manifest.json",
+    "target_used_at_inference": false
+  },
+  "model": {
+    "architecture": "compact_hierarchical_decoder_control",
+    "target_parameters": 2300000,
+    "planned_corpus_tokens": 46000000,
+    "max_context_tokens": 128,
+    "vocab_size": 8192,
+    "intermediate_size": 496,
+    "net_parameter_growth_allowed": false,
+    "tokenizer": ".data/nlp/tokenizer_v1/tokenizer.json"
+  },
+  "optimizer": {
+    "name": "adamw",
+    "learning_rate": 0.0001,
+    "weight_decay": 0.01,
+    "micro_batch_size": 2,
+    "gradient_accumulation_steps": 1
+  },
+  "runtime": {
+    "device": "cpu",
+    "precision": "fp32",
+    "compile_model": false,
+    "deterministic": true,
+    "gpu_authorized": false
+  },
+  "evaluation": {
+    "primary_max_new_tokens": 128,
+    "primary_samples_per_task": 1,
+    "temperature": 0.0,
+    "best_of_n_in_primary": false,
+    "benchmark_manifest": null
+  }
+}

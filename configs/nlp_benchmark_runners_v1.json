@@ -1,0 +1,125 @@
+{
+  "version": "nlp-benchmark-runners-v1",
+  "status": "runners_frozen",
+  "network_during_execution": false,
+  "training_inputs_allowed": false,
+  "runners": [
+    {
+      "benchmark_id": "humaneval_plus",
+      "runner_kind": "evalplus",
+      "runner_version": "evalplus@26d6d00bb1fd0fa37f39c99d5290da67891d1c5e",
+      "command": [
+        "python",
+        "-m",
+        "evalplus.evaluate",
+        "--dataset",
+        "humaneval",
+        "--samples",
+        "{samples_jsonl}",
+        "--parallel",
+        "1"
+      ],
+      "case_timeout_seconds": 30,
+      "suite_timeout_seconds": 7200,
+      "output_glob": "**/*eval_results.json",
+      "sandbox": "isolated_process",
+      "report_schema": "evalplus-results-v1"
+    },
+    {
+      "benchmark_id": "mbpp_plus",
+      "runner_kind": "evalplus",
+      "runner_version": "evalplus@26d6d00bb1fd0fa37f39c99d5290da67891d1c5e",
+      "command": [
+        "python",
+        "-m",
+        "evalplus.evaluate",
+        "--dataset",
+        "mbpp",
+        "--samples",
+        "{samples_jsonl}",
+        "--parallel",
+        "1"
+      ],
+      "case_timeout_seconds": 30,
+      "suite_timeout_seconds": 7200,
+      "output_glob": "**/*eval_results.json",
+      "sandbox": "isolated_process",
+      "report_schema": "evalplus-results-v1"
+    },
+    {
+      "benchmark_id": "humaneval_python",
+      "runner_kind": "multipl_e_execution",
+      "runner_version": "MultiPL-E@3025a531af7450e7df8b96fe0440e9804480bbad",
+      "command": [
+        "podman",
+        "run",
+        "--rm",
+        "--network",
+        "none",
+        "-v",
+        "{run_dir}:/run:rw",
+        "multipl-e-eval",
+        "--dir",
+        "/run",
+        "--output-dir",
+        "/run",
+        "--recursive"
+      ],
+      "case_timeout_seconds": 30,
+      "suite_timeout_seconds": 7200,
+      "output_glob": "**/*.results.json.gz",
+      "sandbox": "podman_network_none",
+      "report_schema": "multipl-e-results-v1"
+    },
+    {
+      "benchmark_id": "multipl_e_rust",
+      "runner_kind": "multipl_e_execution",
+      "runner_version": "MultiPL-E@3025a531af7450e7df8b96fe0440e9804480bbad",
+      "command": [
+        "podman",
+        "run",
+        "--rm",
+        "--network",
+        "none",
+        "-v",
+        "{run_dir}:/run:rw",
+        "multipl-e-eval",
+        "--dir",
+        "/run",
+        "--output-dir",
+        "/run",
+        "--recursive"
+      ],
+      "case_timeout_seconds": 30,
+      "suite_timeout_seconds": 7200,
+      "output_glob": "**/*.results.json.gz",
+      "sandbox": "podman_network_none",
+      "report_schema": "multipl-e-results-v1"
+    },
+    {
+      "benchmark_id": "multipl_e_cpp",
+      "runner_kind": "multipl_e_execution",
+      "runner_version": "MultiPL-E@3025a531af7450e7df8b96fe0440e9804480bbad",
+      "command": [
+        "podman",
+        "run",
+        "--rm",
+        "--network",
+        "none",
+        "-v",
+        "{run_dir}:/run:rw",
+        "multipl-e-eval",
+        "--dir",
+        "/run",
+        "--output-dir",
+        "/run",
+        "--recursive"
+      ],
+      "case_timeout_seconds": 30,
+      "suite_timeout_seconds": 7200,
+      "output_glob": "**/*.results.json.gz",
+      "sandbox": "podman_network_none",
+      "report_schema": "multipl-e-results-v1"
+    }
+  ]
+}

@@ -1,0 +1,277 @@
+{
+  "version": "nlp-source-registry-v1",
+  "status": "license_registry_complete_fetch_pending",
+  "retrieved_at": "2026-11-01",
+  "sources": [
+    {
+      "id": "cpython_docs",
+      "repository": "python/cpython",
+      "revision": "9c0cfb141c236c902954841bb6cca407f86e1eeb",
+      "source_url": "https://github.com/python/cpython",
+      "family": "code",
+      "language": "python",
+      "license": "PSF-2.0",
+      "license_url": "https://github.com/python/cpython/blob/9c0cfb141c236c902954841bb6cca407f86e1eeb/LICENSE",
+      "include_globs": [
+        "Doc/**/*.rst",
+        "Lib/**/*.py",
+        "Include/**/*.h",
+        "Objects/**/*.c",
+        "Python/**/*.c",
+        "Modules/**/*.c",
+        "Parser/**/*.c"
+      ],
+      "exclude_globs": [
+        "Lib/test/**",
+        "Tools/**"
+      ],
+      "usage": "training",
+      "redistribution": "permitted_with_license"
+    },
+    {
+      "id": "rust_book",
+      "repository": "rust-lang/book",
+      "revision": "2771df165f092a4fbb9f46b5b2e7450f19010adb",
+      "source_url": "https://github.com/rust-lang/book",
+      "family": "code",
+      "language": "rust",
+      "license": "MIT OR Apache-2.0",
+      "license_url": "https://github.com/rust-lang/book/tree/2771df165f092a4fbb9f46b5b2e7450f19010adb#license",
+      "include_globs": [
+        "src/*.md",
+        "src/**/*.md"
+      ],
+      "exclude_globs": [
+        "book/**"
+      ],
+      "usage": "training",
+      "redistribution": "permitted_with_license"
+    },
+    {
+      "id": "cpp_core_guidelines",
+      "repository": "isocpp/CppCoreGuidelines",
+      "revision": "d1dda82eb60d9cecf16b227cf94ffceb659003c2",
+      "source_url": "https://github.com/isocpp/CppCoreGuidelines",
+      "family": "code",
+      "language": "cpp",
+      "license": "Standard C++ Foundation custom license",
+      "license_url": "https://github.com/isocpp/CppCoreGuidelines/blob/d1dda82eb60d9cecf16b227cf94ffceb659003c2/LICENSE",
+      "include_globs": [
+        "CppCoreGuidelines.md"
+      ],
+      "exclude_globs": [],
+      "usage": "training_conditional",
+      "redistribution": "do_not_redistribute_source"
+    },
+    {
+      "id": "rust_standard_library",
+      "repository": "rust-lang/rust",
+      "revision": "f90a2d27c2a1e18f10f4fd84c0dcd02710c37de8",
+      "source_url": "https://github.com/rust-lang/rust",
+      "family": "code",
+      "language": "rust",
+      "license": "MIT OR Apache-2.0",
+      "license_url": "https://github.com/rust-lang/rust/blob/f90a2d27c2a1e18f10f4fd84c0dcd02710c37de8/LICENSE-APACHE",
+      "include_globs": [
+        "library/core/**/*.rs",
+        "library/std/**/*.rs",
+        "src/doc/**/*.md"
+      ],
+      "exclude_globs": [
+        "**/tests/**",
+        "**/benches/**"
+      ],
+      "usage": "training",
+      "redistribution": "permitted_with_license"
+    },
+    {
+      "id": "cpp_fmt_library",
+      "repository": "fmtlib/fmt",
+      "revision": "09a606d17a2c5c2a7a295f873f67d626264d2181",
+      "source_url": "https://github.com/fmtlib/fmt",
+      "family": "code",
+      "language": "cpp",
+      "license": "MIT",
+      "license_url": "https://github.com/fmtlib/fmt/blob/09a606d17a2c5c2a7a295f873f67d626264d2181/LICENSE",
+      "include_globs": [
+        "include/**/*.h",
+        "src/**/*.cc",
+        "doc/**/*.md"
+      ],
+      "exclude_globs": [
+        "test/**",
+        "build/**"
+      ],
+      "usage": "training",
+      "redistribution": "permitted_with_license"
+    },
+    {
+      "id": "cpp_nlohmann_json",
+      "repository": "nlohmann/json",
+      "revision": "9c349b1d7c393c6bc6dbbe4191e332e3bb4100b8",
+      "source_url": "https://github.com/nlohmann/json",
+      "family": "code",
+      "language": "cpp",
+      "license": "MIT",
+      "license_url": "https://github.com/nlohmann/json/blob/9c349b1d7c393c6bc6dbbe4191e332e3bb4100b8/LICENSE.MIT",
+      "include_globs": [
+        "include/**/*.hpp",
+        "docs/mkdocs/docs/**/*.md"
+      ],
+      "exclude_globs": [
+        "tests/**",
+        "tools/**"
+      ],
+      "usage": "training",
+      "redistribution": "permitted_with_license"
+    },
+    {
+      "id": "pytorch_python_source",
+      "repository": "pytorch/pytorch",
+      "revision": "cb9eb4b1c210bb18b79b235e7202850b17d70614",
+      "source_url": "https://github.com/pytorch/pytorch",
+      "family": "code",
+      "language": "python",
+      "license": "BSD-3-Clause",
+      "license_url": "https://github.com/pytorch/pytorch/blob/cb9eb4b1c210bb18b79b235e7202850b17d70614/LICENSE",
+      "include_globs": [
+        "torch/**/*.py"
+      ],
+      "exclude_globs": [
+        "torch/testing/**",
+        "**/test/**"
+      ],
+      "usage": "training",
+      "redistribution": "permitted_with_license"
+    },
+    {
+      "id": "pytorch_cpp_source",
+      "repository": "pytorch/pytorch",
+      "revision": "cb9eb4b1c210bb18b79b235e7202850b17d70614",
+      "source_url": "https://github.com/pytorch/pytorch",
+      "family": "code",
+      "language": "cpp",
+      "license": "BSD-3-Clause",
+      "license_url": "https://github.com/pytorch/pytorch/blob/cb9eb4b1c210bb18b79b235e7202850b17d70614/LICENSE",
+      "include_globs": [
+        "aten/src/ATen/native/**/*.cpp",
+        "aten/src/ATen/native/**/*.h",
+        "c10/**/*.cpp",
+        "c10/**/*.h"
+      ],
+      "exclude_globs": [
+        "**/test/**",
+        "**/tests/**"
+      ],
+      "usage": "training",
+      "redistribution": "permitted_with_license"
+    },
+    {
+      "id": "rust_tokio",
+      "repository": "tokio-rs/tokio",
+      "revision": "b499257ef62bd631b83a988d371f4330f545670c",
+      "source_url": "https://github.com/tokio-rs/tokio",
+      "family": "code",
+      "language": "rust",
+      "license": "MIT",
+      "license_url": "https://github.com/tokio-rs/tokio/blob/b499257ef62bd631b83a988d371f4330f545670c/LICENSE",
+      "include_globs": [
+        "tokio/src/**/*.rs",
+        "tokio-util/src/**/*.rs",
+        "tokio-stream/src/**/*.rs"
+      ],
+      "exclude_globs": [
+        "**/tests/**",
+        "**/benches/**"
+      ],
+      "usage": "training",
+      "redistribution": "permitted_with_license"
+    },
+    {
+      "id": "cpp_abseil",
+      "repository": "abseil/abseil-cpp",
+      "revision": "4ce33a3b8a55d727ccb50d4134f869d1689039f2",
+      "source_url": "https://github.com/abseil/abseil-cpp",
+      "family": "code",
+      "language": "cpp",
+      "license": "Apache-2.0",
+      "license_url": "https://github.com/abseil/abseil-cpp/blob/4ce33a3b8a55d727ccb50d4134f869d1689039f2/LICENSE",
+      "include_globs": [
+        "absl/**/*.cc",
+        "absl/**/*.h"
+      ],
+      "exclude_globs": [
+        "**/tests/**",
+        "**/internal/**"
+      ],
+      "usage": "training",
+      "redistribution": "permitted_with_license"
+    },
+    {
+      "id": "transformers_model_docs",
+      "repository": "huggingface/transformers",
+      "revision": "ca8c871ede62b521a75a2ddfc5e1968ac9c8e097",
+      "source_url": "https://github.com/huggingface/transformers",
+      "family": "model_architecture",
+      "language": "text",
+      "license": "Apache-2.0",
+      "license_url": "https://github.com/huggingface/transformers/blob/ca8c871ede62b521a75a2ddfc5e1968ac9c8e097/LICENSE",
+      "include_globs": [
+        "docs/source/en/model_doc/*.md",
+        "docs/source/en/model_doc/**/*.md",
+        "docs/source/en/tasks/*.md",
+        "docs/source/en/tasks/**/*.md"
+      ],
+      "exclude_globs": [
+        "docs/source/en/model_doc/**/*.mdx"
+      ],
+      "usage": "training",
+      "redistribution": "permitted_with_license"
+    },
+    {
+      "id": "triton_docs_and_tutorials",
+      "repository": "triton-lang/triton",
+      "revision": "0861b90f695e3c866f6f7eadd4be8339378ab017",
+      "source_url": "https://github.com/triton-lang/triton",
+      "family": "engineering_acceleration",
+      "language": "triton",
+      "license": "MIT",
+      "license_url": "https://github.com/triton-lang/triton/blob/0861b90f695e3c866f6f7eadd4be8339378ab017/LICENSE",
+      "include_globs": [
+        "docs/**/*.rst",
+        "docs/**/*.md",
+        "python/tutorials/**/*.py",
+        "python/triton/language/**/*.py",
+        "lib/**/*.cpp",
+        "lib/**/*.h"
+      ],
+      "exclude_globs": [
+        "third_party/**"
+      ],
+      "usage": "training",
+      "redistribution": "permitted_with_license"
+    },
+    {
+      "id": "linux_documentation",
+      "repository": "torvalds/linux",
+      "revision": "cbbddb6b08cc9900a87cccaa9b22bbe06aa4f50a",
+      "source_url": "https://github.com/torvalds/linux",
+      "family": "engineering_acceleration",
+      "language": "linux",
+      "license": "GPL-2.0 WITH Linux-syscall-note",
+      "license_url": "https://github.com/torvalds/linux/blob/cbbddb6b08cc9900a87cccaa9b22bbe06aa4f50a/COPYING",
+      "include_globs": [
+        "Documentation/admin-guide/**/*.rst",
+        "Documentation/core-api/**/*.rst",
+        "Documentation/scheduler/**/*.rst",
+        "Documentation/trace/**/*.rst",
+        "Documentation/bpf/**/*.rst"
+      ],
+      "exclude_globs": [
+        "Documentation/translations/**"
+      ],
+      "usage": "training_conditional",
+      "redistribution": "do_not_redistribute_source"
+    }
+  ]
+}

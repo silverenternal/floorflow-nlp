@@ -1,0 +1,44 @@
+{
+  "version": "nlp-sota-band-contract-v1",
+  "status": "protocol_frozen_thresholds_pending_baseline_runs",
+  "primary_parameter_cap": 23000000,
+  "absolute_experiment_parameter_cap": 46000000,
+  "comparison_class": "reproducible models with total resident parameters <= 23M under the frozen tokenizer, data, and inference protocol",
+  "sota_band_rule": {
+    "per_track_absolute_tolerance": 0.01,
+    "candidate_must_be_within_tolerance_of_best_reproducible_class_baseline": true,
+    "candidate_must_be_pareto_non_dominated": true,
+    "posthoc_track_selection_allowed": false,
+    "large_model_comparisons": "out-of-class reference only"
+  },
+  "required_baselines": [
+    "A0 compact decoder control",
+    "A1 one-stage result CFM",
+    "A2 two-stage AST-first CFM",
+    "parameter-matched static width/depth",
+    "fixed-expert MoE",
+    "generated-expert candidate"
+  ],
+  "required_public_baseline_audit": [
+    "model identity and license",
+    "total resident parameter count",
+    "reproducible prompt format",
+    "tokenizer and generation budget",
+    "official evaluator version",
+    "no benchmark contamination"
+  ],
+  "primary_comparison": {
+    "paired_cases": true,
+    "paired_bootstrap_ci": 0.95,
+    "report_negative_tracks": true,
+    "headline_forbidden_if_any_track_outside_band": true
+  },
+  "smallest_model_claim": {
+    "requires_frozen_leaderboard_snapshot": true,
+    "requires_all_reproducible_small_baseline_rows": true,
+    "requires_three_training_seeds": true,
+    "requires_independent_rerun": true,
+    "forbidden_if_baseline_search_incomplete": true
+  },
+  "evidence_boundary": "Comparison rules are frozen. Numeric band thresholds are populated only after reproducible baseline audit."
+}

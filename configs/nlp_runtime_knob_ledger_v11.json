@@ -1,0 +1,25 @@
+{
+  "version": "nlp-runtime-knob-ledger-v11",
+  "status": "provenance_contract_only",
+  "zero_tuning_certificate": false,
+  "per_task_answer_overrides": false,
+  "knobs": {
+    "optimizer.learning_rate": {"value": 0.0003, "source": "fixed", "evidence": "implementation default; tune only on validation"},
+    "optimizer.epsilon": {"value": 1e-8, "source": "fixed", "evidence": "optimizer contract"},
+    "loss.ast_action": {"value": 1.0, "source": "fixed", "evidence": "declared objective weight"},
+    "loss.lexical": {"value": 0.5, "source": "fixed", "evidence": "declared objective weight"},
+    "loss.execution": {"value": 0.5, "source": "fixed", "evidence": "verifier-supervised objective"},
+    "runtime.trigger_threshold": {"value": 0.5, "source": "fixed", "evidence": "bounded runtime config"},
+    "planner.top_k": {"value": 3, "source": "fixed", "evidence": "bounded competence config"},
+    "budget.max_nodes": {"value": 256, "source": "fixed", "evidence": "hard safety cap"},
+    "budget.max_source_bytes": {"value": 65536, "source": "fixed", "evidence": "hard safety cap"},
+    "budget.max_depth": {"value": 8, "source": "fixed", "evidence": "hard safety cap"},
+    "budget.max_lanes": {"value": 4, "source": "fixed", "evidence": "hard safety cap"},
+    "budget.max_nfe": {"value": 32, "source": "fixed", "evidence": "hard safety cap"},
+    "budget.max_generated_experts": {"value": 8, "source": "fixed", "evidence": "runtime store capacity"},
+    "budget.stopping_source": {"value": "learned_budget_then_fixed_hard_cap", "source": "learned", "evidence": "planner budget head with fixed fallback"}
+  },
+  "allowed_sources": ["fixed", "learned", "validation_selected"],
+  "validation_selected_values_require": ["selection_report_sha256", "validation_split"],
+  "selection_policy": "freeze values before final test; never select per task from target or answer data"
+}

@@ -1,0 +1,286 @@
+{
+  "version": "nlp-neuron-growth-v1",
+  "status": "evidence_formalization",
+  "research_route": "learned_submodel_neurogenesis",
+  "operational_hypothesis": "A network improves iteration and sample efficiency when a node is represented as a stateful local submodel rather than a scalar operator, and a bounded controller learns when to instantiate, route, merge, or retire such submodels under a fixed parameter and compute budget.",
+  "evidence_ledger": [
+    {
+      "id": "NEURO-01",
+      "title": "Dendro-plexing of Single Input Spikes via Multiple Synaptic Contacts Can Enhance Cortical Neuron Computation and Reduce Axonal Wiring",
+      "authors": "Beniaguev D, Shapira S, Segev I, London M",
+      "venue": "Journal of Neuroscience",
+      "publication_date": "2026-04-29",
+      "doi": "10.1523/JNEUROSCI.0839-24.2026",
+      "pmid": "41916758",
+      "source_type": "peer_reviewed_simulation_and_model",
+      "verified_claim": "A filter-and-fire model with multiple synaptic contacts and dendritic filtering has threefold higher memory capacity than a leaky integrate-and-fire model on a precise spike-timing task and recognizes spatiotemporal MNIST patterns where the integrate-and-fire model fails.",
+      "engineering_implication": "Single nodes may need temporal state and multi-timescale local computation.",
+      "scope_limit": "This is a specific model and task result, not evidence that every biological neuron equals an arbitrary model."
+    },
+    {
+      "id": "NEURO-02",
+      "title": "Multi-output computation by single neuron biophysics in a visual system",
+      "authors": "Seung HS",
+      "venue": "bioRxiv preprint",
+      "publication_date": "2025-02-03",
+      "doi": "10.1101/2025.02.02.636137",
+      "pmid": null,
+      "source_type": "preprint",
+      "verified_claim": "Biophysical analysis finds evidence that some fly visual interneurons may be multi-output devices; within a linear approximation a neuron is equivalent to a hierarchy of virtual neurons pooling over multiple spatial scales.",
+      "engineering_implication": "A local node may expose multiple outputs or internally instantiate a hierarchy.",
+      "scope_limit": "Preprint and model-dependent equivalence; not a universal equivalence between one neuron and one task model."
+    },
+    {
+      "id": "NEURO-03",
+      "title": "Implementing feature binding through dendritic networks of a single neuron",
+      "authors": "Tang Y, Jia S, Huang T, Yu Z, Liu JK",
+      "venue": "Neural Networks",
+      "publication_date": "2025-05-09",
+      "doi": "10.1016/j.neunet.2025.107555",
+      "pmid": "40375419",
+      "source_type": "peer_reviewed_modeling",
+      "verified_claim": "Dendritic branches with strong sublinearity can act as computational units through which a single Purkinje-cell model addresses feature binding.",
+      "engineering_implication": "Local nonlinear gating across branches can implement capabilities traditionally assigned to a network layer.",
+      "scope_limit": "Task-specific modeling result; it does not imply general language-model capacity."
+    },
+    {
+      "id": "NEURO-04",
+      "title": "Single organic electrochemical neuron capable of anticoincidence detection",
+      "authors": "Harikesh PC, Gao D, Wu HY, Yang CY, Tu D, Fabiano S",
+      "venue": "Science Advances",
+      "publication_date": "2025-06-20",
+      "doi": "10.1126/sciadv.adv3194",
+      "pmid": "40540569",
+      "source_type": "peer_reviewed_hardware",
+      "verified_claim": "A dendritic organic electrochemical neuron performs XOR classification within a single neuron and supports edge detection in a tactile sensing system.",
+      "engineering_implication": "A node with dendritic state can implement a linearly non-separable local computation.",
+      "scope_limit": "A specialized physical neuron and task; not a general model."
+    },
+    {
+      "id": "NEURO-05",
+      "title": "Distribution and voltage dependence of ion channels shape single-neuron computations",
+      "authors": "Vieira RM, Deistler M, Guillemet C, Schilling T, Macke JH, Borst A, Groschner LN",
+      "venue": "Proceedings of the National Academy of Sciences",
+      "publication_date": "2026-09-29",
+      "doi": "10.1073/pnas.2610600123",
+      "pmid": "42809392",
+      "source_type": "peer_reviewed_experiment_and_model",
+      "verified_claim": "Subcellular ion-channel localization and properties shape single-neuron computation and are required in a biophysically constrained model to reproduce directional tuning.",
+      "engineering_implication": "Useful node abstraction may depend on where computation occurs inside the node.",
+      "scope_limit": "Supports spatially structured local computation, not model-level generality."
+    }
+  ],
+  "rejected_interpretations": [
+    "Every biological neuron is equivalent to an LLM.",
+    "A single neuron universally contains the same capability as an arbitrary trained model.",
+    "A biological analogy alone proves learned module birth will improve coding ability.",
+    "Unbounded growth is acceptable without parameter, compute, or dead-module costs."
+  ],
+  "provisional_claim": "The defensible 2025-2026 finding is that single neurons can carry substantially richer local computation than a scalar point-neuron abstraction. It motivates, but does not establish, learned submodel growth in an artificial network.",
+  "neuron_module": {
+    "state": [
+      "local hidden state",
+      "fast and slow temporal state",
+      "dendritic branch gates",
+      "one or more local outputs"
+    ],
+    "initialization": "zero-gated residual child attached to a declared parent",
+    "allowed_module_types": [
+      "dendritic_residual",
+      "temporal_memory",
+      "typed_expert",
+      "local_router"
+    ],
+    "forbidden_shortcuts": [
+      "counting a scalar MLP neuron as a newly born model without independent local state",
+      "adding parameters without counting them in the 20:1 corpus budget",
+      "allowing birth only on benchmark-specific identifiers",
+      "continued growth after the final network is frozen"
+    ]
+  },
+  "expert_factory": {
+    "definition": "The model must synthesize a new expert from its current computational state rather than only choose among a fixed expert pool.",
+    "factory_inputs": [
+      "parent latent state",
+      "residual and error signature",
+      "routing entropy",
+      "active task-family embedding",
+      "remaining parameter and compute budget"
+    ],
+    "factory_outputs": [
+      "expert blueprint",
+      "low-rank weight factors",
+      "input/output routing",
+      "zero-initialized birth gate"
+    ],
+    "minimal_generation_method": "A context-conditioned hypernetwork generates low-rank residual-expert weights; topology selection may be added only after weight synthesis is validated.",
+    "counts_as_generated_expert_only_if": [
+      "weights depend on the current parent and residual context",
+      "two different contexts produce measurably different expert parameters",
+      "the expert is not selected from a fixed pretrained pool",
+      "the expert cannot be replaced by a constant clone without losing the measured gain",
+      "the expert and factory parameters count toward the parameter budget",
+      "the expert is zero-gated at birth"
+    ],
+    "does_not_count": [
+      "choosing one fixed expert with a router",
+      "activating an unused parameter block with no generated weights",
+      "cloning the parent expert without context-conditioned synthesis",
+      "adding a scalar gate or scalar MLP and calling it an expert",
+      "generating an expert with validation or test outcomes"
+    ]
+  },
+  "expert_synthesis_ladder": [
+    {
+      "id": "S0",
+      "name": "fixed-pool routing",
+      "generated": false,
+      "description": "Select among predefined experts; MoE reference only."
+    },
+    {
+      "id": "S1",
+      "name": "generated fixed-shape weights",
+      "generated": true,
+      "description": "Context-conditioned hypernetwork generates low-rank residual weights for a fixed expert shape."
+    },
+    {
+      "id": "S2",
+      "name": "generated capacity and routing",
+      "generated": true,
+      "description": "Factory generates rank/width, input/output routing, gate, and weights from the current residual state.",
+      "core_self_generation_claim": true
+    },
+    {
+      "id": "S3",
+      "name": "generated typed micro-architecture",
+      "generated": true,
+      "description": "Factory selects and connects a constrained typed operation graph with generated weights.",
+      "frontier_only": true
+    }
+  ],
+  "moe_boundary": {
+    "moe_role": "matched control only",
+    "fixed_expert_pool": "G5 baseline",
+    "generated_expert_branch": "G4",
+    "disentanglement_requirement": "G4 must beat G5 at matched final parameters and inference compute, and generated experts must be non-constant across contexts.",
+    "reject_if": [
+      "G4 behaves as a soft router over a fixed pool",
+      "G4 experts collapse to one pattern",
+      "G4 gains disappear after removing extra inference compute or parameter headroom"
+    ]
+  },
+  "meta_growth_learning": {
+    "episode": [
+      "attempt a training task",
+      "run the training-only verifier",
+      "summarize residual and error state",
+      "decide whether to synthesize an expert",
+      "adapt for a bounded number of steps",
+      "compare task gain and resource cost",
+      "commit, merge, or retire the expert"
+    ],
+    "objective": "expected task improvement minus parameter, compute, birth, and dead-module costs",
+    "controller_target": "A birth is useful only when its post-adaptation gain exceeds random-expert and fixed-MoE expectations.",
+    "adaptation_steps_per_episode": 8,
+    "meta_train_validation_split": "Disjoint training tasks; meta-validation is never used to generate experts.",
+    "final_training_phase": "Freeze the factory and the final expert set before primary evaluation."
+  },
+  "growth_controller": {
+    "when_growth_is_allowed": "training only, after warmup and before the final frozen phase",
+    "signals_available": [
+      "training loss and gradient statistics",
+      "module utilization and dead-state statistics",
+      "routing entropy and residual error",
+      "explicit task-family metadata during training"
+    ],
+    "signals_forbidden": [
+      "validation or test labels",
+      "benchmark identifiers as shortcuts",
+      "oracle target plans",
+      "unbounded external evaluator calls"
+    ],
+    "actions": [
+      "birth",
+      "route",
+      "merge",
+      "retire"
+    ],
+    "max_growth_rounds": 3,
+    "birth_size_fraction_of_parent_cap": 0.02,
+    "initial_birth_gate": 0.0,
+    "freeze_after_growth": true
+  },
+  "budget": {
+    "mode": "fixed_tier_reallocation",
+    "parameter_cap": "declared matched tier",
+    "primary_claim_parameter_cap": 23000000,
+    "absolute_experiment_parameter_cap": 46000000,
+    "net_parameter_growth_allowed": false,
+    "generated_parameters_count_toward_total": true,
+    "corpus_token_parameter_ratio": 20,
+    "birth_requires_headroom_or_retirement": true,
+    "primary_compute_budget": "no more than 1.1x static matched control",
+    "inference_after_freeze": "static final network",
+    "absolute_growth_mode": "forbidden for the primary claim; diagnostic only and never a headline",
+    "capacity_reallocation": [
+      "retire the least useful expert",
+      "merge compatible experts before birth",
+      "use explicitly reserved headroom",
+      "reject the birth if no headroom can be recovered"
+    ]
+  },
+  "ablation_arms": [
+    {
+      "id": "G0",
+      "name": "fixed control",
+      "description": "No growth; same shared decoder and parameter tier."
+    },
+    {
+      "id": "G1",
+      "name": "static width/depth",
+      "description": "Use the generation budget to widen or deepen the decoder without learned births."
+    },
+    {
+      "id": "G2",
+      "name": "random births",
+      "description": "Birth the same number and size of modules at fixed random times."
+    },
+    {
+      "id": "G3",
+      "name": "error-triggered births",
+      "description": "Birth from residual error or dead-capacity signals without a learned controller."
+    },
+    {
+      "id": "G4",
+      "name": "learned neurogenesis",
+      "description": "A learned controller implements at least S2: it synthesizes context-conditioned weights, capacity, and routing, then learns bounded birth, merge, and retirement decisions."
+    },
+    {
+      "id": "G5",
+      "name": "matched MoE",
+      "description": "A fixed expert pool with parameter- and compute-matched routing, but no generated expert."
+    }
+  ],
+  "promotion_gates": [
+    "A child module is zero-gated and numerically inert at birth.",
+    "Generated expert weights, capacity, and routing change materially with parent/error context and are not a constant clone.",
+    "Net trainable parameters do not increase beyond the declared matched tier.",
+    "Every born module has nonzero gradient or an explicit dead-module diagnosis.",
+    "Learned growth beats random births, static width/depth, and the fixed-expert MoE at matched final parameters and inference compute.",
+    "At least one coding or engineering task improves by five percentage points with paired evidence.",
+    "Language-retention regression is at most one percent relative.",
+    "Final unique parameters remain at or below 23M for the primary claim and within the 20:1 budget.",
+    "Final inference contains no dynamic births or evaluator calls.",
+    "The effect persists across two seeds before any larger confirmation."
+  ],
+  "failure_modes": [
+    "module explosion",
+    "routing collapse",
+    "dead children",
+    "birth-signal benchmark overfitting",
+    "parameter-budget leakage",
+    "delayed inference instability",
+    "gains explained by extra compute"
+  ],
+  "evidence_boundary": "Neuroscience motivates a local-state and module-growth hypothesis. No experiment in this repository yet establishes that learned neuron/model birth improves coding or engineering ability."
+}

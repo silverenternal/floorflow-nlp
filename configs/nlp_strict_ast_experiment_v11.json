@@ -1,0 +1,57 @@
+{
+  "version": "nlp-strict-ast-experiment-v11",
+  "status": "registered_authorized_single_run",
+  "task_id": "NLP-068-STRICT-AST-CLOSURE",
+  "device_index": 1,
+  "minimum_free_memory_mib": 24000,
+  "seed_set": [
+    17,
+    29,
+    43
+  ],
+  "frozen_suite": "configs/nlp_legacy60_eval_manifest_v11.json",
+  "training_config": "configs/nlp_tree_training_v11.json",
+  "implementation_freeze": "configs/nlp_implementation_freeze_v11.json",
+  "controls": [
+    "oracle_topology_only",
+    "oracle_lexical_only",
+    "flat_local_mask",
+    "certified_terminalizable_mask",
+    "flat_structure",
+    "blueprint_structure",
+    "flat_lexical",
+    "typed_lexical",
+    "teacher_only_rollout",
+    "train_only_rollout"
+  ],
+  "training_data_split": "train",
+  "selection_split": "validation",
+  "forbidden_inputs": [
+    "oracle_during_inference",
+    "test_content",
+    "best_of_n",
+    "repair_retry_template"
+  ],
+  "qualification": {
+    "parser_validity": 1.0,
+    "strict_passed": 1.0,
+    "per_case_thresholds": "configs/nlp_legacy60_eval_manifest_v11.json",
+    "all_registered_seeds_required": true,
+    "internal_reconstruction_only": true
+  },
+  "execution": {
+    "training_enabled": false,
+    "quality_evaluation_enabled": false,
+    "launch_enabled": false
+  },
+  "budget": {
+    "max_gpu_hours_total": 18,
+    "max_gpu_hours_per_seed": 6,
+    "max_training_examples": 60000,
+    "max_optimizer_steps": 7500,
+    "max_action_tokens": 13000000,
+    "max_attempts_per_seed": 1,
+    "failure_policy": "stop_and_report_without_retry_or_best_of_n",
+    "minimum_free_memory_mib": 24000
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "version": "nlp-executor-contracts-v1",
+  "network": false,
+  "max_output_bytes": 8000,
+  "triton": {
+    "timeout_seconds": 120,
+    "required_result_fields": [
+      "compiled",
+      "correct",
+      "max_abs_error",
+      "shape"
+    ],
+    "atol": 0.0001,
+    "rtol": 0.0001,
+    "allow_gpu": true
+  },
+  "linux": {
+    "timeout_seconds": 30,
+    "required_prediction_fields": [
+      "diagnosis",
+      "recommended_action",
+      "evidence"
+    ],
+    "exact_action_match": true
+  },
+  "evidence_boundary": "Executor contract only; no generated-model score."
+}

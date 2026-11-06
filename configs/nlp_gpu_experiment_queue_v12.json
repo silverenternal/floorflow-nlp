@@ -1,0 +1,50 @@
+{
+  "version": "nlp-gpu-experiment-queue-v12",
+  "status": "active_single_corrective_registration",
+  "concurrency": 1,
+  "lock_path": "outputs/.locks/nlp_gpu_training.lock",
+  "experiments": [
+    {
+      "task_id": "NLP-068-STRICT-AST-CLOSURE",
+      "experiment_id": "nlp-strict-ast-corrective-v12",
+      "status": "registered",
+      "seed_set": [
+        17,
+        29,
+        43
+      ],
+      "budget": {
+        "max_gpu_hours_total": 18,
+        "max_gpu_hours_per_seed": 6,
+        "max_training_examples": 60000,
+        "max_optimizer_steps": 7500,
+        "max_action_tokens": 13000000,
+        "max_attempts_per_seed": 1,
+        "failure_policy": "stop_and_report_without_retry_or_best_of_n",
+        "minimum_free_memory_mib": 24000
+      },
+      "controls": [
+        "oracle_topology_only",
+        "oracle_lexical_only",
+        "flat_local_mask",
+        "certified_terminalizable_mask",
+        "flat_structure",
+        "blueprint_structure",
+        "flat_lexical",
+        "typed_lexical",
+        "teacher_only_rollout",
+        "train_only_rollout"
+      ],
+      "training_split": "train",
+      "selection_split": "validation",
+      "test_content_allowed": false,
+      "best_of_n_allowed": false,
+      "retry_allowed": false,
+      "corrective_run_of": "nlp-strict-ast-v11"
+    }
+  ],
+  "activation_rule": "NLP-074 implementation freeze passed and all experiment-specific dependencies and budgets preregistered",
+  "training_allowed_now": true,
+  "quality_evaluation_allowed_now": false,
+  "dry_run_may_allocate_gpu": false
+}

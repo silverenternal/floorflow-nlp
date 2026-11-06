@@ -1,0 +1,40 @@
+{
+  "version": "nlp-synthetic-grammar-v1",
+  "status": "planned",
+  "purpose": "Deterministic CPU mechanism screen before any public corpus training.",
+  "generator_seed": 20261101,
+  "splits": {
+    "train": 50000,
+    "validation": 2000,
+    "test": 5000
+  },
+  "document": {
+    "min_tokens": 48,
+    "max_tokens": 256,
+    "min_segments": 2,
+    "max_segments": 8,
+    "min_entities": 2,
+    "max_entities": 12
+  },
+  "latent_plan": [
+    "intent",
+    "topic",
+    "required_entities",
+    "entity_relations",
+    "segment_order",
+    "exact_token_budget"
+  ],
+  "executable_constraints": [
+    "all_required_entities_present",
+    "relation_direction_preserved",
+    "segment_order_preserved",
+    "exact_token_budget_met",
+    "grammar_valid"
+  ],
+  "leakage_policy": {
+    "plan_visible_at_inference": false,
+    "target_text_visible_at_inference": false,
+    "reference_labels_allowed_in_evaluator_only": true
+  },
+  "evidence_boundary": "Synthetic success is mechanism evidence only and cannot support natural-language quality claims."
+}

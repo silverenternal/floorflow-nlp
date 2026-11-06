@@ -1,0 +1,40 @@
+{
+  "version": "nlp-proxy-alignment-v11",
+  "status": "eligibility_contract_only",
+  "split": "validation",
+  "minimum_distinct_checkpoints": 5,
+  "minimum_cases_per_family": 30,
+  "minimum_spearman_rho": 0.7,
+  "minimum_sign_agreement": 0.75,
+  "bootstrap_interval": {
+    "resamples": 2000,
+    "confidence": 0.95
+  },
+  "join_key": [
+    "model_hash",
+    "config_hash",
+    "corpus_hash",
+    "split",
+    "task_id",
+    "case_id",
+    "seed",
+    "parser_hash",
+    "evaluator_hash"
+  ],
+  "required_report_slices": [
+    "per_family",
+    "support_counts",
+    "label_provenance",
+    "bootstrap_interval",
+    "checkpoint_count",
+    "coverage"
+  ],
+  "forbidden_inputs": [
+    "final_test",
+    "oracle_labels",
+    "fixture_execution",
+    "teacher_replay_as_external_success"
+  ],
+  "status_on_insufficient_support": "unqualified_non_selectable",
+  "execution_enabled": false
+}

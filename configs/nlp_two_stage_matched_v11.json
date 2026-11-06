@@ -1,0 +1,56 @@
+{
+  "version": "nlp-two-stage-matched-v11",
+  "status": "dry_run_contract_only",
+  "evaluation_split": "validation",
+  "seed_set": [11, 17, 23],
+  "controls": [
+    {
+      "id": "one_stage_flat",
+      "architecture": "single_decoder",
+      "conditioning": "prompt_only",
+      "enabled": true
+    },
+    {
+      "id": "two_stage_parsed_ast",
+      "architecture": "stage_a_and_stage_b",
+      "conditioning": "verified_parsed_ast_receipt",
+      "enabled": true
+    },
+    {
+      "id": "local_action_mask",
+      "architecture": "flat_action_policy",
+      "conditioning": "local_legal_action_mask",
+      "enabled": true
+    },
+    {
+      "id": "hierarchical_tree_policy",
+      "architecture": "hierarchical_tree_policy",
+      "conditioning": "legal_action_rollout_alignment",
+      "enabled": true
+    }
+  ],
+  "matching": {
+    "token_exposure_tolerance": 0.05,
+    "resident_parameter_tolerance": 0.05,
+    "total_compute_ceiling": 1.0,
+    "measure_actual_overhead": true,
+    "infeasible_pair_status": "infeasible_unmatched"
+  },
+  "execution": {
+    "run_enabled": false,
+    "gpu_enabled": false,
+    "required_before_execution": "NLP-074-IMPLEMENTATION-INTEGRATION"
+  },
+  "ledger_fields": [
+    "pair_id",
+    "control_id",
+    "seed",
+    "config_sha256",
+    "tokens_seen",
+    "resident_parameters",
+    "total_compute",
+    "actual_overhead",
+    "feasibility",
+    "measured"
+  ]
+}

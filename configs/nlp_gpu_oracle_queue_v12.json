@@ -1,0 +1,32 @@
+{
+  "version": "nlp-gpu-oracle-diagnostic-queue-v12",
+  "status": "active_single_diagnostic",
+  "concurrency": 1,
+  "lock_path": "outputs/.locks/nlp_gpu_training.lock",
+  "experiments": [
+    {
+      "diagnostic_id": "nlp-ast-oracle-live-v12",
+      "status": "registered",
+      "budget": {
+        "max_wall_hours": 8,
+        "max_wall_seconds": 28800,
+        "max_wall_seconds_per_seed": 10800,
+        "max_attempts": 1,
+        "failure_policy": "retain_failure_and_stop_without_retry_or_best_of_n",
+        "minimum_free_memory_mib": 24000
+      },
+      "seed_set": [
+        17,
+        29,
+        43
+      ],
+      "split": "validation",
+      "test_content_allowed": false,
+      "best_of_n_allowed": false,
+      "retry_allowed": false
+    }
+  ],
+  "training_allowed_now": false,
+  "quality_evaluation_allowed_now": true,
+  "dry_run_may_allocate_gpu": false
+}

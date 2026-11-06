@@ -1,0 +1,117 @@
+{
+  "version": "nlp-structure-matched-v13",
+  "status": "fresh_full_attempt_registered_after_external_interruption",
+  "experiment_id": "nlp-structure-matched-v14",
+  "gpu_queue": "configs/nlp_gpu_experiment_queue_v15.json",
+  "shared": {
+    "train_actions": ".data/nlp/tree_action_v2/train_corpus.jsonl",
+    "ast_corpus": ".data/nlp/ast_core_v1/corpus.jsonl",
+    "transition_grammar": "configs/nlp_ast_transition_grammar_v2.json",
+    "prompt_contract": "configs/nlp_tree_action_corpus_v1.json",
+    "languages": [
+      "python",
+      "rust",
+      "cpp"
+    ],
+    "seeds": [
+      17,
+      29,
+      43
+    ],
+    "epochs": 4,
+    "batch_rows": 8,
+    "optimizer": "ScheduleFreeAdamW",
+    "learning_rate": 0.0025,
+    "training_order": "same frozen row order and seed-controlled batch permutation per arm",
+    "hidden_size": 128,
+    "decoder_layers": 4,
+    "attention_heads": 8,
+    "maximum_action_steps": 768,
+    "maximum_nodes": 256,
+    "validation_split": "validation",
+    "validation_use": "metrics only; never used for model selection or prompt derivation",
+    "test_use": "closed; test rows are never parsed by this runner"
+  },
+  "arms": [
+    {
+      "id": "flat",
+      "local_transition_mask": false,
+      "lexical_candidate_mask": false,
+      "terminalizable_completion_mask": false,
+      "blueprint_conditioning": false,
+      "train_only_rollout": false
+    },
+    {
+      "id": "local_mask",
+      "local_transition_mask": true,
+      "lexical_candidate_mask": false,
+      "terminalizable_completion_mask": false,
+      "blueprint_conditioning": false,
+      "train_only_rollout": false
+    },
+    {
+      "id": "lexical_mask",
+      "local_transition_mask": true,
+      "lexical_candidate_mask": true,
+      "terminalizable_completion_mask": false,
+      "blueprint_conditioning": false,
+      "train_only_rollout": false
+    },
+    {
+      "id": "hierarchical",
+      "local_transition_mask": true,
+      "lexical_candidate_mask": true,
+      "terminalizable_completion_mask": true,
+      "blueprint_conditioning": true,
+      "train_only_rollout": true
+    }
+  ],
+  "rollout_curriculum": {
+    "warmup_steps": 100,
+    "decay_steps": 1000,
+    "initial_teacher_probability": 1.0,
+    "final_teacher_probability": 0.25
+  },
+  "report": "outputs/reports/nlp_ast_recovery_ablation_v14.json",
+  "checkpoint_dir": ".data/nlp/structure_ablation_v14",
+  "selection_policy": {
+    "winner_selection": false,
+    "validation_selection": false,
+    "rule": "Report every arm and seed; no checkpoint or arm is promoted by this package."
+  },
+  "evidence_boundary": "Train-only fitted models and frozen validation metrics; no test content, retries, or checkpoint selection. This is a fresh complete attempt; no checkpoint from the externally interrupted v13 run is resumed or combined.",
+  "implementation_artifacts": [
+    "configs/nlp_structure_matched_v14.json",
+    "configs/nlp_gpu_experiment_queue_v15.json",
+    "scripts/run_nlp_structure_ablation.py",
+    "src/floorflow/nlp_flow/structure_ablation_runner.py",
+    "src/floorflow/nlp_flow/experiment_deadline.py",
+    "src/floorflow/nlp_flow/experiment_fingerprint.py",
+    "src/floorflow/nlp_flow/prefix_tree_runtime.py",
+    "src/floorflow/nlp_flow/prefix_tree_policy.py",
+    "src/floorflow/nlp_flow/prefix_tree_training.py",
+    "src/floorflow/nlp_flow/tree_action_selection.py",
+    "src/floorflow/nlp_flow/tree_completion_runtime.py",
+    "src/floorflow/nlp_flow/ast_completion_contract.py",
+    "src/floorflow/nlp_flow/ast_grammar.py",
+    "tests/test_nlp_tree_completion_runtime.py",
+    "tests/test_nlp_terminalizable_action_mask.py",
+    "tests/test_nlp_experiment_deadline.py",
+    "tests/test_nlp_tree_training_losses.py",
+    "tests/test_nlp_hierarchical_tree_runner.py",
+    "tests/test_nlp_structure_matched_ablation.py",
+    "docs/nlp_rollout_runtime_optimization.md"
+  ],
+  "runtime_budget_enforcement": {
+    "clock": "cooperative monotonic wall-clock deadlines",
+    "checks": [
+      "optimizer batches and steps",
+      "train-only rollout rows and actions",
+      "validation cases and batches"
+    ],
+    "partial_seed_checkpoint": "persist after training before free-running validation",
+    "partial_report": "write completed runs, stopped run phase, and not-attempted seeds",
+    "device_hours": "not measured; report elapsed wall hours separately"
+  },
+  "preflight_report": "outputs/reports/nlp_structure_matched_preflight_v14.json"
+}

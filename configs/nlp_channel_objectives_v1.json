@@ -1,0 +1,39 @@
+{
+  "version": "nlp-channel-objectives-v1",
+  "channels": {
+    "syntax": {
+      "objective": "multiclass",
+      "output_dim": 8,
+      "purpose": "delimiter, indentation, and block grammar state"
+    },
+    "symbol": {
+      "objective": "binary",
+      "output_dim": 1,
+      "purpose": "definition-reference and API consistency"
+    },
+    "discourse": {
+      "objective": "multiclass",
+      "output_dim": 8,
+      "purpose": "document, segment, and patch-intent role"
+    },
+    "execution": {
+      "objective": "multiclass",
+      "output_dim": 4,
+      "purpose": "compile, test, runtime, or numerical outcome"
+    },
+    "engineering": {
+      "objective": "multiclass",
+      "output_dim": 8,
+      "purpose": "Triton, scheduler, memory, I/O, trace, and performance constraint family"
+    }
+  },
+  "loss_weights": {
+    "syntax": 1.0,
+    "symbol": 1.0,
+    "discourse": 1.0,
+    "execution": 1.0,
+    "engineering": 1.0
+  },
+  "mask_policy": "ignore padded and unavailable channel positions",
+  "evidence_boundary": "Objective contract only; no trained channel quality."
+}

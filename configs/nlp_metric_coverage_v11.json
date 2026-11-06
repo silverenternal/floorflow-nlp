@@ -1,0 +1,126 @@
+{
+  "version": "nlp-metric-coverage-v11",
+  "status": "coverage_declared_not_measured",
+  "source_manifest": "configs/nlp_benchmark_manifest_v1.json",
+  "training_use": "forbidden_for_evaluation_only_families",
+  "coverage": [
+    {
+      "benchmark_id": "humaneval_plus",
+      "family": "natural_task_executable_success",
+      "metric": "pass_at_1",
+      "runner_status": "unavailable",
+      "selectable": false,
+      "coverage_reason": "runner/data execution has not been authorized; source registry entry alone is not a measured label"
+    },
+    {
+      "benchmark_id": "mbpp_plus",
+      "family": "natural_task_executable_success",
+      "metric": "pass_at_1",
+      "runner_status": "unavailable",
+      "selectable": false,
+      "coverage_reason": "runner/data execution has not been authorized; source registry entry alone is not a measured label"
+    },
+    {
+      "benchmark_id": "humaneval_python",
+      "family": "natural_task_executable_success",
+      "metric": "pass_at_1",
+      "runner_status": "unavailable",
+      "selectable": false,
+      "coverage_reason": "runner/data execution has not been authorized; source registry entry alone is not a measured label"
+    },
+    {
+      "benchmark_id": "multipl_e_rust",
+      "family": "natural_task_executable_success",
+      "metric": "pass_at_1",
+      "runner_status": "unavailable",
+      "selectable": false,
+      "coverage_reason": "runner/data execution has not been authorized; source registry entry alone is not a measured label"
+    },
+    {
+      "benchmark_id": "multipl_e_cpp",
+      "family": "natural_task_executable_success",
+      "metric": "pass_at_1",
+      "runner_status": "unavailable",
+      "selectable": false,
+      "coverage_reason": "runner/data execution has not been authorized; source registry entry alone is not a measured label"
+    },
+    {
+      "benchmark_id": "reconstruction_recovery",
+      "family": "reconstruction_recovery",
+      "metric": "tree_action_f1",
+      "runner_status": "unavailable",
+      "selectable": false,
+      "coverage_reason": "Internal reconstruction only; requires frozen AST replay labels and cannot establish user-task success."
+    },
+    {
+      "benchmark_id": "native_output_validity",
+      "family": "native_output_validity",
+      "metric": "schema_validity_rate",
+      "runner_status": "unavailable",
+      "selectable": false,
+      "coverage_reason": "Implementation metric; requires native output verifier receipts."
+    },
+    {
+      "benchmark_id": "compile_execution",
+      "family": "compile_execution",
+      "metric": "compile_and_test_success",
+      "runner_status": "unavailable",
+      "selectable": false,
+      "coverage_reason": "Requires case-hash-bound executable verifier evidence."
+    },
+    {
+      "benchmark_id": "proxy_alignment",
+      "family": "proxy_alignment",
+      "metric": "spearman_and_sign_agreement",
+      "runner_status": "unavailable",
+      "selectable": false,
+      "coverage_reason": "Unavailable until at least five distinct checkpoints and 30 validation cases per family are joined."
+    },
+    {
+      "benchmark_id": "retrieval_completion",
+      "family": "retrieval_completion",
+      "metric": "retrieval_recall_at_k",
+      "runner_status": "unavailable",
+      "selectable": false,
+      "coverage_reason": "No current frozen execution manifest family in the active benchmark registry."
+    }
+  ],
+  "track_metric_contracts": {
+    "reconstruction_recovery": {
+      "primary_metric": "reconstruction_f1",
+      "required_validity": [
+        "ast_validity",
+        "native_validity"
+      ],
+      "claim_scope": "internal_reconstruction_only"
+    },
+    "natural_task_executable_success": {
+      "primary_metric": "executable_success",
+      "required_validity": [
+        "ast_validity",
+        "native_validity",
+        "execution_verifier"
+      ],
+      "claim_scope": "external_user_task_only"
+    },
+    "native_output_validity": {
+      "primary_metric": "native_validity",
+      "domains": [
+        "json",
+        "ast",
+        "patch",
+        "tool_action"
+      ],
+      "claim_scope": "format_validity_only"
+    },
+    "proxy_alignment": {
+      "primary_metrics": [
+        "spearman_rho",
+        "sign_agreement"
+      ],
+      "minimum_distinct_checkpoints": 5,
+      "minimum_cases_per_family": 30,
+      "status_when_missing": "unqualified_non_selectable"
+    }
+  }
+}

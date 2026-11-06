@@ -1,0 +1,17 @@
+{
+  "version": "nlp-external-eval-v1",
+  "status": "awaiting_finalist",
+  "benchmark_manifest": "configs/nlp_benchmark_manifest_v1.json",
+  "runner_manifest": "configs/nlp_benchmark_runners_v1.json",
+  "benchmark_root": ".data/nlp/benchmarks_v1",
+  "tokenizer": ".data/nlp/tokenizer_v1/tokenizer.json",
+  "primary_sampling": {
+    "temperature": 0.0,
+    "samples_per_task": 1,
+    "retries": 0,
+    "best_of_n": false,
+    "max_new_tokens": 256
+  },
+  "smoke_cases_per_suite": 4,
+  "evidence_boundary": "Generation manifest and runner preflight only until a trained finalist is frozen."
+}

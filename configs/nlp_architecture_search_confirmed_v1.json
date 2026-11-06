@@ -1,0 +1,6 @@
+{
+  "version": "nlp-architecture-search-confirmed-v1",
+  "status": "rejected",
+  "selected_candidate": null,
+  "reason": "Executable quality labels were not joined before confirmation."
+}

@@ -1,0 +1,73 @@
+{
+  "version": "nlp-engineering-p5m-chat-v2",
+  "name": "nlp-p5m-chat-instruct-candidate",
+  "arm": "candidate",
+  "tier": "P5M",
+  "seed": 29,
+  "status": "chat_instruction_training",
+  "data": {
+    "train": [
+      ".data/nlp/chat_instructions_v1/train.jsonl",
+      ".data/nlp/mixed_v1/corpus_v1/train.jsonl",
+      ".data/nlp/p5m_v2/delta_train.jsonl"
+    ],
+    "validation": [
+      ".data/nlp/chat_instructions_v1/validation.jsonl",
+      ".data/nlp/mixed_v1/corpus_v1/validation.jsonl",
+      ".data/nlp/p5m_v2/delta_validation.jsonl"
+    ],
+    "test": [
+      ".data/nlp/mixed_v1/corpus_v1/test.jsonl",
+      ".data/nlp/p5m_v2/delta_test.jsonl"
+    ],
+    "manifest": ".data/nlp/p5m_v2/manifest.json",
+    "target_used_at_inference": false,
+    "text_mode": "chat",
+    "families": [
+      "chat_instruction",
+      "general_language",
+      "code"
+    ]
+  },
+  "model": {
+    "architecture": "compact_hierarchical_decoder_candidate",
+    "target_parameters": 4600000,
+    "planned_corpus_tokens": 92000000,
+    "max_context_tokens": 512,
+    "vocab_size": 8192,
+    "hidden_size": 224,
+    "num_layers": 5,
+    "intermediate_size": 512,
+    "net_parameter_growth_allowed": false,
+    "tokenizer": ".data/nlp/tokenizer_v1/tokenizer.json"
+  },
+  "optimizer": {
+    "name": "adamw",
+    "learning_rate": 0.0003,
+    "weight_decay": 0.05,
+    "micro_batch_size": 32,
+    "gradient_accumulation_steps": 1
+  },
+  "runtime": {
+    "device": "cuda:1",
+    "precision": "bf16",
+    "compile_model": false,
+    "deterministic": false,
+    "gpu_authorized": true
+  },
+  "evaluation": {
+    "primary_max_new_tokens": 160,
+    "primary_samples_per_task": 1,
+    "temperature": 0.0,
+    "best_of_n_in_primary": false,
+    "benchmark_manifest": null
+  },
+  "training": {
+    "max_steps": 12000,
+    "checkpoint_every": 250,
+    "validation_batches": 2,
+    "workers": 8,
+    "train_sequences_per_worker": 300000,
+    "validation_sequences_per_worker": 64
+  }
+}

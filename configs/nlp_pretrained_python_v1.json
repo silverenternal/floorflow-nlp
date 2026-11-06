@@ -1,0 +1,140 @@
+{
+  "version": "nlp-pretrained-python-v1",
+  "experiment_id": "codet5-small-python-add-v1",
+  "scope": "bounded_synthetic_python_function_generation_diagnostic",
+  "dataset": {
+    "builder": "floorflow.nlp_flow.synthetic_tree_policy.build_synthetic_tasks",
+    "builder_path": "src/floorflow/nlp_flow/synthetic_tree_policy.py",
+    "builder_sha256": "690db0c99ed180585d440bcc7415261be8bffad5330e7a75da8a17efad0fdbdd",
+    "train": {
+      "start": 0,
+      "count": 192,
+      "task_ids_sha256": "fab26b81559460518ca723f47be75670d351d7d06c98388bf31cacde33bf78e0",
+      "prompt_sha256": "5d7d272dfdbaae0675a23929c2c638aed5bbb6dcf6819ea82f78f130edc5c89e",
+      "reference_source_sha256": "a9c6f43f2ef532beb9318834f16d6cb31ce524675c5c133aa2c3b21987248e28"
+    },
+    "validation": {
+      "start": 1000,
+      "count": 24,
+      "task_ids_sha256": "aa6edebd41e8c96f4dff0145969603a5127b97232b0cea511853e98dfb73565e",
+      "prompt_sha256": "e8017b5b75ed0e6f18b056bcce9f541a625cc44466e24e6b82bc5a7856b92df7",
+      "reference_source_sha256": "4cb63a1506d7189448dc6438e90ca6e8e2b5fd974c21a447432ad40cf73ed494"
+    },
+    "allowed_model_input": "task.prompt only",
+    "forbidden_model_inputs": [
+      "function_name field outside the prompt",
+      "constant field outside the prompt",
+      "reference source",
+      "AST/action sequence",
+      "expected execution result"
+    ],
+    "split_facts": {
+      "function_names_disjoint": true,
+      "training_unique_names": 192,
+      "validation_unique_names": 24,
+      "constant_values_seen_in_both_splits": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
+      "correction": "Historical report labels validation constants unseen, but the deterministic generator repeats all 19 constants in train and validation. This pilot evaluates unseen function names, not unseen constants."
+    },
+    "test_content_allowed": false
+  },
+  "baseline": {
+    "report": "outputs/reports/nlp_tree_action_generation_v1.json",
+    "report_sha256": "343f5b78a158966d60fd5b4d8daeb2cd1157f63b9011ccadfe55a058889fb232",
+    "runner": "scripts/audit_nlp_tree_action_generation.py",
+    "runner_sha256": "d11aceda5422bb8a7f202692f4d29531c1d981bb4ea414626a5e73167fd5d513",
+    "runtime": "src/floorflow/nlp_flow/synthetic_tree_runtime.py",
+    "runtime_sha256": "4d94a430756ab11f5044de3cfc9de3379cfe7bf363bbeb41f65dd83cba897352",
+    "metrics": {
+      "cases": 24,
+      "generated": 24,
+      "parser_valid": 24,
+      "execution_success": 12,
+      "parser_validity": 1.0,
+      "executable_success_rate": 0.5
+    },
+    "checkpoint": "historical baseline was trained in-memory and has no saved checkpoint; paired baseline evidence is frozen by report hash and case IDs"
+  },
+  "pretrained_model": {
+    "repository": "Salesforce/codet5-small",
+    "revision": "b1ee9570c289f21b5922b9c768a1ce12957bf968",
+    "revision_url": "https://huggingface.co/Salesforce/codet5-small/tree/b1ee9570c289f21b5922b9c768a1ce12957bf968",
+    "checkpoint_file": "pytorch_model.bin",
+    "checkpoint_etag": "18a8d358b44bee6f378ec0bdffa770d877a61637454f6804f830cb4a7ac9cea5",
+    "checkpoint_size_bytes": 242026427,
+    "license": "apache-2.0",
+    "license_source": "revision-pinned Hugging Face model metadata cardData.license",
+    "model_config": {
+      "path": "config.json",
+      "sha256": "c067a6377fc235b103a1577fcb8a114e2885b700198bad22e34f84659d0025ca",
+      "architecture": "T5ForConditionalGeneration",
+      "d_model": 512,
+      "d_ff": 2048,
+      "num_layers": 6,
+      "num_decoder_layers": 6,
+      "num_heads": 8,
+      "d_kv": 64,
+      "vocab_size": 32100,
+      "max_positions": 512,
+      "transformers_version_in_checkpoint_metadata": "4.10.2"
+    },
+    "tokenizer": {
+      "class": "RobertaTokenizer",
+      "tokenizer_config_sha256": "ccc2672ac229eef1a36010a147b8d3e7881d39a30b9bca7ddaa73a30fccfd517",
+      "special_tokens_map_sha256": "2454193b9f88437a3c0497300f21a2a4372115b5367ea71f07e912589baedaa6",
+      "added_tokens_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "vocab_sha256": "43bb485f4de0f2fd49b370bef4efab23ea3ab6d0019e72bdd9cec1436a6eaa2b",
+      "merges_sha256": "5d346f84939a98df0cde902df7d60154b461cde1b90dc653ab9b81d74e752a4d",
+      "max_length": 512
+    },
+    "parameter_count": {
+      "exact": 60492288,
+      "method": "derived from pinned T5 architecture config and tied encoder/decoder token embedding; validate against instantiated checkpoint before training",
+      "formula": "32100*512 + 6*(4*512*512 + 2*512*2048 + 2*512) + 32*8 + 512 + 6*(8*512*512 + 2*512*2048 + 3*512) + 32*8 + 512"
+    },
+    "compact_claim_eligible": false
+  },
+  "executor": {
+    "parser": "floorflow.nlp_flow.ast_codec.parse_ast_graph(language='python')",
+    "parser_path": "src/floorflow/nlp_flow/ast_codec.py",
+    "parser_sha256": "246a234c6034a9991087a23db881c088173071d550ce5d9e5f61626a6a9ff467",
+    "execution_contract": "Execute generated source in a fresh subprocess; call the generated function with 5; compare return value with 5 + task.constant.",
+    "reference_executor_source": "scripts/audit_nlp_tree_action_generation.py",
+    "timeout_seconds": 2,
+    "one_greedy_completion_per_case": true,
+    "repair_retry_or_best_of_n": false
+  },
+  "training": {
+    "runtime": {
+      "python": "3.11",
+      "transformers": "4.57.3",
+      "tokenizers": "0.22.2",
+      "torch": "2.14.1+cu130",
+      "pythonpath_overlay": ".data/nlp/pretrained_python_v1/runtime",
+      "reason": "Transformers 5.20.2 fails to load this revision's tokenizer; the pinned 4.57.3 runtime loads it successfully."
+    },
+    "seed": 17,
+    "epochs": 20,
+    "batch_size": 8,
+    "learning_rate": 0.00005,
+    "weight_decay": 0.0001,
+    "optimizer": "AdamW",
+    "max_source_tokens": 128,
+    "max_target_tokens": 64,
+    "checkpoint_selection": "fixed final step; no validation selection",
+    "max_gpu_hours": 2,
+    "generation": {
+      "do_sample": false,
+      "num_beams": 1,
+      "max_new_tokens": 64
+    }
+  },
+  "runtime_dependencies": {
+    "transformers": "pinned isolated tokenizer probe uses 4.57.3; do not use 5.x for this checkpoint",
+    "tokenizers": "pinned 0.22.2; resolved transitively by Transformers 4.57.3",
+    "sentencepiece": "not required by the tested RobertaTokenizerFast path"
+  },
+  "minimum_free_memory_mib": 24000,
+  "pilot_report": "outputs/reports/nlp_pretrained_python_pilot_v1.json",
+  "checkpoint_output": ".data/nlp/pretrained_python_v1/codet5_small_seed17.pt",
+  "evidence_boundary": "One bounded synthetic Python diagnostic only; the 60M external model is outside compact claims, and no open-domain or capability claim is permitted."
+}

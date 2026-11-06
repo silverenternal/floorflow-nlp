@@ -1,0 +1,206 @@
+{
+  "version": "nlp-gap-parallel-training-v1",
+  "status": "frozen_contract",
+  "purpose": "Train verifier-bound capability gaps independently, then compose them with zero-gated cross-attention before low-LR joint tuning.",
+  "tracks": {
+    "compressed_primary": {
+      "parameter_cap": 23000000,
+      "token_parameter_ratio": 20,
+      "claim_eligible_after": [
+        "compression",
+        "matched parameter audit",
+        "matched compute evaluation"
+      ]
+    },
+    "open_capability_exploratory": {
+      "parameter_cap": null,
+      "claim_eligible": false,
+      "purpose": "Prioritize coding, AST/CFM, engineering, and dialogue quality before compression.",
+      "required_follow_up": [
+        "tensor-ring or low-rank compression",
+        "quantization or hybrid compression if needed",
+        "rerun all capability gates after compression"
+      ]
+    }
+  },
+  "gaps": [
+    {
+      "id": "json_validity",
+      "adapter": "json_validity",
+      "loss": "binary_cross_entropy_with_logits",
+      "data_split": "json_train_only",
+      "verifier": "strict JSON parser plus frozen schema",
+      "metrics": ["parse_validity", "schema_compliance"],
+      "holdout_isolation": "json_validation_and_test_only"
+    },
+    {
+      "id": "ast_structure",
+      "adapter": "ast_structure",
+      "loss": "ast_node_edge_supervision",
+      "data_split": "ast_stage_a_train_only",
+      "verifier": "AST parser and codec round-trip",
+      "metrics": ["ast_parse_validity", "node_f1", "edge_f1"],
+      "holdout_isolation": "ast_stage_a_validation_and_test_only"
+    },
+    {
+      "id": "stage_b_cfm",
+      "adapter": "ast_structure",
+      "loss": "result_cfm",
+      "data_split": "stage_b_train_only",
+      "verifier": "generated AST to executable code",
+      "metrics": ["execution_success", "tree_edit_distance"],
+      "holdout_isolation": "stage_b_validation_and_test_only"
+    },
+    {
+      "id": "python_execution",
+      "adapter": "python_execution",
+      "loss": "execution_verifier",
+      "data_split": "python_train_only",
+      "verifier": "Python compile and bounded executor",
+      "metrics": ["compile_rate", "unit_test_pass_rate"],
+      "holdout_isolation": "python_validation_and_test_only"
+    },
+    {
+      "id": "rust_execution",
+      "adapter": "rust_execution",
+      "loss": "execution_verifier",
+      "data_split": "rust_train_only",
+      "verifier": "rustc and bounded test runner",
+      "metrics": ["compile_rate", "unit_test_pass_rate"],
+      "holdout_isolation": "rust_validation_and_test_only"
+    },
+    {
+      "id": "cpp_execution",
+      "adapter": "cpp_execution",
+      "loss": "execution_verifier",
+      "data_split": "cpp_train_only",
+      "verifier": "C++ compiler and bounded test runner",
+      "metrics": ["compile_rate", "unit_test_pass_rate"],
+      "holdout_isolation": "cpp_validation_and_test_only"
+    },
+    {
+      "id": "engineering_acceleration",
+      "adapter": "engineering_acceleration",
+      "loss": "triton_linux_verifier",
+      "data_split": "engineering_train_only",
+      "verifier": "numerical match, shell diagnostic, latency guard",
+      "metrics": [
+        "triton_numerical_match",
+        "linux_diagnostic_accuracy",
+        "performance_patch_correctness"
+      ],
+      "holdout_isolation": "engineering_validation_and_test_only"
+    },
+    {
+      "id": "model_architecture",
+      "adapter": "model_architecture",
+      "loss": "document_grounded_prediction",
+      "data_split": "architecture_train_only",
+      "verifier": "held-out architecture question set",
+      "metrics": ["exact_or_rubric_accuracy", "citation_grounding"],
+      "holdout_isolation": "architecture_validation_and_test_only"
+    },
+    {
+      "id": "language_retention",
+      "adapter": "language_retention",
+      "loss": "language_modeling_and_grammar",
+      "data_split": "general_train_only",
+      "verifier": "held-out language and grammar suite",
+      "metrics": ["heldout_loss", "grammar_validity"],
+      "holdout_isolation": "general_validation_and_test_only"
+    },
+    {
+      "id": "compositional_emergence",
+      "adapter": "compositional_emergence",
+      "loss": "basis_cycle_plus_surface_execution_validity",
+      "data_split": "atom_and_nonholdout_composition_train_only",
+      "verifier": "held-out executable composition suite",
+      "metrics": [
+        "support_recall",
+        "cycle_error",
+        "surface_validity",
+        "execution_validity"
+      ],
+      "holdout_isolation": "combination_holdout_never_used_in_loss_or_selection"
+    }
+  ],
+  "stages": [
+    {
+      "id": "stage_1_parallel_gap_training",
+      "order": 1,
+      "parallelizable": true,
+      "shared_trunk": "frozen_or_low_learning_rate",
+      "trainable": "one_gap_adapter_and_loss_head",
+      "checkpoint_rule": "one checkpoint per gap adapter; no cross-gap selection",
+      "exit": [
+        "each gap has a finite loss",
+        "each enabled adapter has nonzero isolated gradient",
+        "each gap verifier report is frozen"
+      ]
+    },
+    {
+      "id": "stage_2_router_calibration",
+      "order": 2,
+      "parallelizable": false,
+      "shared_trunk": "frozen",
+      "trainable": "zero_gated_cross_attention_aggregator_only",
+      "checkpoint_rule": "validation aggregate metrics only; gap holdouts remain isolated",
+      "exit": [
+        "aggregator starts at identity",
+        "routing utilization and entropy are finite",
+        "aggregation improves held-out aggregate validity over frozen-gate control"
+      ]
+    },
+    {
+      "id": "stage_3_joint_low_lr",
+      "order": 3,
+      "parallelizable": false,
+      "shared_trunk": "low_learning_rate",
+      "trainable": "trunk_adapters_and_aggregator",
+      "checkpoint_rule": "frozen aggregate validation; final tests opened once",
+      "exit": [
+        "JSON validity remains 1.0 with zero repair and retry",
+        "coding and engineering verifier gains do not regress language retention beyond the frozen tolerance",
+        "matched monolithic and frozen-aggregation controls are reported"
+      ]
+    }
+  ],
+  "matched_controls": {
+    "arms": [
+      "monolithic",
+      "decomposed_parallel_frozen_router",
+      "decomposed_parallel_calibrated_router"
+    ],
+    "matched_fields": [
+      "physical parameters",
+      "training tokens",
+      "inference compute",
+      "optimizer steps",
+      "tokenizer",
+      "evaluation suites"
+    ]
+  },
+  "forbidden": [
+    "test leakage into channel training or checkpoint selection",
+    "JSON repair",
+    "hidden retry",
+    "best-of-N primary evaluation",
+    "presenting an open-capability checkpoint as the compressed primary",
+    "reporting routing metrics as coding or engineering capability"
+  ],
+  "compression_handoff": {
+    "candidate_methods": [
+      "tensor_ring",
+      "low_rank",
+      "quantization",
+      "hybrid"
+    ],
+    "required_artifacts": [
+      "resident parameter ledger",
+      "model-only checkpoint",
+      "training and evaluation hashes",
+      "pre-compression capability report",
+      "post-compression capability report"
+    ]
+  }
+}
