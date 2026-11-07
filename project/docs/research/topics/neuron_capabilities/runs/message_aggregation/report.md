@@ -240,3 +240,9 @@ L1筛查未改善误差尾部：四seed set-sum MAE为0.13565/0.02438/0.05162/0.
 ## 精确原始消息加和直通候选（NE-024.40）
 
 本轮保持full bilinear角色分组交互，额外给ModelNeuron增加无参数的`Σ(message × strength)`直通输出，并在启用该结构时将普通隐藏态输出projection置零初始化。这样线性加和从初始前向就精确保留，binding仍依靠共享隐藏态与full bilinear分支学习。CPU smoke已核对模型输出逐位等于加权原始消息和；冻结validation配置位于`training_budget_diagnostic/formal_confirmation/structural_candidates/raw_sum_bilinear/validation/config.json`，fresh seed 320000–320003，不触及sealed数据。
+
+四个seed全部在内网RX 7800 XT上完成；每个seed均记录PyTorch 2.15.0、HIP 7.2.53211、实际设备名和同步矩阵乘法探针checksum。独立GPU采样日志中card1共2803次采样，平均忙碌率97.19%、中位98%；card0始终为0%。每个模型40,274参数，训练中位约349.45秒/seed；前后向成本中位数按64/256/1024/4096条入边为4.27/5.32/9.24/17.14 ms。完整逐seed数据和GPU采样见该validation目录的`results.json`与`gpu_activity.log`。
+
+候选未通过冻结门槛。Set-sum validation MAE逐seed为0.000396/0.110701/0.000354/0.000052，最大误差最高0.303429；seed 320001单独即超过MAE与最大误差阈值。Grouped-binding MAE为0.001572/0.003938/0.005983/0.016592，最大误差最高0.050481；16组外推MAE为0.005689/0.007301/0.015236/0.070194，最大误差最高0.106091，seed 320003外推失败。排列偏差≤2.39e-6。sealed数据未生成或读取；按冻结规则停止候选，不据该批validation继续调参。
+
+这次结果也暴露了设计上的关键点：只在初始化时将普通输出projection置零，不能保证训练后可学习分支不会污染精确加和通道。CPU smoke证明的只是初始化语义，不能证明训练全过程的不变量。若后续重新提出该方向，必须先在接口/结构上隔离加和输出与可学习关系输出，再单独设计新验证方案；本轮不追加实验。NE-024整体关系能力验收仍未通过。

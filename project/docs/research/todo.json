@@ -527,11 +527,11 @@
         },
         {
           "id": "NE-024.40",
-          "status": "in_progress",
+          "status": "completed",
           "work": "为线性集合归约建立精确原始消息加和直通路径，同时保留full bilinear角色分组分支学习非线性绑定。直通路径无参数，将message×strength直接求和加到共享ModelNeuron输出；开启该结构时将普通输出projection零初始化，使集合加和从初始前向即精确。其余隐藏态与双线性交互仍训练，所有逻辑神经元共享这一模型。以全新seed 320000–320003对比原full bilinear，2048样本/任务、128epoch，validation检查集合与绑定MAE、所有验证样本最大误差、16组外推最大误差、置换及成本；sealed不访问。 GPU硬门禁要求ROCm HIP、设备名匹配RX 7800 XT、指定HIP版本一致，并先执行同步GPU矩阵乘法探针；不匹配立即失败，严禁CPU/MPS降级。",
           "output": "精确线性聚合直通实现、确定性ROCm validation-only四seed对照和候选继续/停止决定。",
           "done_when": "原始直通输出对任意度数、重复消息、空集和strength严格符合加权和语义；四seed set-sum MAE/max误差均≤0.05、grouped-binding MAE/max误差均≤0.05、16组外推MAE/max误差均≤0.05、排列差异≤1e-5；记录参数与ROCm成本。失败则停止候选，不读取sealed或据该批validation复调；通过才另建新sealed正式任务。 GPU探针必须记录ROCm runtime、实际设备名和同步矩阵运算；每个seed完成后原子保存，进程中断可按配置/runner哈希安全续跑。",
-          "evidence": "独立候选配置冻结于structural_candidates/raw_sum_bilinear/validation/config.json，fresh seed 320000–320003，训练目标normalized_mse，sealed_test_generated_or_read=false。CPU smoke已验证full bilinear开启时输出逐位等于加权原始消息和。实验将先强制核验ROCm、RX 7800 XT、HIP 7.2.53211，再同步执行GPU矩阵乘法并把设备元数据写入每seed结果；验证runner已改为逐seed原子落盘、按输入哈希安全续跑。待本地检查/CI完成后上机。"
+          "evidence": "冻结配置和完整四seed结果见structural_candidates/raw_sum_bilinear/validation/{config.json,results.json}，fresh seed 320000–320003，2048样本/任务、128 epoch，sealed_test_generated_or_read=false。所有seed均记录device=cuda、PyTorch 2.15.0、HIP 7.2.53211、AMD Radeon RX 7800 XT及同步矩阵乘法探针checksum 67978240.0。gpu_activity.log共2803组采样：card1平均97.19%、中位98%、范围0–100%；card0始终0%，证实训练使用独显GPU而非CPU回退。四seed set-sum validation MAE为0.000396/0.110701/0.000354/0.000052，最大误差最高0.303429；grouped-binding MAE为0.001572/0.003938/0.005983/0.016592，最大误差最高0.050481；16组外推MAE为0.005689/0.007301/0.015236/0.070194，最大误差最高0.106091。排列偏差≤2.39e-6，参数40,274，训练中位成本349.45秒/seed；前后向中位成本64/256/1024/4096入边为4.27/5.32/9.24/17.14ms。冻结门槛失败：seed 320001集合求和MAE/max超限，seed 320003的16组外推MAE/max超限，且seed 320003的binding最大误差略超0.05。候选停止，不读取sealed、不按本批validation复调。结果显示当前直通值与可训练输出分支并未在训练全过程保持隔离的精确加和不变量；后续若重开，必须先提出结构上不可被学习分支污染的输出通道设计并另立预注册任务。"
         }
       ],
       "acceptance": [
