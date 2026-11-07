@@ -79,6 +79,7 @@ class ModelNeuron(nn.Module):
         message_size: int,
         num_edge_types: int = 1,
         message_aggregator: nn.Module | None = None,
+        exact_input_sum_readout: bool = False,
     ) -> None:
         super().__init__()
         for name, value in (
@@ -89,11 +90,14 @@ class ModelNeuron(nn.Module):
         ):
             if not isinstance(value, int) or isinstance(value, bool) or value <= 0:
                 raise ValueError(f"{name} must be a positive integer")
+        if not isinstance(exact_input_sum_readout, bool):
+            raise TypeError("exact_input_sum_readout must be a bool")
         self.input_size = input_size
         self.hidden_size = hidden_size
         self.message_size = message_size
         self.num_edge_types = num_edge_types
         self.message_aggregator = message_aggregator
+        self.exact_input_sum_readout = exact_input_sum_readout
         self.message_projection = nn.Linear(message_size, hidden_size, bias=False)
         self.edge_type_embedding = nn.Embedding(num_edge_types, hidden_size)
         self.input_projection = nn.Linear(input_size, hidden_size)
@@ -102,10 +106,15 @@ class ModelNeuron(nn.Module):
         self.aggregate_output_projection = nn.Linear(hidden_size, message_size)
         nn.init.zeros_(self.aggregate_output_projection.weight)
         nn.init.zeros_(self.aggregate_output_projection.bias)
+        if exact_input_sum_readout:
+            nn.init.zeros_(self.output_projection.weight)
+            nn.init.zeros_(self.output_projection.bias)
 
     @property
     def architecture_signature(self) -> tuple[int, int, int, int, str]:
         implementation = type(self).__qualname__
+        if self.exact_input_sum_readout:
+            implementation += "+ExactInputSumReadout"
         if self.message_aggregator is not None:
             implementation += f"+{type(self.message_aggregator).__qualname__}"
         return (
@@ -220,6 +229,8 @@ class ModelNeuron(nn.Module):
         drive = torch.tanh(self.input_projection(inputs) + aggregate)
         next_state = self.state_update(drive, state)
         value = self.output_projection(next_state) + self.aggregate_output_projection(readout_aggregate)
+        if self.exact_input_sum_readout:
+            value = value + (incoming_messages * incoming_strengths.unsqueeze(-1)).sum(dim=1)
         return NeuronResult(value, next_state)
 
 

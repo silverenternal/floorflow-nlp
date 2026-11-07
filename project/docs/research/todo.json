@@ -523,7 +523,15 @@
           "work": "对全新训练目标候选做validation-only诊断：保持NE-024.37的full_bilinear结构、ModelNeuron权重共享、数据量和优化配比完全不变，将按sqrt(入边数)标准化的均方损失换为同尺度L1目标，以直接优化冻结的MAE指标。使用全新seed 310000–310003，对照同目标下global_sum；报告训练尺寸MAE、逐样本最大绝对误差、16组外推、排列误差和ROCm成本。只接触新训练/validation数据，不读取或重放任何sealed数据。",
           "output": "训练目标候选validation-only四seed误差尾部与能力诊断，进入独立sealed复核或停止的决策。",
           "done_when": "四seed两任务validation MAE均≤0.05、每个任务/seed最大绝对误差≤0.05、16组外推MAE与最大误差≤0.05、排列差异≤1e-5；成本可执行且结果可复现。任何失败都按规则停止该目标，不据该批validation复调；通过后另建独立正式sealed任务。",
-          "evidence": "ROCm validation-only四seed结果见robust_objective_validation/results.json，明确sealed_test_generated_or_read=false。normalized L1目标下，full bilinear set-sum MAE逐seed 0.13565/0.02438/0.05162/0.07055，三seed失败0.05门槛；最大误差最高0.31429。grouped-binding MAE为0.02303/0.00657/0.01752/0.00664，但最大误差最高0.09905；16组外推MAE为0.04751/0.03584/0.03611/0.01358，最大误差最高0.17804。候选没有满足冻结阈值，停止L1目标，不按本批validation复调，不读取sealed数据。"
+          "evidence": "ROCm validation-only四seed结果见robust_objective_validation/results.json，明确sealed_test_generated_or_read=false。normalized L1目标下，full bilinear set-sum MAE逐seed0.13565/0.02438/0.05162/0.07055，三seed失败0.05门槛；最大误差最高0.31429。grouped-binding MAE为0.02303/0.00657/0.01752/0.00664，但最大误差最高0.09905；16组外推MAE为0.04751/0.03584/0.03611/0.01358，最大误差最高0.17804。候选没有满足冻结阈值，停止L1目标，不按本批validation复调，不读取sealed数据。"
+        },
+        {
+          "id": "NE-024.40",
+          "status": "in_progress",
+          "work": "为线性集合归约建立精确原始消息加和直通路径，同时保留full bilinear角色分组分支学习非线性绑定。直通路径无参数，将message×strength直接求和加到共享ModelNeuron输出；开启该结构时将普通输出projection零初始化，使集合加和从初始前向即精确。其余隐藏态与双线性交互仍训练，所有逻辑神经元共享这一模型。以全新seed 320000–320003对比原full bilinear，2048样本/任务、128epoch，validation检查集合与绑定MAE、所有验证样本最大误差、16组外推最大误差、置换及成本；sealed不访问。 GPU硬门禁要求ROCm HIP、设备名匹配RX 7800 XT、指定HIP版本一致，并先执行同步GPU矩阵乘法探针；不匹配立即失败，严禁CPU/MPS降级。",
+          "output": "精确线性聚合直通实现、确定性ROCm validation-only四seed对照和候选继续/停止决定。",
+          "done_when": "原始直通输出对任意度数、重复消息、空集和strength严格符合加权和语义；四seed set-sum MAE/max误差均≤0.05、grouped-binding MAE/max误差均≤0.05、16组外推MAE/max误差均≤0.05、排列差异≤1e-5；记录参数与ROCm成本。失败则停止候选，不读取sealed或据该批validation复调；通过才另建新sealed正式任务。 GPU探针必须记录ROCm runtime、实际设备名和同步矩阵运算；每个seed完成后原子保存，进程中断可按配置/runner哈希安全续跑。",
+          "evidence": "独立候选配置冻结于structural_candidates/raw_sum_bilinear/validation/config.json，fresh seed 320000–320003，训练目标normalized_mse，sealed_test_generated_or_read=false。CPU smoke已验证full bilinear开启时输出逐位等于加权原始消息和。实验将先强制核验ROCm、RX 7800 XT、HIP 7.2.53211，再同步执行GPU矩阵乘法并把设备元数据写入每seed结果；验证runner已改为逐seed原子落盘、按输入哈希安全续跑。待本地检查/CI完成后上机。"
         }
       ],
       "acceptance": [

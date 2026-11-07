@@ -38,6 +38,52 @@ def _synchronize(device: torch.device) -> None:
         torch.cuda.synchronize(device)
 
 
+def _device_runtime_metadata(config: dict[str, Any], device: torch.device) -> dict[str, Any]:
+    """Fail closed when a configured accelerator does not match the experiment host."""
+    if config.get("require_rocm") and device.type != "cuda":
+        raise RuntimeError("ROCm CUDA device is required; CPU/MPS fallback is disabled")
+    metadata: dict[str, Any] = {
+        "device": str(device),
+        "torch": torch.__version__,
+        "torch_hip": torch.version.hip,
+        "torch_cuda_runtime": torch.version.cuda,
+    }
+    if device.type == "cuda":
+        if not torch.cuda.is_available():
+            raise RuntimeError("CUDA/HIP device is required; CPU fallback is disabled")
+        accelerator_name = torch.cuda.get_device_name(device)
+        expected_name = config.get("expected_accelerator_name")
+        if expected_name and expected_name not in accelerator_name:
+            raise RuntimeError(
+                f"expected accelerator {expected_name!r}, got {accelerator_name!r}"
+            )
+        if config.get("require_rocm") and torch.version.hip is None:
+            raise RuntimeError("ROCm PyTorch is required; CPU/CUDA fallback is disabled")
+        expected_hip = config.get("expected_torch_hip")
+        if expected_hip and torch.version.hip != expected_hip:
+            raise RuntimeError(f"expected ROCm runtime {expected_hip!r}, got {torch.version.hip!r}")
+
+        probe = torch.arange(256, dtype=torch.float32, device=device).reshape(16, 16)
+        checksum = float((probe @ probe).sum().item())
+        _synchronize(device)
+        if not math.isfinite(checksum):
+            raise RuntimeError("accelerator matrix-multiplication preflight returned non-finite output")
+        metadata.update(
+            {
+                "accelerator_name": accelerator_name,
+                "accelerator_preflight": "synchronized_matrix_multiplication",
+                "accelerator_preflight_checksum": checksum,
+            }
+        )
+    elif device.type == "mps":
+        if not torch.backends.mps.is_available():
+            raise RuntimeError("MPS is required; CPU fallback is disabled")
+        metadata["accelerator_name"] = "Apple MPS"
+    else:
+        metadata["accelerator_name"] = "CPU"
+    return metadata
+
+
 def _select_task_output(values: Tensor, family_ids: Tensor) -> Tensor:
     """Decode one shared model's task-conditioned output channel."""
     if values.ndim != 2 or family_ids.shape != (values.shape[0],):
@@ -68,6 +114,7 @@ def _normalized_training_loss(
 class SharedAggregationModel(torch.nn.Module):
     def __init__(self, *, hidden_size: int, aggregator_kind: str) -> None:
         super().__init__()
+        exact_input_sum_readout = aggregator_kind == "exact_raw_sum_bilinear_group_role_sum"
         # Initialize the shared neuron core identically for every candidate;
         # experimental aggregator parameters must not shift core RNG draws.
         self.neuron = ModelNeuron(
@@ -75,7 +122,10 @@ class SharedAggregationModel(torch.nn.Module):
             hidden_size=hidden_size,
             message_size=9,
             num_edge_types=2,
+            exact_input_sum_readout=exact_input_sum_readout,
         )
+        if exact_input_sum_readout:
+            aggregator_kind = "full_bilinear_group_role_sum"
         if aggregator_kind == "global_sum":
             aggregator = None
         elif aggregator_kind == "pyg_set_transformer":
@@ -347,6 +397,7 @@ def run(config_path: Path, output: Path) -> dict[str, Any]:
     device = torch.device(device_name)
     if device.type == "cuda" and not torch.cuda.is_available():
         raise RuntimeError("CUDA/HIP device is required for this experiment; CPU fallback is disabled")
+    runtime_device = _device_runtime_metadata(config, device)
     capacity = int(config["data"].get("capacity", 64))
     families = config["data"].get(
         "families", {"set_sum": [4, 16, 64], "grouped_binding": [2, 4, 8]}
@@ -370,6 +421,7 @@ def run(config_path: Path, output: Path) -> dict[str, Any]:
         "output_decoder": "observable task family selects a channel from the single ModelNeuron output_projection; no per-task model or extra decoder weights",
         "sealed_test_used": True,
         "training_objective": config["training"].get("objective", "normalized_mse"),
+        "device_runtime": runtime_device,
         "seeds": [],
     }
     for seed_index in config["training"]["seeds"]:

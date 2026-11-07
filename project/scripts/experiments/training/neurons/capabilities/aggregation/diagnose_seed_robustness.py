@@ -11,35 +11,18 @@ from pathlib import Path
 from typing import Any
 
 import diagnose_training_budget
+import torch
+from compare_message_aggregators import _device_runtime_metadata
 
 
-def run(config_path: Path, output: Path) -> dict[str, Any]:
-    config = json.loads(config_path.read_text())
-    runs = []
-    for sample_count in config["sample_counts_per_family"]:
-        for seed in config["seeds"]:
-            variant = {
-                key: value
-                for key, value in config.items()
-                if key not in {"sample_counts_per_family", "seeds"}
-            }
-            variant["samples_per_family"] = sample_count
-            variant["seed"] = seed
-            with tempfile.TemporaryDirectory(prefix="newera-validation-seed-") as directory:
-                work = Path(directory)
-                variant_path = work / "config.json"
-                variant_path.write_text(json.dumps(variant, sort_keys=True))
-                result = diagnose_training_budget.run(variant_path, work / "results.json")
-            runs.append(
-                {
-                    "sample_count_per_family": sample_count,
-                    "seed": seed,
-                    "config_sha256": result["config_sha256"],
-                    "candidate_results": result["candidates"],
-                }
-            )
-            print(f"completed validation seed={seed}, samples_per_family={sample_count}", flush=True)
+def _write_progress(output: Path, result: dict[str, Any]) -> None:
+    output.parent.mkdir(parents=True, exist_ok=True)
+    temporary = output.with_name(f".{output.name}.tmp")
+    temporary.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n")
+    temporary.replace(output)
 
+
+def _summarize(runs: list[dict[str, Any]], config: dict[str, Any]) -> dict[str, Any]:
     summary = {}
     for sample_count in config["sample_counts_per_family"]:
         selected = [run for run in runs if run["sample_count_per_family"] == sample_count]
@@ -80,22 +63,99 @@ def run(config_path: Path, output: Path) -> dict[str, Any]:
                 for size, metrics in extrapolation_by_size.items()
             },
         }
+    return summary
 
-    result = {
-        "experiment_id": config["experiment_id"],
-        "config_sha256": hashlib.sha256(config_path.read_bytes()).hexdigest(),
-        "runner_sha256": hashlib.sha256(Path(diagnose_training_budget.__file__).read_bytes()).hexdigest(),
-        "source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
-        "sealed_test_generated_or_read": False,
-        "seeds": config["seeds"],
-        "sample_counts_per_family": config["sample_counts_per_family"],
-        "validation_sizes": config.get("validation_sizes", config["train_sizes"]),
-        "extrapolation_sizes": config.get("extrapolation_sizes", {}),
-        "summary": summary,
-        "runs": runs,
+
+def run(config_path: Path, output: Path) -> dict[str, Any]:
+    config = json.loads(config_path.read_text())
+    device_runtime = _device_runtime_metadata(config, torch.device(config["device"]))
+    config_sha256 = hashlib.sha256(config_path.read_bytes()).hexdigest()
+    runner_sha256 = hashlib.sha256(Path(diagnose_training_budget.__file__).read_bytes()).hexdigest()
+    comparison_path = Path(diagnose_training_budget.__file__).with_name("compare_message_aggregators.py")
+    comparison_sha256 = hashlib.sha256(comparison_path.read_bytes()).hexdigest()
+    source_sha256 = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+    if output.exists():
+        result = json.loads(output.read_text())
+        for key, expected in (
+            ("config_sha256", config_sha256),
+            ("runner_sha256", runner_sha256),
+            ("comparison_source_sha256", comparison_sha256),
+            ("source_sha256", source_sha256),
+        ):
+            if result.get(key) != expected:
+                raise RuntimeError(f"cannot resume validation run: {key} does not match frozen inputs")
+        if result.get("run_state") != "in_progress":
+            raise RuntimeError("refusing to overwrite a completed validation run")
+    else:
+        result = {
+            "experiment_id": config["experiment_id"],
+            "config_sha256": config_sha256,
+            "runner_sha256": runner_sha256,
+            "comparison_source_sha256": comparison_sha256,
+            "source_sha256": source_sha256,
+            "sealed_test_generated_or_read": False,
+            "device": config["device"],
+            "device_runtime": device_runtime,
+            "require_rocm": bool(config.get("require_rocm", False)),
+            "expected_accelerator_name": config.get("expected_accelerator_name"),
+            "expected_torch_hip": config.get("expected_torch_hip"),
+            "seeds": config["seeds"],
+            "sample_counts_per_family": config["sample_counts_per_family"],
+            "validation_sizes": config.get("validation_sizes", config["train_sizes"]),
+            "extrapolation_sizes": config.get("extrapolation_sizes", {}),
+            "run_state": "in_progress",
+            "summary": {},
+            "runs": [],
+        }
+        _write_progress(output, result)
+
+    completed_pair_list = [
+        (run["sample_count_per_family"], run["seed"]) for run in result["runs"]
+    ]
+    expected_pairs = {
+        (sample_count, seed)
+        for sample_count in config["sample_counts_per_family"]
+        for seed in config["seeds"]
     }
-    output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n")
+    completed_pairs = set(completed_pair_list)
+    if len(completed_pairs) != len(completed_pair_list) or not completed_pairs <= expected_pairs:
+        raise RuntimeError("cannot resume validation run: progress file has duplicate or unknown seed entries")
+    for sample_count in config["sample_counts_per_family"]:
+        for seed in config["seeds"]:
+            if (sample_count, seed) in completed_pairs:
+                continue
+            variant = {
+                key: value
+                for key, value in config.items()
+                if key not in {"sample_counts_per_family", "seeds"}
+            }
+            variant["samples_per_family"] = sample_count
+            variant["seed"] = seed
+            with tempfile.TemporaryDirectory(prefix="newera-validation-seed-") as directory:
+                work = Path(directory)
+                variant_path = work / "config.json"
+                variant_path.write_text(json.dumps(variant, sort_keys=True))
+                seed_result = diagnose_training_budget.run(variant_path, work / "results.json")
+            result["runs"].append(
+                {
+                    "sample_count_per_family": sample_count,
+                    "seed": seed,
+                    "config_sha256": seed_result["config_sha256"],
+                    "runner_sha256": seed_result["source_sha256"],
+                    "comparison_source_sha256": seed_result["comparison_source_sha256"],
+                    "device_runtime": seed_result["device_runtime"],
+                    "candidate_results": seed_result["candidates"],
+                }
+            )
+            completed_pairs.add((sample_count, seed))
+            _write_progress(output, result)
+            print(f"completed validation seed={seed}, samples_per_family={sample_count}", flush=True)
+
+    if completed_pairs != expected_pairs or len(result["runs"]) != len(expected_pairs):
+        raise RuntimeError("validation run is incomplete or has duplicate seeds")
+    result["summary"] = _summarize(result["runs"], config)
+    result["run_state"] = "completed"
+    _write_progress(output, result)
     return result
 
 

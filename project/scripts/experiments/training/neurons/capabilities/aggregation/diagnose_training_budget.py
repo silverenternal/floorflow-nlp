@@ -21,6 +21,7 @@ from compare_message_aggregators import (
     _batch,
     _cost,
     _dataset,
+    _device_runtime_metadata,
     _evaluate,
     _normalized_training_loss,
     _permutation_delta,
@@ -43,6 +44,7 @@ def run(config_path: Path, output: Path) -> dict[str, Any]:
     device = torch.device(device_name)
     if device.type == "cuda" and not torch.cuda.is_available():
         raise RuntimeError("CUDA/HIP device is required; CPU fallback is disabled")
+    runtime_device = _device_runtime_metadata(config, device)
     seed = int(config["seed"])
     families = config["train_sizes"]
     train_samples = []
@@ -88,6 +90,9 @@ def run(config_path: Path, output: Path) -> dict[str, Any]:
         "device": device_name,
         "deterministic_algorithms": torch.are_deterministic_algorithms_enabled(),
         "torch": torch.__version__,
+        "torch_hip": torch.version.hip,
+        "accelerator_name": runtime_device["accelerator_name"],
+        "device_runtime": runtime_device,
         "config_sha256": hashlib.sha256(config_path.read_bytes()).hexdigest(),
         "source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         "comparison_source_sha256": hashlib.sha256(Path(__file__).with_name("compare_message_aggregators.py").read_bytes()).hexdigest(),
