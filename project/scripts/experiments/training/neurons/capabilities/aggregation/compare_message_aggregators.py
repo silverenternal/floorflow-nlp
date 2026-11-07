@@ -6,9 +6,11 @@ import argparse
 import hashlib
 import json
 import math
+import os
 import random
 import statistics
 import sys
+import tempfile
 import time
 from pathlib import Path
 from typing import Any
@@ -402,6 +404,69 @@ def _cost(model: SharedAggregationModel, *, device: torch.device, widths: list[i
     return costs
 
 
+def _atomic_write_json(path: Path, payload: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary_path: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", dir=path.parent, prefix=f".{path.name}.", suffix=".tmp", delete=False
+        ) as stream:
+            temporary_path = Path(stream.name)
+            json.dump(payload, stream, ensure_ascii=False, indent=2)
+            stream.write("\n")
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary_path, path)
+        directory_fd = os.open(path.parent, os.O_RDONLY)
+        try:
+            os.fsync(directory_fd)
+        finally:
+            os.close(directory_fd)
+    finally:
+        if temporary_path is not None and temporary_path.exists():
+            temporary_path.unlink()
+
+
+def _load_formal_progress(
+    output: Path,
+    *,
+    config_sha256: str,
+    source_sha256: str,
+    device_runtime: dict[str, Any],
+    expected_seeds: list[int],
+    initial_results: dict[str, Any],
+) -> dict[str, Any]:
+    if not output.exists():
+        return initial_results
+    progress = json.loads(output.read_text())
+    if progress.get("run_state") == "completed":
+        raise RuntimeError("refusing to rerun a completed sealed confirmation")
+    if progress.get("run_state") != "in_progress":
+        raise RuntimeError("sealed confirmation progress has an invalid run state")
+    if progress.get("config_sha256") != config_sha256 or progress.get("source_sha256") != source_sha256:
+        raise RuntimeError("cannot resume sealed confirmation with different config or source hashes")
+    if progress.get("device_runtime") != device_runtime:
+        raise RuntimeError("cannot resume sealed confirmation on a different accelerator runtime")
+    completed_seeds = [entry.get("seed") for entry in progress.get("seeds", [])]
+    if len(completed_seeds) != len(set(completed_seeds)) or not set(completed_seeds) <= set(expected_seeds):
+        raise RuntimeError("sealed confirmation progress contains duplicate or unexpected seeds")
+    active_seed = progress.get("active_seed")
+    if active_seed is not None:
+        if active_seed not in expected_seeds:
+            raise RuntimeError("sealed confirmation progress contains an unexpected active seed")
+        if progress.get("sealed_access_started"):
+            raise RuntimeError(
+                "refusing to repeat a seed whose sealed evaluation started; preserve the partial run and stop"
+            )
+        if active_seed in completed_seeds:
+            raise RuntimeError("sealed confirmation active seed is already marked complete")
+        progress["active_seed"] = None
+    elif progress.get("sealed_access_started"):
+        raise RuntimeError("sealed confirmation progress has an access marker without an active seed")
+    progress["sealed_access_started"] = False
+    return progress
+
+
 def run(config_path: Path, output: Path) -> dict[str, Any]:
     config = json.loads(config_path.read_text())
     torch.use_deterministic_algorithms(bool(config.get("deterministic_algorithms", False)))
@@ -417,6 +482,9 @@ def run(config_path: Path, output: Path) -> dict[str, Any]:
         "families", {"set_sum": [4, 16, 64], "grouped_binding": [2, 4, 8]}
     )
     held_out = config["data"].get("held_out", {"grouped_binding": 16})
+    config_sha256 = hashlib.sha256(config_path.read_bytes()).hexdigest()
+    source_sha256 = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+    expected_seeds = [config["data"]["seed_base"] + index for index in config["training"]["seeds"]]
     results: dict[str, Any] = {
         "experiment_id": config["experiment_id"],
         "device": device_name,
@@ -428,21 +496,39 @@ def run(config_path: Path, output: Path) -> dict[str, Any]:
             else "CPU"
         ),
         "deterministic_algorithms": torch.are_deterministic_algorithms_enabled(),
-        "config_sha256": hashlib.sha256(config_path.read_bytes()).hexdigest(),
-        "source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+        "config_sha256": config_sha256,
+        "source_sha256": source_sha256,
         "shared_model_contract": "one ModelNeuron and one weight set trained jointly on both families",
         "weight_sets_per_model": 1,
         "output_decoder": "observable task family selects a channel from the single ModelNeuron output_projection; no per-task model or extra decoder weights",
         "sealed_test_used": True,
         "training_objective": config["training"].get("objective", "normalized_mse"),
         "device_runtime": runtime_device,
+        "run_state": "in_progress",
+        "active_seed": None,
+        "sealed_access_started": False,
         "seeds": [],
     }
+    output.parent.mkdir(parents=True, exist_ok=True)
+    results = _load_formal_progress(
+        output,
+        config_sha256=config_sha256,
+        source_sha256=source_sha256,
+        device_runtime=runtime_device,
+        expected_seeds=expected_seeds,
+        initial_results=results,
+    )
+    completed_seeds = {entry["seed"] for entry in results["seeds"]}
+    _atomic_write_json(output, results)
     for seed_index in config["training"]["seeds"]:
         seed = config["data"]["seed_base"] + seed_index
+        if seed in completed_seeds:
+            continue
+        results["active_seed"] = seed
+        results["sealed_access_started"] = False
+        _atomic_write_json(output, results)
         train_samples = []
         validation: dict[str, list[dict[str, Tensor]]] = {}
-        test: dict[str, list[dict[str, Tensor]]] = {}
         extrapolation: dict[str, list[dict[str, Tensor]]] = {}
         for family_index, family in enumerate(families):
             train_samples.extend(
@@ -459,12 +545,6 @@ def run(config_path: Path, output: Path) -> dict[str, Any]:
                 families[family],
                 config["data"]["validation_samples_per_family"],
             )
-            test[family] = _dataset(
-                family,
-                seed + 300_000 + family_index * 100_000,
-                families[family],
-                config["data"]["sealed_test_samples_per_family"],
-            )
             if family in held_out:
                 extrapolation[family] = _dataset(
                     family,
@@ -474,6 +554,7 @@ def run(config_path: Path, output: Path) -> dict[str, Any]:
                 )
         random.Random(seed).shuffle(train_samples)
         seed_result: dict[str, Any] = {"seed": seed, "candidates": {}}
+        models: dict[str, SharedAggregationModel] = {}
         for name in config["candidates"]:
             torch.manual_seed(seed)
             model = SharedAggregationModel(
@@ -501,12 +582,6 @@ def run(config_path: Path, output: Path) -> dict[str, Any]:
                 candidate["validation"][family] = _evaluate(
                     model, validation[family], capacity=capacity, batch_size=64, device=device
                 )
-                candidate["sealed_test"][family] = _evaluate(
-                    model, test[family], capacity=capacity, batch_size=64, device=device
-                )
-                candidate["sealed_test"][family]["permutation_max_abs_delta"] = _permutation_delta(
-                    model, test[family], capacity=capacity, device=device
-                )
                 if family in extrapolation:
                     candidate["size_extrapolation_validation"][family] = _evaluate(
                         model,
@@ -527,11 +602,39 @@ def run(config_path: Path, output: Path) -> dict[str, Any]:
                 widths=config.get("cost_widths", [4, 16, 64, 256]),
             )
             seed_result["candidates"][name] = candidate
+            models[name] = model
+
+        # Persist the once-only access marker before generating or evaluating any sealed examples.
+        results["active_seed"] = seed
+        results["active_seed_result"] = seed_result
+        results["sealed_access_started"] = True
+        _atomic_write_json(output, results)
+        test: dict[str, list[dict[str, Tensor]]] = {}
+        for family_index, family in enumerate(families):
+            test[family] = _dataset(
+                family,
+                seed + 300_000 + family_index * 100_000,
+                families[family],
+                config["data"]["sealed_test_samples_per_family"],
+            )
+        for name, model in models.items():
+            candidate = seed_result["candidates"][name]
+            for family in families:
+                candidate["sealed_test"][family] = _evaluate(
+                    model, test[family], capacity=capacity, batch_size=64, device=device
+                )
+                candidate["sealed_test"][family]["permutation_max_abs_delta"] = _permutation_delta(
+                    model, test[family], capacity=capacity, device=device
+                )
         results["seeds"].append(seed_result)
-        results["run_state"] = "in_progress"
-        output.parent.mkdir(parents=True, exist_ok=True)
-        output.write_text(json.dumps(results, ensure_ascii=False, indent=2) + "\n")
+        results.pop("active_seed_result", None)
+        completed_seeds.add(seed)
+        results["active_seed"] = None
+        results["sealed_access_started"] = False
+        _atomic_write_json(output, results)
         print(f"completed seed {seed}; graph candidates evaluated", flush=True)
+    if completed_seeds != set(expected_seeds):
+        raise RuntimeError("sealed confirmation is incomplete or contains duplicate seeds")
     summary: dict[str, Any] = {}
     for name in config["candidates"]:
         summary[name] = {}
@@ -585,8 +688,9 @@ def run(config_path: Path, output: Path) -> dict[str, Any]:
         results["paired_binding_mse_effect"] = paired_summary
     results["summary"] = summary
     results["run_state"] = "completed"
-    output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(json.dumps(results, ensure_ascii=False, indent=2) + "\n")
+    results["active_seed"] = None
+    results["sealed_access_started"] = False
+    _atomic_write_json(output, results)
     return results
 
 

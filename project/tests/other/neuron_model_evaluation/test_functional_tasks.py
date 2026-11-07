@@ -1,6 +1,7 @@
 import sys
 from pathlib import Path
 
+import pytest
 import torch
 
 ROOT = Path(__file__).resolve().parents[4]
@@ -14,7 +15,14 @@ sys.path.insert(
     0,
     str(ROOT / "project/scripts/experiments/training/neurons/capabilities/aggregation"),
 )
-from compare_message_aggregators import SharedAggregationModel, _batch, _make_sample, _select_task_output
+from compare_message_aggregators import (
+    SharedAggregationModel,
+    _atomic_write_json,
+    _batch,
+    _load_formal_progress,
+    _make_sample,
+    _select_task_output,
+)
 
 from newera.capabilities.evaluation.functional_tasks import (
     grouped_binding_oracle,
@@ -177,3 +185,78 @@ def test_shared_multichannel_memory_model_decodes_tasks_without_copying_core():
     assert len({name.split(".")[0] for name, _ in model.named_parameters()}) == 1
     standalone, _ = model.run(events[1:2])
     torch.testing.assert_close(standalone, outputs[1:2])
+
+
+def test_formal_sealed_progress_is_atomic_and_rejects_repeated_access(tmp_path):
+    output = tmp_path / "sealed-results.json"
+    runtime = {"device": "cuda", "accelerator_name": "AMD Radeon RX 7800 XT"}
+    initial = {
+        "run_state": "in_progress",
+        "config_sha256": "config-hash",
+        "source_sha256": "source-hash",
+        "device_runtime": runtime,
+        "active_seed": None,
+        "sealed_access_started": False,
+        "seeds": [],
+    }
+    _atomic_write_json(output, initial)
+    assert output.read_text().endswith("\n")
+    assert not list(tmp_path.glob("*.tmp"))
+
+    presealed = dict(initial, active_seed=350000, sealed_access_started=False)
+    _atomic_write_json(output, presealed)
+    resumed = _load_formal_progress(
+        output,
+        config_sha256="config-hash",
+        source_sha256="source-hash",
+        device_runtime=runtime,
+        expected_seeds=[350000, 350001],
+        initial_results=initial,
+    )
+    assert resumed["active_seed"] is None
+
+    sealed_started = dict(presealed, sealed_access_started=True)
+    _atomic_write_json(output, sealed_started)
+    with pytest.raises(RuntimeError, match="sealed evaluation started"):
+        _load_formal_progress(
+            output,
+            config_sha256="config-hash",
+            source_sha256="source-hash",
+            device_runtime=runtime,
+            expected_seeds=[350000, 350001],
+            initial_results=initial,
+        )
+
+
+def test_formal_sealed_progress_rejects_changed_hashes_and_completed_reruns(tmp_path):
+    output = tmp_path / "sealed-results.json"
+    runtime = {"device": "cuda", "accelerator_name": "AMD Radeon RX 7800 XT"}
+    state = {
+        "run_state": "in_progress",
+        "config_sha256": "config-hash",
+        "source_sha256": "source-hash",
+        "device_runtime": runtime,
+        "active_seed": None,
+        "sealed_access_started": False,
+        "seeds": [],
+    }
+    _atomic_write_json(output, state)
+    with pytest.raises(RuntimeError, match="different config or source hashes"):
+        _load_formal_progress(
+            output,
+            config_sha256="changed-config",
+            source_sha256="source-hash",
+            device_runtime=runtime,
+            expected_seeds=[350000],
+            initial_results=state,
+        )
+    _atomic_write_json(output, dict(state, run_state="completed"))
+    with pytest.raises(RuntimeError, match="completed sealed confirmation"):
+        _load_formal_progress(
+            output,
+            config_sha256="config-hash",
+            source_sha256="source-hash",
+            device_runtime=runtime,
+            expected_seeds=[350000],
+            initial_results=state,
+        )

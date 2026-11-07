@@ -555,7 +555,7 @@
           "work": "仅在NE-024.42四seed validation全部通过后，冻结factorized_role_product_group_sum与global_sum配对正式确认。使用全新seed 350000–350005、新生成的独立sealed split、hidden32、每任务2048训练/256 validation/256 sealed样本、128epoch；在RX 7800 XT ROCm确定性运行。报告逐seed两任务validation/sealed MAE与最大绝对误差、16组validation外推、paired sealed binding MSE改善及95%区间、置换偏差、参数和分宽度成本。配置、代码、依赖设备门禁在首次读取sealed前冻结；sealed结果不能用于调参/重训。",
           "output": "低秩因子化关系聚合器六seed独立sealed确认和NE-024能力交付判定。",
           "done_when": "6/6 seed set-sum与binding validation/sealed MAE≤0.05；16组validation外推MAE≤0.05；所有validation/sealed/外推最大绝对误差≤0.05；置换偏差≤1e-5；paired sealed binding MSE平均改善≥20%且95%区间下界>0。确定性ROCm无fallback、RX 7800 XT/HIP版本与GPU探针核验通过，并报告参数/成本。任一门槛失败则如实停止候选，sealed只读取一次，NE-024保持未完成。",
-          "evidence": "NE-024.42 fresh validation seed 340000–340003全部通过预注册MAE/max/置换门槛；因子化候选10,386参数，四seed外推MAE≤0.00709、最大误差≤0.023692，full bilinear对照有失败seed。原始结果、GPU采样和完整对照见message_aggregation/training_budget_diagnostic/formal_confirmation/structural_candidates/factorized_role_product/validation/。新正式确认使用全新seed base 350000，与历史sealed seeds分离；最终model/runner/config SHA冻结后才生成并一次性评估新sealed split。"
+          "evidence": "NE-024.42 fresh validation seed 340000–340003全部通过预注册MAE/max/置换门槛；因子化候选10,386参数，四seed外推MAE≤0.00709、最大误差≤0.023692，full bilinear对照有失败seed。原始结果、GPU采样和完整对照见message_aggregation/training_budget_diagnostic/formal_confirmation/structural_candidates/factorized_role_product/validation/。新正式确认使用全新seed base 350000，与历史sealed seeds分离；最终model/runner/config SHA冻结后才生成并一次性评估新sealed split。 正式runner已在访问新sealed样本前完成恢复安全修复：结果JSON原子替换并fsync；逐seed提交已完成项并按配置/源代码/设备哈希核验；中断发生于训练/验证阶段可安全重跑该seed，中断发生于sealed访问开始后会拒绝重新访问，避免重复解封。测试覆盖标记和哈希拒绝路径；尚未执行正式sealed runner，未生成/读取此次新sealed split。"
         }
       ],
       "acceptance": [

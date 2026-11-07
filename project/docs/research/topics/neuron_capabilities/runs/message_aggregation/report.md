@@ -268,3 +268,5 @@ NE-024.41失败seed的训练MAE接近零但validation误差明显上升，说明
 ## 因子化角色乘积六seed正式确认（NE-024.43）
 
 由于NE-024.42四个全新validation seed的训练/验证两族、最大样本误差、16组外推和置换指标全部通过，冻结新的独立正式确认配置`training_budget_diagnostic/formal_confirmation/structural_candidates/factorized_role_product/formal_confirmation/config.json`。候选为`factorized_role_product_group_sum`，公平对照为`global_sum`；使用seed base 350000的六个新seed、2048训练与256 validation/sealed样本每任务、hidden32、128epoch和确定性ROCm。新sealed split只在此冻结运行中生成并读取一次；所有指标和paired improvement区间完成后封存结论，不因结果再调参。
+
+正式运行前检查发现原比较runner会直接写JSON且无法恢复；这在中断时可能损坏进度或导致sealed样本被重复读取。现已修复为临时文件+fsync+原子替换，逐seed提交完整结果并核验config/source/设备哈希；训练/验证阶段中断可以重做尚未访问sealed的当前seed，sealed访问开始后会持久记录active seed并拒绝重跑。只要进程在sealed评估阶段中断，保留该次partial run并停止，不重读该seed sealed。测试覆盖原子落盘、哈希变化拒绝、已完成运行拒绝和sealed访问防重拒绝。该正式实验尚未启动，独立sealed split尚未生成或读取。
