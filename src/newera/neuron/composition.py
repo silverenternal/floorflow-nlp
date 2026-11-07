@@ -8,6 +8,7 @@ from typing import Any
 
 import torch
 from torch import Tensor, nn
+from torch.nn import functional as F
 
 from newera.neuron.behavior import NeuronResult
 from newera.neuron.graph.layer import gather_rows
@@ -82,6 +83,7 @@ class ModelNeuron(nn.Module):
         exact_input_sum_readout: bool = False,
         exact_input_sum_output_channel: int | None = None,
         aggregate_only_output_channels: tuple[int, ...] = (),
+        use_edge_type_embedding: bool = True,
     ) -> None:
         super().__init__()
         for name, value in (
@@ -94,6 +96,8 @@ class ModelNeuron(nn.Module):
                 raise ValueError(f"{name} must be a positive integer")
         if not isinstance(exact_input_sum_readout, bool):
             raise TypeError("exact_input_sum_readout must be a bool")
+        if not isinstance(use_edge_type_embedding, bool):
+            raise TypeError("use_edge_type_embedding must be a bool")
         if exact_input_sum_output_channel is not None and (
             not isinstance(exact_input_sum_output_channel, int)
             or isinstance(exact_input_sum_output_channel, bool)
@@ -117,10 +121,12 @@ class ModelNeuron(nn.Module):
         self.num_edge_types = num_edge_types
         self.message_aggregator = message_aggregator
         self.exact_input_sum_readout = exact_input_sum_readout
+        self.use_edge_type_embedding = use_edge_type_embedding
         self.exact_input_sum_output_channel = exact_input_sum_output_channel
         self.aggregate_only_output_channels = aggregate_only_output_channels
         self.message_projection = nn.Linear(message_size, hidden_size, bias=False)
-        self.edge_type_embedding = nn.Embedding(num_edge_types, hidden_size)
+        edge_type_embedding = nn.Embedding(num_edge_types, hidden_size)
+        self.edge_type_embedding = edge_type_embedding if use_edge_type_embedding else None
         self.input_projection = nn.Linear(input_size, hidden_size)
         self.state_update = nn.GRUCell(hidden_size, hidden_size)
         self.output_projection = nn.Linear(hidden_size, message_size)
@@ -136,6 +142,8 @@ class ModelNeuron(nn.Module):
         implementation = type(self).__qualname__
         if self.exact_input_sum_readout:
             implementation += "+ExactInputSumReadout"
+        if not self.use_edge_type_embedding:
+            implementation += "+NoEdgeTypeEmbedding"
         if self.exact_input_sum_output_channel is not None:
             implementation += f"+ExactInputSumChannel{self.exact_input_sum_output_channel}"
         if self.aggregate_only_output_channels:
@@ -210,10 +218,13 @@ class ModelNeuron(nn.Module):
 
         if edge_count:
             projected = self.message_projection(incoming_messages)
-            relation = gather_rows(
-                self.edge_type_embedding.weight, incoming_edge_types.reshape(-1)
-            ).reshape(*edge_data_shape, self.hidden_size)
-            weighted = (projected + relation) * incoming_strengths.unsqueeze(-1)
+            if self.edge_type_embedding is None:
+                weighted = projected * incoming_strengths.unsqueeze(-1)
+            else:
+                relation = gather_rows(
+                    self.edge_type_embedding.weight, incoming_edge_types.reshape(-1)
+                ).reshape(*edge_data_shape, self.hidden_size)
+                weighted = (projected + relation) * incoming_strengths.unsqueeze(-1)
             degree = incoming_strengths.sum(dim=1, keepdim=True).clamp_min(1.0).sqrt()
             if self.message_aggregator is None:
                 aggregate = weighted.sum(dim=1) / degree
@@ -262,7 +273,10 @@ class ModelNeuron(nn.Module):
         if self.aggregate_only_output_channels:
             channel_mask = torch.zeros(self.message_size, dtype=torch.bool, device=value.device)
             channel_mask[list(self.aggregate_only_output_channels)] = True
-            value = torch.where(channel_mask.unsqueeze(0), aggregate_value, value)
+            aggregate_only_value = F.linear(
+                readout_aggregate, self.aggregate_output_projection.weight, bias=None
+            )
+            value = torch.where(channel_mask.unsqueeze(0), aggregate_only_value, value)
         if self.exact_input_sum_output_channel is not None:
             raw_sum = (incoming_messages * incoming_strengths.unsqueeze(-1)).sum(dim=1)
             channel_mask = torch.arange(self.message_size, device=value.device).eq(

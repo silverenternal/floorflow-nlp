@@ -62,6 +62,7 @@ class GroupRoleDeepSetsAggregator(nn.Module):
         exact_bilinear: bool = False,
         full_bilinear: bool = False,
         full_bilinear_bias: bool = True,
+        group_network_bias: bool = True,
         sum_residual: bool = False,
     ) -> None:
         super().__init__()
@@ -69,6 +70,8 @@ class GroupRoleDeepSetsAggregator(nn.Module):
             raise ValueError("channels, num_edge_types, and expansion must be positive; context_size cannot be negative")
         if not isinstance(full_bilinear_bias, bool):
             raise TypeError("full_bilinear_bias must be a bool")
+        if not isinstance(group_network_bias, bool):
+            raise TypeError("group_network_bias must be a bool")
         self.channels = channels
         self.num_edge_types = num_edge_types
         self.expansion = expansion
@@ -78,6 +81,7 @@ class GroupRoleDeepSetsAggregator(nn.Module):
         self.exact_bilinear = exact_bilinear
         self.full_bilinear = full_bilinear
         self.full_bilinear_bias = full_bilinear_bias
+        self.group_network_bias = group_network_bias
         self.sum_residual = sum_residual
         if sum_residual and context_size <= 0:
             raise ValueError("sum_residual requires a positive context_size")
@@ -106,12 +110,18 @@ class GroupRoleDeepSetsAggregator(nn.Module):
         if full_bilinear:
             self.group_network = nn.Identity()
         elif exact_bilinear:
-            self.group_network = nn.Linear(channels * pair_count, channels)
+            self.group_network = nn.Linear(
+                channels * pair_count, channels, bias=group_network_bias
+            )
         else:
             self.group_network = nn.Sequential(
-                nn.Linear(channels * (num_edge_types + pair_count) + context_size, width),
+                nn.Linear(
+                    channels * (num_edge_types + pair_count) + context_size,
+                    width,
+                    bias=group_network_bias,
+                ),
                 nn.GELU(),
-                nn.Linear(width, channels),
+                nn.Linear(width, channels, bias=group_network_bias),
             )
         if sum_residual:
             self.residual_gate = nn.Linear(context_size, channels)
@@ -131,6 +141,7 @@ class GroupRoleDeepSetsAggregator(nn.Module):
             self.exact_bilinear,
             self.full_bilinear,
             self.full_bilinear_bias,
+            self.group_network_bias,
             self.sum_residual,
         )
 

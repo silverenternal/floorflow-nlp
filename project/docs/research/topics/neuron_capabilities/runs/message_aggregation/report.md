@@ -256,3 +256,9 @@ L1筛查未改善误差尾部：四seed set-sum MAE为0.13565/0.02438/0.05162/0.
 四seed均在RX 7800 XT（PyTorch 2.15.0/HIP 7.2.53211）完成，并逐seed通过同步GPU矩阵预检；562次card1忙碌采样均值97.45%、中位98%，card0的562次采样始终为0%。Set-sum原始输出通道MAE约2.44e-7–3.00e-7、最大误差≤2.39e-6，精确聚合不变量达标。关系通道失败：binding validation MAE逐seed0.002108/0.000141/0.074064/0.001019，最大误差最高0.414745；16组外推MAE为0.007006/0.001758/0.243687/0.003367，最大误差最高0.814643。seed 330002同时突破训练范围和16组外推门槛。模型40,242参数，训练耗时350.24/351.88/349.58/351.50秒；前后向成本中位数按64/256/1024/4096条消息为5.65/6.38/10.27/17.87ms。`results.json`确认sealed数据未生成或读取。按预注册规则停止该候选，不按同批validation调整。
 
 因此，结构隔离修复了求和通道泄漏，却没有解决跨seed关系学习不稳定；移除full bilinear的逐组bias也没有保证稳定泛化。新候选需要重新审查角色投影中的冗余、初始化/梯度尺度和共享组求和的可辨识性，再设计全新seed的冻结验证；当前结果不用于改参。
+
+## 无偏置因子化角色乘积候选（NE-024.42，validation-only）
+
+NE-024.41失败seed的训练MAE接近零但validation误差明显上升，说明问题不是简单的欠拟合。复核模型输入后发现：role ID已经用于按角色拆分组摘要，却仍额外以可训练embedding加到每条消息；该项可能让每组输出依赖角色接触计数而非消息内容。新候选将role embedding从ModelNeuron消息路径移除，让edge type只用于聚合分组；每个组分别汇总两角色的共享线性投影，对应向量逐通道相乘，再通过无bias线性层映射并对组求和。此rank-H双线性映射适合乘性交互且参数量低于完整H×H×H张量。关闭sum residual和所有逐组bias，关系readout也无bias，因此无有效组时输出严格为零；通道0继续直接输出strength加权原始消息和，关系通道绕开GRU状态。
+
+现有grouped relation核心保留其CPU/MPS/ROCm确定性分段求和路径。新增契约覆盖无bias因子化的行置换/group label重标、有限梯度、无edge embedding的ModelNeuron集成，以及训练后readout bias变化不污染空关系输出。配置冻结于`training_budget_diagnostic/formal_confirmation/structural_candidates/factorized_role_product/validation/config.json`，fresh seed 340000–340003；聚焦聚合测试40项、Ruff与工程gate通过。正式GPU运行必须先匹配RX 7800 XT和HIP 7.2.53211并通过同步GPU运算探针，禁止回退；validation失败不触及sealed，也不按同批数据复调。

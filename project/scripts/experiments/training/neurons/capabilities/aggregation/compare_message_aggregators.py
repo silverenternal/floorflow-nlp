@@ -116,6 +116,7 @@ class SharedAggregationModel(torch.nn.Module):
         super().__init__()
         exact_input_sum_readout = aggregator_kind == "exact_raw_sum_bilinear_group_role_sum"
         isolated_sum_relation = aggregator_kind == "isolated_sum_relation_bilinear_group_role_sum"
+        factorized_role_product = aggregator_kind == "factorized_role_product_group_sum"
         # Initialize the shared neuron core identically for every candidate;
         # experimental aggregator parameters must not shift core RNG draws.
         self.neuron = ModelNeuron(
@@ -124,8 +125,9 @@ class SharedAggregationModel(torch.nn.Module):
             message_size=9,
             num_edge_types=2,
             exact_input_sum_readout=exact_input_sum_readout,
-            exact_input_sum_output_channel=0 if isolated_sum_relation else None,
-            aggregate_only_output_channels=(1,) if isolated_sum_relation else (),
+            exact_input_sum_output_channel=0 if (isolated_sum_relation or factorized_role_product) else None,
+            aggregate_only_output_channels=(1,) if (isolated_sum_relation or factorized_role_product) else (),
+            use_edge_type_embedding=not factorized_role_product,
         )
         if exact_input_sum_readout or isolated_sum_relation:
             aggregator_kind = "full_bilinear_group_role_sum"
@@ -177,6 +179,14 @@ class SharedAggregationModel(torch.nn.Module):
                 full_bilinear=True,
                 full_bilinear_bias=not isolated_sum_relation,
                 sum_residual=True,
+            )
+        elif aggregator_kind == "factorized_role_product_group_sum":
+            aggregator = GroupRoleDeepSetsAggregator(
+                hidden_size,
+                num_edge_types=2,
+                bilinear_interactions=True,
+                exact_bilinear=True,
+                group_network_bias=False,
             )
         elif aggregator_kind == "pyg_deep_sets_wide":
             aggregator = DeepSetsMessageAggregator(hidden_size, expansion=8)

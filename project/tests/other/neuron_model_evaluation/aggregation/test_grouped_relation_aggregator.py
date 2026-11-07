@@ -411,6 +411,96 @@ def test_full_bilinear_can_remove_per_group_bias():
 
 
 @pytest.mark.parametrize("device_name", DEVICES)
+def test_factorized_role_product_is_bias_free_and_permutation_invariant(device_name: str):
+    device = torch.device(device_name)
+    torch.manual_seed(1441)
+    aggregator = GroupRoleDeepSetsAggregator(
+        8,
+        2,
+        bilinear_interactions=True,
+        exact_bilinear=True,
+        group_network_bias=False,
+    ).to(device).eval()
+    assert aggregator.group_network.bias is None
+    messages = torch.randn(2, 17, 8, device=device, requires_grad=True)
+    roles = torch.randint(0, 2, (2, 17), device=device)
+    labels = torch.randint(-2**50, 2**50, (2, 17), device=device)
+    mask = torch.rand(2, 17, device=device) > 0.15
+    baseline = aggregator.forward_batched_with_relations(
+        messages, edge_types=roles, group_ids=labels, mask=mask
+    )
+    order = torch.randperm(17, device=device)
+    relabel_ids = torch.unique(labels[0], sorted=True, return_inverse=True)[1]
+    relabeled = relabel_ids.index_select(0, order) * 37 + 11
+    permuted = aggregator.forward_batched_with_relations(
+        messages[0:1].index_select(1, order),
+        edge_types=roles[0:1].index_select(1, order),
+        group_ids=relabeled.unsqueeze(0),
+        mask=mask[0:1].index_select(1, order),
+    )
+    torch.testing.assert_close(permuted[0], baseline[0], atol=2e-6, rtol=2e-6)
+    baseline.square().sum().backward()
+    assert messages.grad is not None and torch.isfinite(messages.grad).all()
+
+
+def test_model_neuron_can_route_role_metadata_without_embedding_parameters():
+    neuron = ModelNeuron(2, 8, 9, num_edge_types=2, use_edge_type_embedding=False)
+    assert neuron.edge_type_embedding is None
+    with_embedding = ModelNeuron(2, 8, 9, num_edge_types=2)
+    assert neuron.architecture_signature != with_embedding.architecture_signature
+
+
+@pytest.mark.parametrize("device_name", DEVICES)
+def test_factorized_role_product_runs_inside_shared_neuron_without_role_embeddings(device_name: str):
+    device = torch.device(device_name)
+    torch.manual_seed(1442)
+    aggregator = GroupRoleDeepSetsAggregator(
+        8,
+        2,
+        bilinear_interactions=True,
+        exact_bilinear=True,
+        group_network_bias=False,
+    ).to(device)
+    neuron = ModelNeuron(
+        2,
+        8,
+        9,
+        num_edge_types=2,
+        message_aggregator=aggregator,
+        exact_input_sum_output_channel=0,
+        aggregate_only_output_channels=(1,),
+        use_edge_type_embedding=False,
+    ).to(device)
+    messages = torch.randn(3, 12, 9, device=device, requires_grad=True)
+    strengths = torch.rand(3, 12, device=device)
+    roles = torch.randint(0, 2, (3, 12), device=device)
+    groups = torch.randint(-10**12, 10**12, (3, 12), device=device)
+    result = neuron.step(
+        torch.randn(3, 2, device=device),
+        incoming_messages=messages,
+        incoming_strengths=strengths,
+        incoming_edge_types=roles,
+        incoming_group_ids=groups,
+    )
+    expected = (messages * strengths.unsqueeze(-1)).sum(dim=1)[:, 0]
+    assert torch.equal(result.value[:, 0], expected)
+    result.value[:, 1].square().sum().backward()
+    assert messages.grad is not None and torch.isfinite(messages.grad).all()
+    assert all(parameter.grad is None or torch.isfinite(parameter.grad).all() for parameter in neuron.parameters())
+    with torch.no_grad():
+        neuron.aggregate_output_projection.bias.fill_(123.0)
+    empty_relation = neuron.step(
+        torch.randn(3, 2, device=device),
+        incoming_messages=messages.detach(),
+        incoming_strengths=torch.zeros_like(strengths),
+        incoming_edge_types=roles,
+        incoming_group_ids=groups,
+    )
+    assert torch.equal(empty_relation.value[:, 0], torch.zeros(3, device=device))
+    assert torch.equal(empty_relation.value[:, 1], torch.zeros(3, device=device))
+
+
+@pytest.mark.parametrize("device_name", DEVICES)
 def test_model_neuron_linear_aggregate_readout_scales_beyond_bounded_state(device_name: str):
     device = torch.device(device_name)
     neuron = ModelNeuron(1, 1, 1).to(device)

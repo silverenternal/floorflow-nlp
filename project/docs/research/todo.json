@@ -540,6 +540,14 @@
           "output": "训练中精确线性求和不变量、组数可加关系读出候选及四seed ROCm validation-only冻结门槛判定。",
           "done_when": "训练前向的通道0对任意消息数、重复、空集、strength及任意训练后权重始终逐位等于原始加权和；通道1对所有seed训练/验证MAE与最大误差≤0.05，16组外推MAE与最大误差≤0.05，置换误差≤1e-5；四seed均记录GPU型号/ROCm/同步探针、参数、训练与逐度数成本。只要任一冻结指标失败即停止该结构，不访问sealed且不基于同批validation再调。",
           "evidence": "配置、四seed原始结果和GPU采样见structural_candidates/isolated_sum_relation/validation/{config.json,results.json,gpu_activity.log}；fresh seed 330000–330003。每seed记录ROCm/HIP 7.2.53211、PyTorch 2.15.0、RX 7800 XT和同步矩阵探针checksum；GPU采样card1 562次、均值97.45%、中位98%，card0 562次均为0%。sealed_test_generated_or_read=false。原始加和通道0的训练集/validation MAE约为2.44e-7–3.00e-7，最大误差≤2.39e-6，结构不变量通过；40,242参数，四seed训练时间350.24/351.88/349.58/351.50秒，前后向中位成本64/256/1024/4096项为5.65/6.38/10.27/17.87ms。关系候选validation binding MAE逐seed0.002108/0.000141/0.074064/0.001019，最大误差最高0.414745；16组外推MAE为0.007006/0.001758/0.243687/0.003367，最大误差最高0.814643。seed 330002违反训练范围与外推MAE/max门槛，候选按冻结规则停止；不读取sealed、不按同批validation调参。此结果表明将输出与GRU隔离、消除逐组bilinear bias仍不足以稳定学习关系读出；新方向须重新审查逐角色投影与共享组聚合的优化条件。"
+        },
+        {
+          "id": "NE-024.42",
+          "status": "in_progress",
+          "work": "基于NE-024.41的seed失败，建立分解式role交互候选。edge type只作为关系分组元数据，不再加到每条消息表示；每组对各role的线性投影求和后逐通道相乘，经无bias线性映射并对组求和，禁止逐组常量项、sum residual和关系输出bias（空关系集必须输出零）。输出通道0固定为原始strength加权消息和；通道1仅读取该可加关系汇总。该rank-H双线性结构、所有输出路由、seed及配置先冻结，再以新seed 340000–340003、hidden32、2048样本/任务、128epoch validation-only和full bilinear对照；sealed不访问。",
+          "output": "无per-group bias、role偏置或state输出污染的低秩关系聚合实现及四seed ROCm验证决策。",
+          "done_when": "通道0通过任意度数/重复/空集/strength与训练后权重的精确加和不变量；role交互逐组分解且无组常数项，空关系集输出零，对行置换和group label重标不变、反向有限；四seed训练binding与validation MAE/max≤0.05、16组外推MAE/max≤0.05、置换偏差≤1e-5。冻结ROCm设备门禁和每seed原子恢复必须全部通过。任一能力指标失败即停止，不读取sealed、不按同一validation batch调参。",
+          "evidence": "NE-024.41的隔离bilinear候选仍在seed 330002产生binding validation MAE 0.0741、16组外推MAE 0.2437；其结构仍将role embedding加至每条消息，且依赖full rank O(H^3) bilinear。新候选利用现有精确opaque group-id分段和反向，不引入第三方依赖；角色语义已由edge_type元数据表达，去除冗余embedding以防每组偏置项，rank-H投影乘积符合分组乘性交互的代数结构；aggregate-only relation head取消readout bias，保证空关系集输出零。"
         }
       ],
       "acceptance": [
