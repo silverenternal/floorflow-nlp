@@ -80,6 +80,8 @@ class ModelNeuron(nn.Module):
         num_edge_types: int = 1,
         message_aggregator: nn.Module | None = None,
         exact_input_sum_readout: bool = False,
+        exact_input_sum_output_channel: int | None = None,
+        aggregate_only_output_channels: tuple[int, ...] = (),
     ) -> None:
         super().__init__()
         for name, value in (
@@ -92,12 +94,31 @@ class ModelNeuron(nn.Module):
                 raise ValueError(f"{name} must be a positive integer")
         if not isinstance(exact_input_sum_readout, bool):
             raise TypeError("exact_input_sum_readout must be a bool")
+        if exact_input_sum_output_channel is not None and (
+            not isinstance(exact_input_sum_output_channel, int)
+            or isinstance(exact_input_sum_output_channel, bool)
+            or not 0 <= exact_input_sum_output_channel < message_size
+        ):
+            raise ValueError("exact_input_sum_output_channel must index a message output channel")
+        if not isinstance(aggregate_only_output_channels, tuple) or any(
+            not isinstance(channel, int)
+            or isinstance(channel, bool)
+            or not 0 <= channel < message_size
+            for channel in aggregate_only_output_channels
+        ):
+            raise ValueError("aggregate_only_output_channels must be a tuple of valid output channels")
+        if len(set(aggregate_only_output_channels)) != len(aggregate_only_output_channels):
+            raise ValueError("aggregate_only_output_channels cannot contain duplicates")
+        if exact_input_sum_output_channel in aggregate_only_output_channels:
+            raise ValueError("exact sum and aggregate-only output channels must be disjoint")
         self.input_size = input_size
         self.hidden_size = hidden_size
         self.message_size = message_size
         self.num_edge_types = num_edge_types
         self.message_aggregator = message_aggregator
         self.exact_input_sum_readout = exact_input_sum_readout
+        self.exact_input_sum_output_channel = exact_input_sum_output_channel
+        self.aggregate_only_output_channels = aggregate_only_output_channels
         self.message_projection = nn.Linear(message_size, hidden_size, bias=False)
         self.edge_type_embedding = nn.Embedding(num_edge_types, hidden_size)
         self.input_projection = nn.Linear(input_size, hidden_size)
@@ -115,8 +136,15 @@ class ModelNeuron(nn.Module):
         implementation = type(self).__qualname__
         if self.exact_input_sum_readout:
             implementation += "+ExactInputSumReadout"
+        if self.exact_input_sum_output_channel is not None:
+            implementation += f"+ExactInputSumChannel{self.exact_input_sum_output_channel}"
+        if self.aggregate_only_output_channels:
+            implementation += f"+AggregateOnlyChannels{self.aggregate_only_output_channels}"
         if self.message_aggregator is not None:
             implementation += f"+{type(self.message_aggregator).__qualname__}"
+            aggregator_signature = getattr(self.message_aggregator, "architecture_signature", None)
+            if aggregator_signature is not None:
+                implementation += f"[{aggregator_signature!r}]"
         return (
             self.input_size,
             self.hidden_size,
@@ -228,7 +256,19 @@ class ModelNeuron(nn.Module):
             readout_aggregate = aggregate
         drive = torch.tanh(self.input_projection(inputs) + aggregate)
         next_state = self.state_update(drive, state)
-        value = self.output_projection(next_state) + self.aggregate_output_projection(readout_aggregate)
+        state_value = self.output_projection(next_state)
+        aggregate_value = self.aggregate_output_projection(readout_aggregate)
+        value = state_value + aggregate_value
+        if self.aggregate_only_output_channels:
+            channel_mask = torch.zeros(self.message_size, dtype=torch.bool, device=value.device)
+            channel_mask[list(self.aggregate_only_output_channels)] = True
+            value = torch.where(channel_mask.unsqueeze(0), aggregate_value, value)
+        if self.exact_input_sum_output_channel is not None:
+            raw_sum = (incoming_messages * incoming_strengths.unsqueeze(-1)).sum(dim=1)
+            channel_mask = torch.arange(self.message_size, device=value.device).eq(
+                self.exact_input_sum_output_channel
+            )
+            value = torch.where(channel_mask.unsqueeze(0), raw_sum, value)
         if self.exact_input_sum_readout:
             value = value + (incoming_messages * incoming_strengths.unsqueeze(-1)).sum(dim=1)
         return NeuronResult(value, next_state)

@@ -115,6 +115,7 @@ class SharedAggregationModel(torch.nn.Module):
     def __init__(self, *, hidden_size: int, aggregator_kind: str) -> None:
         super().__init__()
         exact_input_sum_readout = aggregator_kind == "exact_raw_sum_bilinear_group_role_sum"
+        isolated_sum_relation = aggregator_kind == "isolated_sum_relation_bilinear_group_role_sum"
         # Initialize the shared neuron core identically for every candidate;
         # experimental aggregator parameters must not shift core RNG draws.
         self.neuron = ModelNeuron(
@@ -123,8 +124,10 @@ class SharedAggregationModel(torch.nn.Module):
             message_size=9,
             num_edge_types=2,
             exact_input_sum_readout=exact_input_sum_readout,
+            exact_input_sum_output_channel=0 if isolated_sum_relation else None,
+            aggregate_only_output_channels=(1,) if isolated_sum_relation else (),
         )
-        if exact_input_sum_readout:
+        if exact_input_sum_readout or isolated_sum_relation:
             aggregator_kind = "full_bilinear_group_role_sum"
         if aggregator_kind == "global_sum":
             aggregator = None
@@ -172,6 +175,7 @@ class SharedAggregationModel(torch.nn.Module):
                 context_size=2,
                 bilinear_interactions=True,
                 full_bilinear=True,
+                full_bilinear_bias=not isolated_sum_relation,
                 sum_residual=True,
             )
         elif aggregator_kind == "pyg_deep_sets_wide":

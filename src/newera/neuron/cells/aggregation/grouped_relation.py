@@ -61,18 +61,23 @@ class GroupRoleDeepSetsAggregator(nn.Module):
         bilinear_interactions: bool = False,
         exact_bilinear: bool = False,
         full_bilinear: bool = False,
+        full_bilinear_bias: bool = True,
         sum_residual: bool = False,
     ) -> None:
         super().__init__()
         if channels <= 0 or num_edge_types <= 0 or expansion <= 0 or context_size < 0:
             raise ValueError("channels, num_edge_types, and expansion must be positive; context_size cannot be negative")
+        if not isinstance(full_bilinear_bias, bool):
+            raise TypeError("full_bilinear_bias must be a bool")
         self.channels = channels
         self.num_edge_types = num_edge_types
+        self.expansion = expansion
         self.context_size = context_size
         self.pairwise_interactions = pairwise_interactions or bilinear_interactions
         self.bilinear_interactions = bilinear_interactions
         self.exact_bilinear = exact_bilinear
         self.full_bilinear = full_bilinear
+        self.full_bilinear_bias = full_bilinear_bias
         self.sum_residual = sum_residual
         if sum_residual and context_size <= 0:
             raise ValueError("sum_residual requires a positive context_size")
@@ -93,7 +98,9 @@ class GroupRoleDeepSetsAggregator(nn.Module):
                 for _ in range(pair_count)
             )
         self.full_bilinear_layer = (
-            nn.Bilinear(channels, channels, channels) if full_bilinear else None
+            nn.Bilinear(channels, channels, channels, bias=full_bilinear_bias)
+            if full_bilinear
+            else None
         )
         width = channels * expansion
         if full_bilinear:
@@ -110,6 +117,22 @@ class GroupRoleDeepSetsAggregator(nn.Module):
             self.residual_gate = nn.Linear(context_size, channels)
             nn.init.zeros_(self.residual_gate.weight)
             nn.init.zeros_(self.residual_gate.bias)
+
+    @property
+    def architecture_signature(self) -> tuple[object, ...]:
+        """Return constructor semantics that affect checkpoint compatibility."""
+        return (
+            self.channels,
+            self.num_edge_types,
+            self.expansion,
+            self.context_size,
+            self.pairwise_interactions,
+            self.bilinear_interactions,
+            self.exact_bilinear,
+            self.full_bilinear,
+            self.full_bilinear_bias,
+            self.sum_residual,
+        )
 
     def forward_batched_with_relations(
         self,

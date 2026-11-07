@@ -329,6 +329,88 @@ def test_model_neuron_requires_group_identity_for_relation_aggregator():
 
 
 @pytest.mark.parametrize("device_name", DEVICES)
+def test_structured_readout_channels_are_isolated_from_trainable_state(device_name: str):
+    device = torch.device(device_name)
+    torch.manual_seed(731)
+    aggregator = GroupRoleDeepSetsAggregator(
+        8,
+        2,
+        context_size=2,
+        bilinear_interactions=True,
+        full_bilinear=True,
+        full_bilinear_bias=False,
+        sum_residual=True,
+    )
+    neuron = ModelNeuron(
+        2,
+        8,
+        9,
+        num_edge_types=2,
+        message_aggregator=aggregator,
+        exact_input_sum_output_channel=0,
+        aggregate_only_output_channels=(1,),
+    ).to(device).eval()
+    messages = torch.randn(2, 5, 9, device=device, requires_grad=True)
+    strengths = torch.tensor([[1, 0.5, 1, 0, 2], [1, 1, 0, 0, 0]], device=device)
+    roles = torch.tensor([[0, 1, 0, 1, 0], [0, 1, 0, 0, 0]], device=device)
+    groups = torch.tensor([[4, 4, -2**50, -2**50, 4], [2**55, 2**55, 0, 0, 0]], device=device)
+    inputs = torch.randn(2, 2, device=device)
+
+    initial = neuron.step(
+        inputs,
+        incoming_messages=messages,
+        incoming_strengths=strengths,
+        incoming_edge_types=roles,
+        incoming_group_ids=groups,
+    )
+    expected_sum = (messages * strengths.unsqueeze(-1)).sum(dim=1)[:, 0]
+    assert torch.equal(initial.value[:, 0], expected_sum)
+    direct_gradient = torch.autograd.grad(initial.value[:, 0].sum(), messages)[0]
+    torch.testing.assert_close(direct_gradient[:, :, 0], strengths)
+    assert torch.count_nonzero(direct_gradient[:, :, 1:]) == 0
+
+    with torch.no_grad():
+        neuron.output_projection.weight.fill_(1000)
+        neuron.output_projection.bias.fill_(1000)
+    after_state_change = neuron.step(
+        inputs,
+        incoming_messages=messages,
+        incoming_strengths=strengths,
+        incoming_edge_types=roles,
+        incoming_group_ids=groups,
+    )
+    assert torch.equal(after_state_change.value[:, 0], expected_sum)
+    torch.testing.assert_close(after_state_change.value[:, 1], initial.value[:, 1])
+
+    empty = neuron.step(
+        inputs,
+        incoming_messages=messages[:, :0],
+        incoming_strengths=strengths[:, :0],
+        incoming_edge_types=roles[:, :0],
+        incoming_group_ids=groups[:, :0],
+    )
+    assert torch.equal(empty.value[:, 0], torch.zeros(2, device=device))
+
+
+def test_full_bilinear_can_remove_per_group_bias():
+    aggregator = GroupRoleDeepSetsAggregator(
+        8,
+        2,
+        bilinear_interactions=True,
+        full_bilinear=True,
+        full_bilinear_bias=False,
+    )
+    assert aggregator.full_bilinear_layer is not None
+    assert aggregator.full_bilinear_layer.bias is None
+    biased = GroupRoleDeepSetsAggregator(
+        8, 2, bilinear_interactions=True, full_bilinear=True, full_bilinear_bias=True
+    )
+    exact_signature = ModelNeuron(2, 8, 9, message_aggregator=aggregator).architecture_signature
+    biased_signature = ModelNeuron(2, 8, 9, message_aggregator=biased).architecture_signature
+    assert exact_signature != biased_signature
+
+
+@pytest.mark.parametrize("device_name", DEVICES)
 def test_model_neuron_linear_aggregate_readout_scales_beyond_bounded_state(device_name: str):
     device = torch.device(device_name)
     neuron = ModelNeuron(1, 1, 1).to(device)
