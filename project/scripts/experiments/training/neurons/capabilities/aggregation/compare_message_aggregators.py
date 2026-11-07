@@ -50,6 +50,21 @@ def _select_task_output(values: Tensor, family_ids: Tensor) -> Tensor:
     return (values * selected.to(values.dtype)).sum(dim=1)
 
 
+def _normalized_training_loss(
+    prediction: Tensor,
+    targets: Tensor,
+    counts: Tensor,
+    *,
+    objective: str = "normalized_mse",
+) -> Tensor:
+    errors = (prediction - targets) / counts.sqrt()
+    if objective == "normalized_mse":
+        return errors.square().mean()
+    if objective == "normalized_mae":
+        return errors.abs().mean()
+    raise ValueError(f"unsupported normalized training objective: {objective}")
+
+
 class SharedAggregationModel(torch.nn.Module):
     def __init__(self, *, hidden_size: int, aggregator_kind: str) -> None:
         super().__init__()
@@ -210,6 +225,7 @@ def _train(
     batch_size: int,
     epochs: int,
     device: torch.device,
+    objective: str = "normalized_mse",
 ) -> dict[str, float | int]:
     model.train()
     optimizer = torch.optim.AdamW(model.parameters(), lr=1e-3, weight_decay=1e-4)
@@ -225,8 +241,12 @@ def _train(
             batch = _batch(samples, capacity, device)
             optimizer.zero_grad(set_to_none=True)
             prediction = model(batch)
-            scale = batch["counts"].sqrt()
-            loss = (((prediction - batch["targets"]) / scale) ** 2).mean()
+            loss = _normalized_training_loss(
+                prediction,
+                batch["targets"],
+                batch["counts"],
+                objective=objective,
+            )
             if not torch.isfinite(loss):
                 raise FloatingPointError("training loss became non-finite")
             loss.backward()
@@ -349,6 +369,7 @@ def run(config_path: Path, output: Path) -> dict[str, Any]:
         "weight_sets_per_model": 1,
         "output_decoder": "observable task family selects a channel from the single ModelNeuron output_projection; no per-task model or extra decoder weights",
         "sealed_test_used": True,
+        "training_objective": config["training"].get("objective", "normalized_mse"),
         "seeds": [],
     }
     for seed_index in config["training"]["seeds"]:
@@ -401,6 +422,7 @@ def run(config_path: Path, output: Path) -> dict[str, Any]:
                 batch_size=config["training"]["batch_size"],
                 epochs=config["training"]["epochs"],
                 device=device,
+                objective=config["training"].get("objective", "normalized_mse"),
             )
             candidate: dict[str, Any] = {
                 "training": train,

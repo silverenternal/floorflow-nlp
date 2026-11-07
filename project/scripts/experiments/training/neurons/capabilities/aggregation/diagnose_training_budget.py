@@ -16,7 +16,15 @@ import torch
 ROOT = Path(__file__).resolve().parents[7]
 sys.path.insert(0, str(ROOT / "src"))
 
-from compare_message_aggregators import SharedAggregationModel, _batch, _cost, _dataset, _evaluate, _permutation_delta
+from compare_message_aggregators import (
+    SharedAggregationModel,
+    _batch,
+    _cost,
+    _dataset,
+    _evaluate,
+    _normalized_training_loss,
+    _permutation_delta,
+)
 
 
 def _synchronize(device: torch.device) -> None:
@@ -84,6 +92,7 @@ def run(config_path: Path, output: Path) -> dict[str, Any]:
         "source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         "comparison_source_sha256": hashlib.sha256(Path(__file__).with_name("compare_message_aggregators.py").read_bytes()).hexdigest(),
         "seed": seed,
+        "training_objective": config.get("training_objective", "normalized_mse"),
         "train_sample_count": len(train_samples),
         "validation_sample_count_per_family": config["validation_samples_per_family"],
         "sealed_test_generated_or_read": False,
@@ -114,7 +123,12 @@ def run(config_path: Path, output: Path) -> dict[str, Any]:
                     batch = _batch(batch_samples, config["capacity"], device)
                     optimizer.zero_grad(set_to_none=True)
                     prediction = model(batch)
-                    loss = (((prediction - batch["targets"]) / batch["counts"].sqrt()) ** 2).mean()
+                    loss = _normalized_training_loss(
+                        prediction,
+                        batch["targets"],
+                        batch["counts"],
+                        objective=config.get("training_objective", "normalized_mse"),
+                    )
                     if not torch.isfinite(loss):
                         raise FloatingPointError(f"non-finite training loss for {name} at epoch {completed_epochs + 1}")
                     loss.backward()

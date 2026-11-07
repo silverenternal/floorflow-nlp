@@ -511,11 +511,19 @@
         },
         {
           "id": "NE-024.38",
-          "status": "in_progress",
+          "status": "completed",
           "work": "仅在NE-024.37四个新validation seed全部通过后，冻结full_bilinear_group_role_sum与global_sum配对六seed正式确认。使用全新seed 300000–300005、独立sealed split、hidden32、2048训练/256验证与sealed样本每任务、128epoch；在RX 7800 XT ROCm确定性运行，记录训练尺寸MAE、16组validation外推、sealed MAE/MSE/最大误差、配对MSE改善、排列偏差和成本。该次sealed解封后不复调、不重训、不追加候选。",
           "output": "预注册六seed完整双线性确认配置/结果、冻结门槛判定及NE-024能力交付决定。",
           "done_when": "六seed任务族validation和sealed MAE均≤0.05，16组validation外推MAE≤0.05，最大绝对误差≤0.05，排列偏差≤1e-5，paired sealed binding MSE改善≥20%且95%区间下界>0；确定性ROCm运行完备并报告每宽度成本。如任一能力阈值失败，只记录失败并停止该候选，不修改任何结构或阈值。",
-          "evidence": "执行前冻结于structural_candidates/full_bilinear_group_sum/formal_confirmation/config.json；seed 300000–300005与NE-024.37的validation数据隔离。待运行。"
+          "evidence": "六seed ROCm正式运行已完成，原始配置/结果位于structural_candidates/full_bilinear_group_sum/formal_confirmation/。RX 7800 XT、PyTorch 2.15.0/HIP 7.2.53211，确定性开启；full_bilinear候选两任务validation/sealed平均MAE均≤0.05；16组validation外推平均MAE=0.01329、最大单样本误差=0.09667。paired sealed binding MSE改善99.9987%，95%区间下界99.9973%；排列差异≤3.82e-6。成本中位数按64/256/1024/4096入边为3.73/4.72/9.13/17.10 ms。冻结门槛未完全通过：单样本最大绝对误差阈值0.05在set-sum validation/sealed和16组外推(validation最大0.09667)均被突破。该候选停止，不以sealed样本调参或重训；NE-024总能力仍需处理最坏情况误差。"
+        },
+        {
+          "id": "NE-024.39",
+          "status": "in_progress",
+          "work": "对全新训练目标候选做validation-only诊断：保持NE-024.37的full_bilinear结构、ModelNeuron权重共享、数据量和优化配比完全不变，将按sqrt(入边数)标准化的均方损失换为同尺度L1目标，以直接优化冻结的MAE指标。使用全新seed 310000–310003，对照同目标下global_sum；报告训练尺寸MAE、逐样本最大绝对误差、16组外推、排列误差和ROCm成本。只接触新训练/validation数据，不读取或重放任何sealed数据。",
+          "output": "训练目标候选validation-only四seed误差尾部与能力诊断，进入独立sealed复核或停止的决策。",
+          "done_when": "四seed两任务validation MAE均≤0.05、每个任务/seed最大绝对误差≤0.05、16组外推MAE与最大误差≤0.05、排列差异≤1e-5；成本可执行且结果可复现。任何失败都按规则停止该目标，不据该批validation复调；通过后另建独立正式sealed任务。",
+          "evidence": "配置冻结于structural_candidates/full_bilinear_group_sum/robust_objective_validation/config.json，normalized_mae训练目标，seed 310000–310003，sealed_test_generated_or_read=false。待运行。"
         }
       ],
       "acceptance": [

@@ -218,3 +218,15 @@ CPU/MPS pair-workspace预算分别为 `256²` 和 `3000²` 个配对项。前反
 在低秩二阶结构 seed 方差失败后，将角色交互替换为 PyTorch `nn.Bilinear` 完整双线性层；输入、共享 `ModelNeuron`、零初始化求和残差和 128 epoch 训练均固定。四个全新 validation seed 290000–290003 与同 seed 求和基线配对，配置/结果见 `training_budget_diagnostic/formal_confirmation/structural_candidates/full_bilinear_group_sum/`。训练范围 set-sum/binding MAE逐seed为0.00208/0.00170、0.01138/0.00217、0.00347/0.00592、0.00195/0.00361；16组外推MAE为0.00286、0.00577、0.01493、0.01411，四seed均低于0.05。binding validation MSE较求和基线改善均超过99.998%，最大排列差低于`2.4e-6`。模型参数40,274。
 
 CPU训练验证四seed总耗时约半小时；聚焦CPU/MPS语义和梯度测试已通过，包含高入度线性workspace路径。按用户授权在内网RX 7800 XT（ROCm 7.2.53211，PyTorch 2.15.0）实测，确定性算法开启。完整模型40,274参数，入边数64/256/1024/4096的前后向中位时延为3.46/4.45/8.81/16.53 ms，p95为3.47/4.48/8.86/16.58 ms，完整原始结果见`full_bilinear_group_sum/rocm_cost/results.json`。NE-024.37按冻结validation标准完成；此结果仅是所测硬件/宽度的成本证据，不表示无界关系泛化已通过。sealed test未访问。
+
+## 完整双线性六 seed 正式确认（NE-024.38）
+
+NE-024.37全新四 seed validation全部通过后，冻结六个新seed 300000–300005、hidden32、每族2048训练/256验证与sealed样本、128 epoch、确定性ROCm，比较`full_bilinear_group_role_sum`和`global_sum`。原始冻结配置与逐seed完整结果见`training_budget_diagnostic/formal_confirmation/structural_candidates/full_bilinear_group_sum/formal_confirmation/`。
+
+在RX 7800 XT（PyTorch 2.15.0、HIP 7.2.53211）上运行完毕。完整双线性候选validation/sealed平均MAE：set-sum 0.00962/0.00950，grouped-binding 0.00468/0.00470；16组validation外推平均MAE 0.01329。paired sealed binding MSE相对求和改善99.9987%，95%区间下界99.9973%；最大排列差3.82e-6。64/256/1024/4096入边的前后向中位成本跨seed中位数为3.73/4.72/9.13/17.10 ms，40,274参数。
+
+该候选未通过严格最大误差门槛：set-sum validation 最大绝对误差0.06877、sealed最大绝对误差0.12146；16组validation外推最大误差0.09667，均超过冻结0.05。binding验证与sealed最大误差≤0.03556。按预注册规则停止该候选，不从sealed数值调参或重训。均值能力和配对收益良好，但NE-024尚不满足完整验收。
+
+## 标准化 L1 训练目标 validation-only 筛查（NE-024.39）
+
+为检验MAE误差尾部，仅改变全新候选的训练目标：保持full bilinear结构、样本量、初始化与更新预算不变，将按`sqrt(入边数)`归一化的MSE改为同尺度L1；对照global sum使用相同目标。使用新seed 310000–310003，仅生成训练与validation集，不访问sealed数据。冻结配置位于`training_budget_diagnostic/formal_confirmation/structural_candidates/full_bilinear_group_sum/robust_objective_validation/config.json`。

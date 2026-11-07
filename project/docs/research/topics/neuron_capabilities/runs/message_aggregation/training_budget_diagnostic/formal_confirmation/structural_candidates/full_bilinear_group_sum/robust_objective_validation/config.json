@@ -1,0 +1,63 @@
+{
+  "experiment_id": "message-aggregation-full-bilinear-normalized-mae-validation",
+  "device": "cuda",
+  "deterministic_algorithms": true,
+  "candidates": [
+    "full_bilinear_group_role_sum",
+    "global_sum"
+  ],
+  "cost_widths": [
+    64,
+    256,
+    1024,
+    4096
+  ],
+  "sample_counts_per_family": [
+    2048
+  ],
+  "seeds": [
+    310000,
+    310001,
+    310002,
+    310003
+  ],
+  "train_sizes": {
+    "set_sum": [
+      4,
+      16,
+      64
+    ],
+    "grouped_binding": [
+      2,
+      4,
+      8
+    ]
+  },
+  "validation_sizes": {
+    "set_sum": [
+      4,
+      16,
+      64
+    ],
+    "grouped_binding": [
+      2,
+      4,
+      8
+    ]
+  },
+  "extrapolation_sizes": {
+    "grouped_binding": [
+      16
+    ]
+  },
+  "validation_samples_per_family": 256,
+  "capacity": 64,
+  "hidden_size": 32,
+  "learning_rate": 0.001,
+  "weight_decay": 0.0001,
+  "batch_size": 32,
+  "epoch_checkpoints": [
+    128
+  ],
+  "training_objective": "normalized_mae"
+}
