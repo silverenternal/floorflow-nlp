@@ -11,7 +11,7 @@ dist/
 
 # Local data and model artifacts
 .data/
-outputs/
+/outputs/
 checkpoints/
 *.pt
 *.pth
