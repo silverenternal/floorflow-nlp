@@ -519,11 +519,11 @@
         },
         {
           "id": "NE-024.39",
-          "status": "in_progress",
+          "status": "completed",
           "work": "对全新训练目标候选做validation-only诊断：保持NE-024.37的full_bilinear结构、ModelNeuron权重共享、数据量和优化配比完全不变，将按sqrt(入边数)标准化的均方损失换为同尺度L1目标，以直接优化冻结的MAE指标。使用全新seed 310000–310003，对照同目标下global_sum；报告训练尺寸MAE、逐样本最大绝对误差、16组外推、排列误差和ROCm成本。只接触新训练/validation数据，不读取或重放任何sealed数据。",
           "output": "训练目标候选validation-only四seed误差尾部与能力诊断，进入独立sealed复核或停止的决策。",
           "done_when": "四seed两任务validation MAE均≤0.05、每个任务/seed最大绝对误差≤0.05、16组外推MAE与最大误差≤0.05、排列差异≤1e-5；成本可执行且结果可复现。任何失败都按规则停止该目标，不据该批validation复调；通过后另建独立正式sealed任务。",
-          "evidence": "配置冻结于structural_candidates/full_bilinear_group_sum/robust_objective_validation/config.json，normalized_mae训练目标，seed 310000–310003，sealed_test_generated_or_read=false。待运行。"
+          "evidence": "ROCm validation-only四seed结果见robust_objective_validation/results.json，明确sealed_test_generated_or_read=false。normalized L1目标下，full bilinear set-sum MAE逐seed 0.13565/0.02438/0.05162/0.07055，三seed失败0.05门槛；最大误差最高0.31429。grouped-binding MAE为0.02303/0.00657/0.01752/0.00664，但最大误差最高0.09905；16组外推MAE为0.04751/0.03584/0.03611/0.01358，最大误差最高0.17804。候选没有满足冻结阈值，停止L1目标，不按本批validation复调，不读取sealed数据。"
         }
       ],
       "acceptance": [

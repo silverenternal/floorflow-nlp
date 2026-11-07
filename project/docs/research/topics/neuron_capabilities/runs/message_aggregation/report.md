@@ -230,3 +230,5 @@ NE-024.37全新四 seed validation全部通过后，冻结六个新seed 300000�
 ## 标准化 L1 训练目标 validation-only 筛查（NE-024.39）
 
 为检验MAE误差尾部，仅改变全新候选的训练目标：保持full bilinear结构、样本量、初始化与更新预算不变，将按`sqrt(入边数)`归一化的MSE改为同尺度L1；对照global sum使用相同目标。使用新seed 310000–310003，仅生成训练与validation集，不访问sealed数据。冻结配置位于`training_budget_diagnostic/formal_confirmation/structural_candidates/full_bilinear_group_sum/robust_objective_validation/config.json`。
+
+L1筛查未改善误差尾部：四seed set-sum MAE为0.13565/0.02438/0.05162/0.07055，三seed超过0.05；最大误差最高0.31429。grouped-binding MAE为0.02303/0.00657/0.01752/0.00664，16组外推MAE为0.04751/0.03584/0.03611/0.01358；最大误差仍最高0.17804。结果见同目录`robust_objective_validation/results.json`，文件确认未生成或读取sealed测试集。按预注册规则停止该损失候选，不依据本批validation继续调整。
