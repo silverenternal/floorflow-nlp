@@ -1,0 +1,61 @@
+{
+  "experiment_id": "message-aggregation-factorized-role-product-six-seed-sealed-confirmation",
+  "device": "cuda",
+  "deterministic_algorithms": true,
+  "candidates": [
+    "global_sum",
+    "factorized_role_product_group_sum"
+  ],
+  "cost_widths": [
+    64,
+    256,
+    1024,
+    4096
+  ],
+  "data": {
+    "seed_base": 350000,
+    "capacity": 64,
+    "families": {
+      "set_sum": [
+        4,
+        16,
+        64
+      ],
+      "grouped_binding": [
+        2,
+        4,
+        8
+      ]
+    },
+    "held_out": {
+      "grouped_binding": 16
+    },
+    "train_samples_per_family": 2048,
+    "validation_samples_per_family": 256,
+    "sealed_test_samples_per_family": 256
+  },
+  "model": {
+    "hidden_size": 32
+  },
+  "training": {
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "batch_size": 32,
+    "epochs": 128
+  },
+  "frozen_decision_rule": {
+    "set_sum_and_grouped_binding_validation_and_test_mae_max": 0.05,
+    "grouped_binding_16_group_validation_mae_max": 0.05,
+    "paired_sealed_binding_mse_relative_improvement_min": 0.2,
+    "paired_95ci_lower_bound_min": 0.0,
+    "max_absolute_error_max": 0.05,
+    "permutation_max_abs_delta_max": 1e-05,
+    "sealed_results_are_not_for_tuning": true
+  }
+}

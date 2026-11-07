@@ -262,3 +262,9 @@ L1筛查未改善误差尾部：四seed set-sum MAE为0.13565/0.02438/0.05162/0.
 NE-024.41失败seed的训练MAE接近零但validation误差明显上升，说明问题不是简单的欠拟合。复核模型输入后发现：role ID已经用于按角色拆分组摘要，却仍额外以可训练embedding加到每条消息；该项可能让每组输出依赖角色接触计数而非消息内容。新候选将role embedding从ModelNeuron消息路径移除，让edge type只用于聚合分组；每个组分别汇总两角色的共享线性投影，对应向量逐通道相乘，再通过无bias线性层映射并对组求和。此rank-H双线性映射适合乘性交互且参数量低于完整H×H×H张量。关闭sum residual和所有逐组bias，关系readout也无bias，因此无有效组时输出严格为零；通道0继续直接输出strength加权原始消息和，关系通道绕开GRU状态。
 
 现有grouped relation核心保留其CPU/MPS/ROCm确定性分段求和路径。新增契约覆盖无bias因子化的行置换/group label重标、有限梯度、无edge embedding的ModelNeuron集成，以及训练后readout bias变化不污染空关系输出。配置冻结于`training_budget_diagnostic/formal_confirmation/structural_candidates/factorized_role_product/validation/config.json`，fresh seed 340000–340003；聚焦聚合测试40项、Ruff与工程gate通过。正式GPU运行必须先匹配RX 7800 XT和HIP 7.2.53211并通过同步GPU运算探针，禁止回退；validation失败不触及sealed，也不按同批数据复调。
+
+四个validation seed均通过冻结门槛，且每seed都记录RX 7800 XT、HIP 7.2.53211和同步矩阵乘法探针。card1共379次忙碌采样，均值95.73%、中位97%；card0共379次，始终0%。训练binding MAE为0.00000030/0.00000031/0.00000029/0.00000030，训练最大误差≤5.73e-6；validation binding MAE为0.003478/0.0000053/0.0000019/0.0000340，最大误差≤0.018871；16组外推MAE为0.007089/0.0000108/0.0000041/0.0000682，最大误差≤0.023692。Set-sum MAE≤3.20e-7、最大误差≤3.82e-6；置换偏差≤2.15e-6。参数10,386；四seed候选训练120–126秒，前后向成本中位数按64/256/1024/4096项为1.427/1.406/1.803/3.329ms。相同seed的full-bilinear对照有binding与16组外推失败seed。完整原始结果及采样日志在`factorized_role_product/validation/`。sealed仍未读取；该候选只获得进入正式确认的资格，不代表NE-024已完成。
+
+## 因子化角色乘积六seed正式确认（NE-024.43）
+
+由于NE-024.42四个全新validation seed的训练/验证两族、最大样本误差、16组外推和置换指标全部通过，冻结新的独立正式确认配置`training_budget_diagnostic/formal_confirmation/structural_candidates/factorized_role_product/formal_confirmation/config.json`。候选为`factorized_role_product_group_sum`，公平对照为`global_sum`；使用seed base 350000的六个新seed、2048训练与256 validation/sealed样本每任务、hidden32、128epoch和确定性ROCm。新sealed split只在此冻结运行中生成并读取一次；所有指标和paired improvement区间完成后封存结论，不因结果再调参。
