@@ -57,5 +57,8 @@
     "max_absolute_error_max": 0.05,
     "permutation_max_abs_delta_max": 1e-05,
     "sealed_results_are_not_for_tuning": true
-  }
+  },
+  "require_rocm": true,
+  "expected_accelerator_name": "AMD Radeon RX 7800 XT",
+  "expected_torch_hip": "7.2.53211"
 }
