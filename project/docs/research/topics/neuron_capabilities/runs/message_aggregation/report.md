@@ -251,4 +251,8 @@ L1筛查未改善误差尾部：四seed set-sum MAE为0.13565/0.02438/0.05162/0.
 
 针对NE-024.40暴露的输出污染和NE-024.38的外推尾部，冻结一个不同的结构候选：ModelNeuron输出通道0以`torch.where`直接选择原始加权消息和，隐藏状态与所有可训练读出都无法写入该通道；输出通道1只选择关系聚合读出，不混入GRU状态。组关系路径仍然通过共享消息投影、角色嵌入、opaque group-id分组和共享双线性映射计算。full bilinear逐组映射去除bias，使缺少交互信号的组不会凭常数项贡献输出，避免该项随组数累积。通道以外的普通状态/输出路径保持现状；模型仍只有一份共享权重。
 
-验证前本地契约检查已确认：任意训练后输出/聚合projection权重下，通道0逐位等于加权原始消息和；该通道对消息的梯度正好等于strength，其他输入通道梯度为零；空集合输出零；修改GRU状态读出权重不会影响通道1；无bias候选的架构签名与有bias候选不同，防止检查点误认为结构兼容。聚焦聚合器测试35项通过，Ruff与`newera-gate --stage explore`通过。全新seed 330000–330003，配置已冻结于`training_budget_diagnostic/formal_confirmation/structural_candidates/isolated_sum_relation/validation/config.json`；sealed数据不生成或读取。GPU运行结果待补充。只有全部seed的训练范围及16组外推MAE与最大误差均≤0.05、置换偏差≤1e-5时才通过；任何失败即停止该结构，不在同批数据上继续调整。
+验证前本地契约检查已确认：任意训练后输出/聚合projection权重下，通道0逐位等于加权原始消息和；该通道对消息的梯度正好等于strength，其他输入通道梯度为零；空集合输出零；修改GRU状态读出权重不会影响通道1；无bias候选的架构签名与有bias候选不同，防止检查点误认为结构兼容。聚焦聚合器测试35项通过，Ruff与`newera-gate --stage explore`通过。全新seed 330000–330003，配置冻结于`training_budget_diagnostic/formal_confirmation/structural_candidates/isolated_sum_relation/validation/config.json`，完整ROCm结果和采样日志在同目录。
+
+四seed均在RX 7800 XT（PyTorch 2.15.0/HIP 7.2.53211）完成，并逐seed通过同步GPU矩阵预检；562次card1忙碌采样均值97.45%、中位98%，card0的562次采样始终为0%。Set-sum原始输出通道MAE约2.44e-7–3.00e-7、最大误差≤2.39e-6，精确聚合不变量达标。关系通道失败：binding validation MAE逐seed0.002108/0.000141/0.074064/0.001019，最大误差最高0.414745；16组外推MAE为0.007006/0.001758/0.243687/0.003367，最大误差最高0.814643。seed 330002同时突破训练范围和16组外推门槛。模型40,242参数，训练耗时350.24/351.88/349.58/351.50秒；前后向成本中位数按64/256/1024/4096条消息为5.65/6.38/10.27/17.87ms。`results.json`确认sealed数据未生成或读取。按预注册规则停止该候选，不按同批validation调整。
+
+因此，结构隔离修复了求和通道泄漏，却没有解决跨seed关系学习不稳定；移除full bilinear的逐组bias也没有保证稳定泛化。新候选需要重新审查角色投影中的冗余、初始化/梯度尺度和共享组求和的可辨识性，再设计全新seed的冻结验证；当前结果不用于改参。

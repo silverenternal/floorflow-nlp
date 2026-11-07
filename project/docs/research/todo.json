@@ -535,11 +535,11 @@
         },
         {
           "id": "NE-024.41",
-          "status": "in_progress",
+          "status": "completed",
           "work": "为NE-024.40失败设计一个结构上隔离的输出候选：共享ModelNeuron输出通道0仅由原始加权消息和生成，训练分支无法写入；通道1仅读取逐组双线性交互聚合，不混入GRU状态；full bilinear逐组映射取消bias，避免每组常数随组数外推而累积。其余通道和单一共享权重语义保持通用。使用全新seed 330000–330003、hidden32、2048样本/任务、128epoch、ROCm validation-only与同seed full bilinear对照；所有结构及配置先冻结、GPU预检失败即停止，不读取sealed数据。",
           "output": "训练中精确线性求和不变量、组数可加关系读出候选及四seed ROCm validation-only冻结门槛判定。",
           "done_when": "训练前向的通道0对任意消息数、重复、空集、strength及任意训练后权重始终逐位等于原始加权和；通道1对所有seed训练/验证MAE与最大误差≤0.05，16组外推MAE与最大误差≤0.05，置换误差≤1e-5；四seed均记录GPU型号/ROCm/同步探针、参数、训练与逐度数成本。只要任一冻结指标失败即停止该结构，不访问sealed且不基于同批validation再调。",
-          "evidence": "NE-024.40已证实零初始化只保证初始态，不保证训练后求和通道不变量；完整失败和GPU证据见message_aggregation/report.md及raw_sum_bilinear/validation/。NE-024.38显示已有双线性候选虽然16组外推MAE均值0.01329，但最大误差达0.09667，故本候选把关系输出限制为逐组项求和，并移除逐组bilinear bias；复用已有opaque group-id分组与full-bilinear映射，不新增依赖或参数化group embedding。sealed数据保持封存。"
+          "evidence": "配置、四seed原始结果和GPU采样见structural_candidates/isolated_sum_relation/validation/{config.json,results.json,gpu_activity.log}；fresh seed 330000–330003。每seed记录ROCm/HIP 7.2.53211、PyTorch 2.15.0、RX 7800 XT和同步矩阵探针checksum；GPU采样card1 562次、均值97.45%、中位98%，card0 562次均为0%。sealed_test_generated_or_read=false。原始加和通道0的训练集/validation MAE约为2.44e-7–3.00e-7，最大误差≤2.39e-6，结构不变量通过；40,242参数，四seed训练时间350.24/351.88/349.58/351.50秒，前后向中位成本64/256/1024/4096项为5.65/6.38/10.27/17.87ms。关系候选validation binding MAE逐seed0.002108/0.000141/0.074064/0.001019，最大误差最高0.414745；16组外推MAE为0.007006/0.001758/0.243687/0.003367，最大误差最高0.814643。seed 330002违反训练范围与外推MAE/max门槛，候选按冻结规则停止；不读取sealed、不按同批validation调参。此结果表明将输出与GRU隔离、消除逐组bilinear bias仍不足以稳定学习关系读出；新方向须重新审查逐角色投影与共享组聚合的优化条件。"
         }
       ],
       "acceptance": [

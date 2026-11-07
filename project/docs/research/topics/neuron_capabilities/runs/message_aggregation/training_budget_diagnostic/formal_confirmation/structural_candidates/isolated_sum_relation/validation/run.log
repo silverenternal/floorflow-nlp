@@ -1,0 +1,15 @@
+/usr/lib/python3.14/site-packages/torch/jit/_script.py:1485: FutureWarning: `torch.jit.script` is not supported in Python 3.14+ and may break. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+completed validation-only budget curve for isolated_sum_relation_bilinear_group_role_sum
+completed validation-only budget curve for full_bilinear_group_role_sum
+completed validation seed=330000, samples_per_family=2048
+completed validation-only budget curve for isolated_sum_relation_bilinear_group_role_sum
+completed validation-only budget curve for full_bilinear_group_role_sum
+completed validation seed=330001, samples_per_family=2048
+completed validation-only budget curve for isolated_sum_relation_bilinear_group_role_sum
+completed validation-only budget curve for full_bilinear_group_role_sum
+completed validation seed=330002, samples_per_family=2048
+completed validation-only budget curve for isolated_sum_relation_bilinear_group_role_sum
+completed validation-only budget curve for full_bilinear_group_role_sum
+completed validation seed=330003, samples_per_family=2048
+{"experiment_id": "message-aggregation-isolated-sum-relation-validation", "run_count": 4, "output": "project/docs/research/topics/neuron_capabilities/runs/message_aggregation/training_budget_diagnostic/formal_confirmation/structural_candidates/isolated_sum_relation/validation/results.json"}
