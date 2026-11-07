@@ -691,7 +691,7 @@
           "work": "在用户授权且远端可触发的提交上查看/执行已有工作流，处理真实失败。",
           "output": "一次 CI 运行记录及必要修复。",
           "done_when": "远端运行真实完成；缺少触发条件时标为待外部条件，不阻塞本地模型任务。",
-          "evidence": "远端仓库存在 origin，但当前没有可触发本工作流的用户授权提交；按约束不擅自 push。留待后续已有提交触发后查看真实运行。"
+          "evidence": "用户明确授权后推送提交并检查GitHub Actions。初次运行暴露全套测试依赖遗漏tokenizers；CI安装改为.[dev,pretrained]后，提交6a0395c与0f44471的Policy checks均通过，包含pytest、门禁单测、结构门禁、Ruff、gitleaks和依赖审计。"
         },
         {
           "id": "NE-014.2",
