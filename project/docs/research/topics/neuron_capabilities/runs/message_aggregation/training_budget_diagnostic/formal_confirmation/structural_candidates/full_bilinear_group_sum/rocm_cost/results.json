@@ -1,0 +1,32 @@
+{
+  "experiment_id": "message-aggregation-full-bilinear-rocm-device-cost",
+  "device": "cuda",
+  "accelerator_name": "AMD Radeon RX 7800 XT",
+  "torch": "2.15.0",
+  "torch_hip": "7.2.53211",
+  "torch_cuda_runtime": null,
+  "deterministic_algorithms": true,
+  "parameter_count": 40274,
+  "config_sha256": "e27548ea3c26a19e044cd2904784445121c9d4d522ea646817c32470140782d6",
+  "runner_sha256": "7529c7c85005c98834bc4349618a2c1a94f8c63bcdad5a65ecd50293fcf9eb22",
+  "comparison_source_sha256": "1b0abe5a933f9bfd4eabe4ee4ea7c2abd946e0bdc13953ea71ce00ba97578e01",
+  "cost": {
+    "parameter_count": 40274,
+    "64": {
+      "median_forward_backward_ms": 3.4594640019349754,
+      "p95_forward_backward_ms": 3.471306001301855
+    },
+    "256": {
+      "median_forward_backward_ms": 4.449814994586632,
+      "p95_forward_backward_ms": 4.481384006794542
+    },
+    "1024": {
+      "median_forward_backward_ms": 8.80565500119701,
+      "p95_forward_backward_ms": 8.85867400211282
+    },
+    "4096": {
+      "median_forward_backward_ms": 16.531091008801013,
+      "p95_forward_backward_ms": 16.582637996179983
+    }
+  }
+}

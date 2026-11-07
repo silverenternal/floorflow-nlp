@@ -217,4 +217,4 @@ CPU/MPS pair-workspace预算分别为 `256²` 和 `3000²` 个配对项。前反
 
 在低秩二阶结构 seed 方差失败后，将角色交互替换为 PyTorch `nn.Bilinear` 完整双线性层；输入、共享 `ModelNeuron`、零初始化求和残差和 128 epoch 训练均固定。四个全新 validation seed 290000–290003 与同 seed 求和基线配对，配置/结果见 `training_budget_diagnostic/formal_confirmation/structural_candidates/full_bilinear_group_sum/`。训练范围 set-sum/binding MAE逐seed为0.00208/0.00170、0.01138/0.00217、0.00347/0.00592、0.00195/0.00361；16组外推MAE为0.00286、0.00577、0.01493、0.01411，四seed均低于0.05。binding validation MSE较求和基线改善均超过99.998%，最大排列差低于`2.4e-6`。模型参数40,274。
 
-CPU训练验证四seed总耗时约半小时；聚焦CPU/MPS语义和梯度测试已通过，包含高入度线性workspace路径。ROCm主机上的真实前后向时延/显存成本仍待测，因此NE-024.37保持进行中；用户已授权将项目推送后在RX 7800 XT上测量。
+CPU训练验证四seed总耗时约半小时；聚焦CPU/MPS语义和梯度测试已通过，包含高入度线性workspace路径。按用户授权在内网RX 7800 XT（ROCm 7.2.53211，PyTorch 2.15.0）实测，确定性算法开启。完整模型40,274参数，入边数64/256/1024/4096的前后向中位时延为3.46/4.45/8.81/16.53 ms，p95为3.47/4.48/8.86/16.58 ms，完整原始结果见`full_bilinear_group_sum/rocm_cost/results.json`。NE-024.37按冻结validation标准完成；此结果仅是所测硬件/宽度的成本证据，不表示无界关系泛化已通过。sealed test未访问。

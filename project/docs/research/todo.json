@@ -503,11 +503,11 @@
         },
         {
           "id": "NE-024.37",
-          "status": "in_progress",
+          "status": "completed",
           "work": "只在NE-024.36低秩双线性线性读出结构上，将压缩投影交互替换为PyTorch官方nn.Bilinear完整二阶角色映射；保持消息接口、组身份、共享ModelNeuron、求和残差、训练配比与hidden32不变。冻结新seed 290000–290003、2048样本/任务、128epoch，对2/4/8训练和16组独立validation外推做同seedglobal_sum对照，报告两任务MAE/MSE、逐组误差、排列差异、参数、CPU/MPS前反向成本；sealed test不访问。",
           "output": "full-rank tensor role interaction候选及新seed validation-only能力/资源决策。",
           "done_when": "四个新validation seed均达到set-sum、训练binding、16组外推MAE≤0.05、置换偏差≤1e-5，且binding MSE相较sum改善；CPU/MPS语义/反向和成本合格。任何门槛失败都停止候选，不按该批validation复调、不读取sealed test。",
-          "evidence": "全新CPU validation-only配置/结果见neuron_capabilities/runs/message_aggregation/training_budget_diagnostic/formal_confirmation/structural_candidates/full_bilinear_group_sum/。四个seed 290000–290003，公平初始化、hidden32、2048样本/任务、128epoch；set-sum/binding验证MAE逐seed0.00208/0.00170、0.01138/0.00217、0.00347/0.00592、0.00195/0.00361；16组外推MAE 0.00286/0.00577/0.01493/0.01411，4/4均≤0.05；binding validation MSE较同seed求和改善>99.998%，排列偏差<2.4e-6，参数40,274。聚焦CPU/MPS语义和反向测试通过。CPU四seed训练耗时约30分钟；ROCm主机上的同步计时和峰值资源仍待测，故本步骤保持进行中。"
+          "evidence": "全新CPU validation-only配置/结果见neuron_capabilities/runs/message_aggregation/training_budget_diagnostic/formal_confirmation/structural_candidates/full_bilinear_group_sum/。四个seed 290000–290003，公平初始化、hidden32、2048样本/任务、128epoch；set-sum/binding验证MAE逐seed0.00208/0.00170、0.01138/0.00217、0.00347/0.00592、0.00195/0.00361；16组外推MAE 0.00286/0.00577/0.01493/0.01411，4/4均≤0.05；binding validation MSE较同seed求和改善>99.998%，排列偏差<2.4e-6，参数40,274。聚焦CPU/MPS语义和反向测试通过。CPU四seed训练耗时约30分钟；聚焦CPU/MPS语义和反向测试通过。ROCm配置/结果见同目录rocm_cost/config.json与results.json：RX 7800 XT、ROCm 7.2.53211、PyTorch 2.15.0，确定性算法开启；完整模型参数40,274，批次入边数64/256/1024/4096前后向中位耗时3.46/4.45/8.81/16.53 ms，p95为3.47/4.48/8.86/16.58 ms。硬件实测完成，候选按预注册validation门槛通过；不据此声称任意规模或关系泛化已解决。sealed test未访问。"
         }
       ],
       "acceptance": [
