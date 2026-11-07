@@ -1,0 +1,72 @@
+{
+  "schema_version": "newera-neuron-comparison-v1",
+  "run_id": "neuron-sequence-sum-budget-matched-v1",
+  "purpose": "Compare a recurrent stateful neuron candidate with flat MLP controls on the same synthetic sequence-sum task.",
+  "hypothesis": "Explicit state improves sequence-sum fit over a state-reset ablation; accuracy and efficiency depend on whether parameter or compute budget is matched.",
+  "task": {
+    "name": "sum_five_values",
+    "sequence_length": 5,
+    "feature_range": [-1.0, 1.0],
+    "target": "sum(sequence)",
+    "train_examples": 128,
+    "validation_examples": 64,
+    "split": "independent fixed seeds per run; no test split"
+  },
+  "runs": {
+    "seeds": [41, 42, 43, 44, 45],
+    "initialization_seed_offset": 1000,
+    "steps": 250,
+    "batching": "full batch",
+    "optimizer": "Adam",
+    "learning_rate": 0.02,
+    "device": "cpu",
+    "threads": 1
+  },
+  "models": {
+    "stateful_candidate": {
+      "implementation": "StatefulMLPNeuron",
+      "input_size": 1,
+      "state_size": 8,
+      "output_size": 1,
+      "state_policy": "carry state across all 5 sequence positions"
+    },
+    "parameter_matched_mlp": {
+      "implementation": "MLPNeuron",
+      "input_size": 5,
+      "hidden_size": 65,
+      "output_size": 1
+    },
+    "compute_matched_mlp": {
+      "implementation": "MLPNeuron",
+      "input_size": 5,
+      "hidden_size": 333,
+      "output_size": 1
+    },
+    "state_reset_ablation": {
+      "implementation": "StatefulMLPNeuron",
+      "input_size": 1,
+      "state_size": 8,
+      "output_size": 1,
+      "state_policy": "reset to None before each of the 5 positions"
+    }
+  },
+  "metrics": [
+    "train_mse",
+    "validation_mse",
+    "validation_mae",
+    "parameter_count",
+    "forward_linear_macs_per_example",
+    "training_forward_linear_mac_proxy",
+    "median_cpu_inference_ms_per_32_examples",
+    "model_sha256",
+    "train_data_sha256",
+    "validation_data_sha256"
+  ],
+  "stopping": "Exactly 250 optimizer steps per model; no tuning against validation results.",
+  "alignment": "All models use identical training and validation examples, optimizer, step count, and batch size. Stateful candidate is compared separately against a near-equal parameter MLP and a near-equal forward-MAC MLP because those budgets cannot both be matched; the state-reset ablation matches candidate parameters and compute.",
+  "limitations": [
+    "Synthetic train and validation data share one fixed sum rule; there is no held-out task or test split.",
+    "MAC counts include affine matrix products only, not bias, activations, optimizer, memory traffic, or framework overhead.",
+    "CPU latency is an observational microbenchmark and not a device-independent performance claim."
+  ]
+}

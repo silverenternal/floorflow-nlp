@@ -1,0 +1,76 @@
+{
+  "version": "nlp-data-efficient-heads-v1",
+  "task_id": "NLP-078-DATA-EFFICIENT-HEADS",
+  "work_package": "WP-078-B",
+  "status": "cpu_implementation_candidate_v1",
+  "evidence_inputs": {
+    "support_audit": "outputs/reports/nlp_low_data_head_audit_v1.json",
+    "support_audit_sha256": "52ea3438d5bf6e210d8aad948a706e1ceb032745791b27c30e1a1787355fccb4",
+    "pilot_decision": "outputs/reports/nlp_pretrained_python_decision_v1.json",
+    "pilot_decision_sha256": "c5db9430820ebe7a43f2903593ee88acf24f1401d372aba9d1550784ba8054e1"
+  },
+  "vocabulary_source": {
+    "data_config": "project/configs/structured_generation/structure_matched/matched_structure/nlp_structure_matched_first_clean_attempt.json",
+    "data_config_sha256": "e82f92c490c27e8a0348073c50d35513028566e6aadb56555ffa9e811dbf4cca",
+    "fit_scope": "frozen train actions and pinned transition grammar; validation metrics only; test content closed"
+  },
+  "scope": {
+    "track": "structured_AST_action_prediction",
+    "claim_level": "mechanism_hypothesis_only",
+    "backbone_changed": false,
+    "parameter_growth_allowed": false,
+    "candidate_count_node_kind_including_unknown": 626,
+    "hidden_size": 128
+  },
+  "control": {
+    "node_kind_head": "nn.Linear(hidden_size, candidate_count)",
+    "parameters": 80754
+  },
+  "candidate_variant": {
+    "id": "factorized_grammar_masked_node_kind_rank32",
+    "node_kind_head": "FactorizedClassHead",
+    "rank": 32,
+    "formula": "query = Linear(hidden_size, rank, bias=False); logits = query @ class_embeddings.T + class_bias",
+    "parameters": 24754,
+    "parameter_reduction": 0.69329,
+    "training_candidates": "Grammar root/child candidates derived from the decoder prefix before each teacher action; terminalizable kinds only.",
+    "inference_candidates": "Existing runtime root/child grammar mask, including terminalizable kinds; the scorer logits and candidate identities are unchanged.",
+    "failure_hypothesis": "Sparse node-kind labels are learned with an independent 128-dimensional classifier per class; low-rank class factors reduce independent output parameters and the legal candidate set narrows each decision.",
+    "expected_observation": "Improved supported-class macro-F1/calibration or equal quality with fewer independent head parameters; parser/executable outcomes must also improve to retain the variant."
+  },
+  "budget_target": {
+    "mode": "grammar_certified_minimum_plus_learned_nonnegative_residual",
+    "minimum_source": "TreeCompletionBudget.minimum_root_nodes() from the pinned parser schema and frozen transition grammar",
+    "training_target": "total_node_count - certified_minimum; fail if negative",
+    "inference": "Map residual scores to absolute totals starting at the certified minimum; mask every lower total to negative infinity.",
+    "parameters": 99201,
+    "parameter_change": 0,
+    "contract": "Both train and inference require a per-example minimum computed without target AST/node count."
+  },
+  "combined_output_head_parameters": {
+    "control": 179955,
+    "candidate": 123955,
+    "reduction": 0.31118
+  },
+  "excluded_hypotheses": {
+    "edge_field": "Deferred: runtime predicts a parent before masking edge fields, while teacher edge decisions do not expose a predicted parent. A faithful legal training mask requires joint parent-edge scoring; target-parent conditioning would leak the gold parent.",
+    "node_budget": "Enabled only with a parser-schema-certified minimum root completion and a learned residual; reject missing minima and targets below the floor. Do not derive a budget floor from the target tree.",
+    "loss_weighting": "No blanket inverse-frequency weighting; per-class support remains reported and the matched screen changes only the registered head mechanism."
+  },
+  "screen_contract": {
+    "control_and_variant": "same backbone, initialization seed, data order, optimizer, steps, grammar, decode budget, and free-running evaluator",
+    "candidate_mask": "same grammar legality at training and inference for node_kind; empty sets and illegal targets fail closed",
+    "metrics": [
+      "per-class support, recall, macro-F1 and calibration",
+      "legal candidate-set size and masked/unmasked accuracy",
+      "parser validity",
+      "free-running exact typed action-sequence match",
+      "executable outcomes only if a frozen bounded invocation/expected-output contract exists",
+      "parameter count and wall-clock cost"
+    ],
+    "gpu": "one registered seed after WP-078-B implementation preflight passes; no capability promotion",
+    "negative_result": "Retain the legacy head and stop this branch if free-running executable outcomes do not improve."
+  },
+  "parameter_cap": 23000000,
+  "strict_ast_gate": "unchanged and separate; the current historical result remains 0/60 strict-passed"
+}

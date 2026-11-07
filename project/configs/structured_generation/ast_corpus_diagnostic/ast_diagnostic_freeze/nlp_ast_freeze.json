@@ -1,0 +1,48 @@
+{
+  "version": "nlp-ast-corpus-freeze-v1",
+  "artifacts": [
+    "project/configs/structured_generation/ast_corpus_diagnostic/corpus_ast/nlp_ast_corpus_base.json",
+    "project/configs/structured_generation/ast_corpus_diagnostic/ast_prompts_schema/nlp_ast_prompts.json",
+    "project/configs/structured_generation/ast_corpus_diagnostic/ast_prompts_schema/nlp_ast_schema.json",
+    "src/newera/nlp_flow/components/ast/representation/codec/ast_codec.py",
+    "src/newera/nlp_flow/components/platform/data/corpus/ast_corpus.py",
+    "src/newera/nlp_flow/components/platform/data/splits/ast_holdout.py",
+    "src/newera/nlp_flow/components/ast/diagnostics/recovery/ast_recovery.py",
+    "src/newera/nlp_flow/components/ast/diagnostics/recovery/ast_recovery_probe.py",
+    "src/newera/nlp_flow/components/platform/data/splits/ast_negative_data.py",
+    "src/newera/nlp_flow/components/ast/flow/core/ast_cfm_data.py",
+    ".data/nlp/ast_core_v1/corpus.jsonl",
+    ".data/nlp/ast_core_v1/manifest.json",
+    ".data/nlp/ast_eval_v1/error_recovery.jsonl",
+    ".data/nlp/ast_train_v1/grammar_negatives.jsonl",
+    ".data/nlp/tokenizer_v1/tokenizer.json",
+    ".data/nlp/tokenizer_v1/report.json",
+    "outputs/reports/nlp_ast_corpus_audit_v1.json",
+    "outputs/reports/nlp_ast_construct_holdout_v1.json",
+    "outputs/reports/nlp_ast_negative_generation_v1.json"
+  ],
+  "corpus": {
+    "path": ".data/nlp/ast_core_v1/corpus.jsonl",
+    "manifest": ".data/nlp/ast_core_v1/manifest.json"
+  },
+  "tokenizer": {
+    "path": ".data/nlp/tokenizer_v1/tokenizer.json",
+    "report": ".data/nlp/tokenizer_v1/report.json"
+  },
+  "holdout_report": "outputs/reports/nlp_ast_construct_holdout_v1.json",
+  "negative_report": "outputs/reports/nlp_ast_negative_generation_v1.json",
+  "parser_schema": "project/configs/structured_generation/ast_corpus_diagnostic/ast_prompts_schema/nlp_ast_schema.json",
+  "prompt_contract": "project/configs/structured_generation/ast_corpus_diagnostic/ast_prompts_schema/nlp_ast_prompts.json",
+  "parser_languages": [
+    "python",
+    "rust",
+    "cpp"
+  ],
+  "access_policy": {
+    "test_read_during_selection": false,
+    "test_predictions_read": false,
+    "test_used_for_model_selection": false,
+    "split_integrity_metadata_only": true,
+    "architecture_freeze_required_after_selection": true
+  }
+}

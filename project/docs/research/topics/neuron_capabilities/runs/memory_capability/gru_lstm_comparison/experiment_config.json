@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "experiment_id": "gru-lstm-memory-comparison",
+  "device": "mps",
+  "allow_fallback": false,
+  "model": {
+    "cell": "ModelNeuron.state_update (GRUCell)",
+    "input_size": 8,
+    "hidden_size": 64,
+    "message_size": 1,
+    "shared_weight_sets": 1,
+    "hidden_sizes": {
+      "gru": 64,
+      "lstm": 75
+    }
+  },
+  "data": {
+    "provenance": "deterministic synthetic generators in newera.capabilities.evaluation.memory_tasks",
+    "train_lengths": [
+      8,
+      16,
+      32
+    ],
+    "extrapolation_lengths": [
+      64,
+      128
+    ],
+    "train_samples_per_family": 512,
+    "validation_samples_per_family": 256,
+    "sealed_test_samples_per_family": 512,
+    "extrapolation_samples_per_family": 256,
+    "seed_base": 46000,
+    "families": [
+      "delayed_recall",
+      "order_recognition",
+      "interference_recovery"
+    ]
+  },
+  "training": {
+    "seeds": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "epochs": 12,
+    "batch_size": 32,
+    "optimizer": "AdamW",
+    "learning_rate": 0.002,
+    "weight_decay": 0.0001,
+    "families_share_one_model_and_weight_set": true,
+    "state_reset_during_training": false,
+    "candidates": [
+      "gru",
+      "lstm"
+    ]
+  },
+  "decision_rules": {
+    "delayed_recall_mae": 0.05,
+    "interference_recovery_mae": 0.05,
+    "order_recognition_accuracy": 0.99,
+    "report_length_extrapolation": [
+      64,
+      128
+    ],
+    "stateful_model_should_beat_reset_and_random_state_drop_controls": true,
+    "replay_and_checkpoint_restore_max_abs_delta": 1e-06
+  }
+}

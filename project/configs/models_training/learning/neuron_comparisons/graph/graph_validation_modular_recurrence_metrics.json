@@ -1,0 +1,50 @@
+{
+  "schema_version": "newera-neuron-graph-validation-v2",
+  "run_id": "neuron-graph-design-validation-v2-metrics",
+  "purpose": "Measure paired task quality, learned topology utility, graph diagnostics, gradient transport, and runtime cost for sparse causal neuron links.",
+  "task": {
+    "name": "modular_second_order_recurrence",
+    "rule": "x[t] = (x[t-1] + x[t-2]) mod vocab_size",
+    "sequence_length": 32,
+    "vocab_size": 32,
+    "training_examples": 32,
+    "validation_examples": 64,
+    "independent_data_seeds": true
+  },
+  "training": {
+    "seeds": [11, 23],
+    "steps": 80,
+    "optimizer": "AdamW",
+    "learning_rate": 0.003,
+    "batching": "full batch",
+    "device": "cpu",
+    "threads": 1
+  },
+  "conditions": [
+    {"name": "transformer_control", "enable_neuron_graph": false},
+    {"name": "graph_budget_16", "enable_neuron_graph": true, "candidate_budget": 16},
+    {"name": "graph_budget_64", "enable_neuron_graph": true, "candidate_budget": 64},
+    {"name": "graph_budget_256", "enable_neuron_graph": true, "candidate_budget": 256}
+  ],
+  "search_benchmark": {
+    "sequence_lengths": [32, 64, 128, 256, 512],
+    "candidate_budgets": [32, 128, 256],
+    "warmup_calls": 3,
+    "measured_calls": 15,
+    "device": "cpu"
+  },
+  "model_latency": {
+    "sequence_lengths": [32, 64, 128],
+    "batch_size": 8,
+    "candidate_budget": 64,
+    "warmup_calls": 3,
+    "measured_calls": 10,
+    "device": "cpu"
+  },
+  "limitations": [
+    "Synthetic algorithmic task only; no natural-language capability claim.",
+    "Two seeds and 80 updates are a screening experiment, not a confirmatory study.",
+    "CPU latency is machine-specific; the profiler allocation sum is not peak process memory.",
+    "The graph uses token-position nodes and the model parameter counts are not matched."
+  ]
+}

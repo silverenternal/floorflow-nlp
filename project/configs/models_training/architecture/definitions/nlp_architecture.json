@@ -1,0 +1,390 @@
+{
+  "version": "nlp-architecture-v1",
+  "status": "architecture_contract",
+  "ambition": "SOTA-level coding and engineering capability inside the declared compact parameter/compute class, without GPT-class parameter stacking.",
+  "shared_core": {
+    "id": "compact_hierarchical_decoder",
+    "token_readout": "autoregressive token decoder used only as the language interface",
+    "role": [
+      "encode prompt, repository, code context, and explicit constraints",
+      "produce shared contextual token states without dominating model capacity",
+      "receive zero-gated residuals from hierarchy, typed attention, CFM, and generated experts"
+    ],
+    "parameter_cap": 23000000,
+    "net_growth_allowed": false
+  },
+  "structured_output": {
+    "contract": "project/configs/other/contracts_runtime/contract_freeze_implementation/nlp_json_contract.json",
+    "native_valid_by_construction": true,
+    "hard_validity_gate": true,
+    "posthoc_repair": false,
+    "retry": false,
+    "scope": "all structured AST, patch, tool-action, diagnostic, and engineering JSON outputs"
+  },
+  "typed_channels": [
+    {
+      "id": "syntax",
+      "role": "indentation, delimiters, grammar, AST-like block structure",
+      "training_targets": [
+        "next-token likelihood on code",
+        "delimiter and indentation prediction",
+        "syntax repair"
+      ],
+      "cross_attention_relations": [
+        "code token to syntax context",
+        "patch region to enclosing block"
+      ]
+    },
+    {
+      "id": "symbol",
+      "role": "identifiers, declarations, imports, API references, call relations",
+      "training_targets": [
+        "identifier masking",
+        "definition-use retrieval",
+        "API/name consistency"
+      ],
+      "cross_attention_relations": [
+        "identifier to declaration",
+        "call to signature",
+        "patch to affected symbol"
+      ]
+    },
+    {
+      "id": "discourse",
+      "role": "task intent, document plan, segment roles, patch rationale",
+      "training_targets": [
+        "plan reconstruction from prompt",
+        "segment boundary prediction",
+        "diff intent classification"
+      ],
+      "cross_attention_relations": [
+        "document plan to code segment",
+        "segment to required change"
+      ]
+    },
+    {
+      "id": "execution",
+      "role": "tests, compiler diagnostics, runtime errors, numerical checks",
+      "training_targets": [
+        "test outcome prediction",
+        "error-to-repair localization",
+        "verifier-conditioned patch scoring"
+      ],
+      "cross_attention_relations": [
+        "failure trace to edited line",
+        "test to covered symbol",
+        "diagnostic to candidate repair"
+      ]
+    },
+    {
+      "id": "engineering",
+      "role": "Triton kernels, Linux systems, profiling, latency, memory and I/O constraints",
+      "training_targets": [
+        "systems terminology and procedure modeling",
+        "kernel shape/dtype reasoning",
+        "performance and correctness constraints"
+      ],
+      "cross_attention_relations": [
+        "kernel specification to implementation",
+        "system observation to diagnostic action",
+        "latency target to patch region"
+      ]
+    }
+  ],
+  "attention": {
+    "semantic_channel_attention": {
+      "source": "floorplan semantic channel and slot attention",
+      "borrow": [
+        "channel queries over token memory",
+        "semantic relation prior",
+        "gated channel feedback"
+      ],
+      "nlp_relation_prior_examples": [
+        "syntax <-> execution diagnostics",
+        "symbol <-> discourse task plan",
+        "engineering <-> execution runtime constraints"
+      ]
+    },
+    "typed_cross_attention": {
+      "source": "CHIP typed cross-attention",
+      "borrow": [
+        "explicit allowed relation mask per channel",
+        "zero-gated residual output",
+        "relation-specific independent gates"
+      ],
+      "query": "shared code/token state",
+      "memory": "global + syntax + symbol + discourse + execution + engineering tokens"
+    },
+    "mita_sparse_routing": {
+      "source": "MiTA route attention used by floorplan/chip lines",
+      "borrow": [
+        "budgeted top-k router keys",
+        "router usage and effective-expert diagnostics",
+        "sparse attention under fixed compute"
+      ],
+      "use": "route long repository and document context without dense all-token attention"
+    },
+    "slot_mixing": {
+      "source": "multiflow soft slot decomposition",
+      "borrow": [
+        "bidirectional gated slot attention",
+        "active-slot masks",
+        "schema/task slots"
+      ],
+      "use": "exchange plan, API, test, and systems constraints before token decoding"
+    }
+  },
+  "cfm": {
+    "role": "two-stage AST-first conditional flow matching",
+    "stage_a_ast": {
+      "id": "CFM-A-AST",
+      "input": [
+        "prompt or repository context",
+        "explicit constraints",
+        "training-only tests and diagnostics during training"
+      ],
+      "target": "canonical language-specific AST graph with node types, lexical values, parent-child edges, and scope/symbol relations",
+      "hierarchy": [
+        {
+          "id": "AST-L0",
+          "level": "root plan and top-level declarations"
+        },
+        {
+          "id": "AST-L1",
+          "level": "subtree and statement/block structure"
+        },
+        {
+          "id": "AST-L2",
+          "level": "leaf grammar, lexical values, and symbol anchors"
+        }
+      ],
+      "objectives": [
+        "velocity MSE on AST latent",
+        "AST endpoint consistency",
+        "node type cross-entropy",
+        "edge type and parent-child loss",
+        "grammar validity",
+        "parseability after discrete AST decoding"
+      ],
+      "outputs": [
+        "generated AST graph",
+        "AST node and edge uncertainty",
+        "AST verifier diagnostics"
+      ]
+    },
+    "stage_b_result": {
+      "id": "CFM-B-RESULT",
+      "condition": "Stage-A generated AST only during primary inference",
+      "training_curriculum": [
+        "early: teacher AST for stable content-flow learning",
+        "middle: target AST mixed with generated and perturbed AST",
+        "late: Stage-A generated AST only"
+      ],
+      "target": "code, patch, and engineering result conditioned on the generated AST",
+      "objectives": [
+        "velocity MSE on result latent",
+        "endpoint consistency",
+        "token or patch reconstruction",
+        "test and verifier-conditioned endpoint loss",
+        "AST-to-result consistency"
+      ],
+      "outputs": [
+        "generated code/patch/result",
+        "execution and compilation feedback",
+        "AST-consistency diagnostics"
+      ]
+    },
+    "inference": "Stage A generates AST first; Stage B consumes only that generated AST and emits the result through the standard token decoder. Target AST is never available at inference.",
+    "ablation_rule": "The two-stage claim requires a matched one-stage control that conditions directly on prompt/repository state without target AST.",
+    "nfe": {
+      "stage_a_primary": 4,
+      "stage_b_primary": 4,
+      "total_primary": 8,
+      "secondary": [
+        "CFM-A 1 + CFM-B 1",
+        "CFM-A 8 + CFM-B 8"
+      ]
+    }
+  },
+  "training_scopes": [
+    {
+      "id": "S0-base",
+      "train": [
+        "shared decoder",
+        "token readout"
+      ],
+      "freeze": [],
+      "purpose": "base language and code competence"
+    },
+    {
+      "id": "S1-channels",
+      "train": [
+        "typed channel encoders",
+        "channel auxiliary heads"
+      ],
+      "freeze": [
+        "shared decoder",
+        "token readout"
+      ],
+      "purpose": "separately train syntax, symbol, discourse, execution, and engineering representations"
+    },
+    {
+      "id": "S2-cross-attention",
+      "train": [
+        "typed cross-attention",
+        "channel fusion",
+        "MiTA routing adapters"
+      ],
+      "freeze": [
+        "shared decoder",
+        "token readout",
+        "typed channel encoders"
+      ],
+      "purpose": "isolate the benefit of cross-channel routing"
+    },
+    {
+      "id": "S3-cfm",
+      "train": [
+        "hierarchical CFM heads",
+        "endpoint adapters",
+        "verifier-conditioned flow"
+      ],
+      "freeze": [
+        "shared decoder",
+        "typed channels",
+        "cross-attention fusion"
+      ],
+      "purpose": "learn plan/segment/span flow without perturbing the base model"
+    },
+    {
+      "id": "S4-joint",
+      "train": [
+        "all hierarchy, fusion, and language heads"
+      ],
+      "freeze": [
+        "tokenizer",
+        "data manifest"
+      ],
+      "purpose": "joint calibration at low LR"
+    },
+    {
+      "id": "S5-factory",
+      "train": [
+        "expert factory",
+        "growth controller",
+        "bounded generated experts"
+      ],
+      "freeze": [
+        "tokenizer",
+        "benchmark",
+        "base decoder schedule"
+      ],
+      "purpose": "learn E synthesis and reallocate capacity inside the fixed tier",
+      "conditional": true
+    }
+  ],
+  "execution_order": [
+    "cache frozen base features",
+    "train channel encoders only",
+    "train typed cross-attention and MiTA fusion only",
+    "train hierarchical CFM only",
+    "joint low-LR calibration",
+    "optional generated-expert stage after matched controls pass"
+  ],
+  "data_usage": {
+    "general_language": {
+      "stage": "S0-base",
+      "source": ".data/nlp/tinystories_small_v1",
+      "purpose": "language retention and tokenizer stability"
+    },
+    "code": {
+      "stage": "S0-base and S1-channels",
+      "source": ".data/nlp/mixed_v1/code",
+      "languages": [
+        "python",
+        "rust",
+        "cpp"
+      ]
+    },
+    "model_architecture": {
+      "stage": "S1-channels and S3-cfm",
+      "source": ".data/nlp/mixed_v1/model_architecture"
+    },
+    "engineering_acceleration": {
+      "stage": "S1-channels through S4-joint",
+      "source": ".data/nlp/mixed_v1/engineering",
+      "systems": [
+        "triton",
+        "linux"
+      ]
+    }
+  },
+  "experimental_arms": [
+    {
+      "id": "A0",
+      "name": "compact decoder control",
+      "components": [
+        "shared decoder",
+        "token readout"
+      ]
+    },
+    {
+      "id": "A1",
+      "name": "one-stage result CFM control",
+      "components": [
+        "A0",
+        "direct result CFM conditioned on prompt/repository state"
+      ]
+    },
+    {
+      "id": "A2",
+      "name": "two-stage AST-first CFM",
+      "components": [
+        "A0",
+        "Stage-A AST graph CFM",
+        "Stage-B generated-AST-conditioned result CFM"
+      ]
+    },
+    {
+      "id": "A3",
+      "name": "two-stage CFM plus typed channels",
+      "components": [
+        "A2",
+        "five typed channels"
+      ]
+    },
+    {
+      "id": "A4",
+      "name": "typed fusion and sparse routing",
+      "components": [
+        "A3",
+        "semantic channel attention",
+        "typed cross-attention",
+        "MiTA sparse routing",
+        "slot mixing"
+      ]
+    },
+    {
+      "id": "A5",
+      "name": "full compact SOTA candidate",
+      "components": [
+        "A4",
+        "generated expert factory",
+        "staged cross-attention training",
+        "executable verifier feedback"
+      ]
+    }
+  ],
+  "promotion_gates": [
+    "No component is promoted by parameter count alone.",
+    "Typed channels are individually trainable and independently measurable.",
+    "Cross-attention-only training must beat the frozen base before joint training.",
+    "Two-stage AST-first CFM must improve AST validity and executable success, not only latent MSE.",
+    "Stage B primary evaluation must consume only Stage-A generated AST.",
+    "All structured outputs must achieve 100% strict JSON validity through native model structure.",
+    "Final model stays at or below the 23M primary claim cap.",
+    "Final inference is static and reports total resident parameters and FLOPs.",
+    "The SOTA claim is restricted to the frozen low-capability benchmark class."
+  ],
+  "evidence_boundary": "This is an architecture contract. No coding or engineering quality result exists yet."
+}

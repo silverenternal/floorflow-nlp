@@ -1,0 +1,535 @@
+{
+  "device": "mps",
+  "git_commit": "4247105df556b121816a2f657af5d3927e69f908",
+  "source_sha256": {
+    "project/scripts/experiments/training/neurons/diagnostics/compare_route_supervision.py": "64c49a506b50b10a3c7ae5dc6278dc9a0ed2840e2bad9ff7429124271314d69c",
+    "project/configs/models_training/learning/neuron_comparisons/topology_evolution/modelized_neuron_training_baseline.json": "f78b727969556d86ad839670734574a11d482bea74c5d5f7b4001434bf170f79",
+    "src/newera/neuron/composition.py": "753d6f63fe4f7876c9fbbdf46e126bb520691d09d6547c64bacb8bf6e04e1a4c",
+    "src/newera/neuron/graph/policy.py": "049c56f8621955220b021ab52cc969aa770b90b59c38c5a0848686b995ed6134",
+    "src/newera/neuron/graph/layer.py": "00bd1aa393515a28ecc4ab8b24efd4fdb765717dcbdc7fce3a102bc08d5db2c5"
+  },
+  "task": "single_link_retrieval",
+  "train_seed": 92001,
+  "validation_seed": 92002,
+  "training_sample_count": 32,
+  "validation_sample_count": 64,
+  "steps_per_condition": 500,
+  "sealed_test_used": false,
+  "parameter_matched_flat_mlp": {
+    "parameters": 10945,
+    "target_parameters": 11102,
+    "validation_mse": 0.1486484706401825
+  },
+  "conditions": {
+    "production_control": {
+      "validation": {
+        "mse": 0.1081137037120401,
+        "mae": 0.26419699180405587,
+        "edge_f1": 0.28125,
+        "empty_edge_graph_count": 0,
+        "evaluated_graph_count": 64,
+        "edge_precision": 0.20833333333333334,
+        "edge_precision_numerator": 25,
+        "edge_precision_denominator": 120,
+        "edge_recall": 0.390625,
+        "edge_recall_numerator": 25,
+        "edge_recall_denominator": 64,
+        "strength_mae": 0.3310005391836166,
+        "operation_scores": {
+          "add": {
+            "expected_count": 0,
+            "predicted_count": 0,
+            "correct_count": 0,
+            "precision": null,
+            "recall": null
+          },
+          "remove": {
+            "expected_count": 64,
+            "predicted_count": 8,
+            "correct_count": 4,
+            "precision": 0.5,
+            "recall": 0.0625
+          },
+          "retype": {
+            "expected_count": 37,
+            "predicted_count": 0,
+            "correct_count": 0,
+            "precision": null,
+            "recall": 0.0
+          },
+          "set_strength": {
+            "expected_count": 27,
+            "predicted_count": 103,
+            "correct_count": 19,
+            "precision": 0.18446601941747573,
+            "recall": 0.7037037037037037
+          }
+        }
+      },
+      "validation_train_mean_mse": 0.13459542393684387,
+      "selected_threshold": 0.3,
+      "threshold_trials": [
+        {
+          "threshold": 0.2,
+          "selection_score": 0.2614776234567901,
+          "edge_f1": 0.22916666666666666,
+          "operation_macro_recall": 0.29378858024691357,
+          "mse": 0.13184805644170172
+        },
+        {
+          "threshold": 0.3,
+          "selection_score": 0.26832561728395066,
+          "edge_f1": 0.28125,
+          "operation_macro_recall": 0.25540123456790126,
+          "mse": 0.1081137037120401
+        },
+        {
+          "threshold": 0.5,
+          "selection_score": 0.23939043209876543,
+          "edge_f1": 0.28125,
+          "operation_macro_recall": 0.19753086419753085,
+          "mse": 0.08011681608906418
+        },
+        {
+          "threshold": 0.75,
+          "selection_score": 0.140625,
+          "edge_f1": 0.28125,
+          "operation_macro_recall": 0.0,
+          "mse": 0.08519648446099382
+        }
+      ],
+      "candidate_action_counts_keep_type0_type1_remove": [
+        209,
+        0,
+        0,
+        47
+      ],
+      "training_action_target_counts_keep_type0_type1_remove": [
+        80.0,
+        16.0,
+        0.0,
+        32.0
+      ],
+      "class_balancing_weights": [
+        0.5333333611488342,
+        2.6666667461395264,
+        0.0,
+        1.3333333730697632
+      ],
+      "hard_mutation_count": 111,
+      "mean_single_edge_deletion_abs_prediction_change": 0.11624657145390908,
+      "mean_single_edge_deletion_delta_mse": 0.024039826560869906,
+      "fraction_edge_deletions_that_worsen_mse": 0.55,
+      "model_parameters": 11102,
+      "training_updates": 500
+    },
+    "task_only": {
+      "validation": {
+        "mse": 0.10365881035227176,
+        "mae": 0.26610335742589086,
+        "edge_f1": 0.2786458333333333,
+        "empty_edge_graph_count": 0,
+        "evaluated_graph_count": 64,
+        "edge_precision": 0.20930232558139536,
+        "edge_precision_numerator": 27,
+        "edge_precision_denominator": 129,
+        "edge_recall": 0.421875,
+        "edge_recall_numerator": 27,
+        "edge_recall_denominator": 64,
+        "strength_mae": 0.20642270313368902,
+        "operation_scores": {
+          "add": {
+            "expected_count": 0,
+            "predicted_count": 1,
+            "correct_count": 0,
+            "precision": 0.0,
+            "recall": null
+          },
+          "remove": {
+            "expected_count": 64,
+            "predicted_count": 0,
+            "correct_count": 0,
+            "precision": null,
+            "recall": 0.0
+          },
+          "retype": {
+            "expected_count": 37,
+            "predicted_count": 0,
+            "correct_count": 0,
+            "precision": null,
+            "recall": 0.0
+          },
+          "set_strength": {
+            "expected_count": 27,
+            "predicted_count": 107,
+            "correct_count": 21,
+            "precision": 0.19626168224299065,
+            "recall": 0.7777777777777778
+          }
+        }
+      },
+      "validation_train_mean_mse": 0.13459542393684387,
+      "selected_threshold": 0.3,
+      "threshold_trials": [
+        {
+          "threshold": 0.2,
+          "selection_score": 0.2363233024691358,
+          "edge_f1": 0.20104166666666667,
+          "operation_macro_recall": 0.2716049382716049,
+          "mse": 0.10807941330534732
+        },
+        {
+          "threshold": 0.3,
+          "selection_score": 0.2689525462962963,
+          "edge_f1": 0.2786458333333333,
+          "operation_macro_recall": 0.25925925925925924,
+          "mse": 0.10365881035227176
+        },
+        {
+          "threshold": 0.5,
+          "selection_score": 0.23321759259259262,
+          "edge_f1": 0.28125,
+          "operation_macro_recall": 0.1851851851851852,
+          "mse": 0.09466464651427486
+        },
+        {
+          "threshold": 0.75,
+          "selection_score": 0.15297067901234568,
+          "edge_f1": 0.28125,
+          "operation_macro_recall": 0.024691358024691357,
+          "mse": 0.10013313390891199
+        }
+      ],
+      "candidate_action_counts_keep_type0_type1_remove": [
+        226,
+        0,
+        25,
+        5
+      ],
+      "training_action_target_counts_keep_type0_type1_remove": [
+        80.0,
+        16.0,
+        0.0,
+        32.0
+      ],
+      "class_balancing_weights": [
+        0.5333333611488342,
+        2.6666667461395264,
+        0.0,
+        1.3333333730697632
+      ],
+      "hard_mutation_count": 108,
+      "mean_single_edge_deletion_abs_prediction_change": 0.10255749818197517,
+      "mean_single_edge_deletion_delta_mse": 0.014454274971008346,
+      "fraction_edge_deletions_that_worsen_mse": 0.5116279069767442,
+      "model_parameters": 11102,
+      "training_updates": 500
+    },
+    "sparsity_only": {
+      "validation": {
+        "mse": 0.1238844454634318,
+        "mae": 0.28214907471556216,
+        "edge_f1": 0.265625,
+        "empty_edge_graph_count": 1,
+        "evaluated_graph_count": 64,
+        "edge_precision": 0.20168067226890757,
+        "edge_precision_numerator": 24,
+        "edge_precision_denominator": 119,
+        "edge_recall": 0.375,
+        "edge_recall_numerator": 24,
+        "edge_recall_denominator": 64,
+        "strength_mae": 0.347100284943978,
+        "operation_scores": {
+          "add": {
+            "expected_count": 0,
+            "predicted_count": 0,
+            "correct_count": 0,
+            "precision": null,
+            "recall": null
+          },
+          "remove": {
+            "expected_count": 64,
+            "predicted_count": 9,
+            "correct_count": 4,
+            "precision": 0.4444444444444444,
+            "recall": 0.0625
+          },
+          "retype": {
+            "expected_count": 37,
+            "predicted_count": 0,
+            "correct_count": 0,
+            "precision": null,
+            "recall": 0.0
+          },
+          "set_strength": {
+            "expected_count": 27,
+            "predicted_count": 119,
+            "correct_count": 24,
+            "precision": 0.20168067226890757,
+            "recall": 0.8888888888888888
+          }
+        }
+      },
+      "validation_train_mean_mse": 0.13459542393684387,
+      "selected_threshold": 0.2,
+      "threshold_trials": [
+        {
+          "threshold": 0.2,
+          "selection_score": 0.29137731481481477,
+          "edge_f1": 0.265625,
+          "operation_macro_recall": 0.3171296296296296,
+          "mse": 0.1238844454634318
+        },
+        {
+          "threshold": 0.3,
+          "selection_score": 0.27642746913580246,
+          "edge_f1": 0.28125,
+          "operation_macro_recall": 0.2716049382716049,
+          "mse": 0.11485433438031123
+        },
+        {
+          "threshold": 0.5,
+          "selection_score": 0.2517361111111111,
+          "edge_f1": 0.28125,
+          "operation_macro_recall": 0.2222222222222222,
+          "mse": 0.095013725578724
+        },
+        {
+          "threshold": 0.75,
+          "selection_score": 0.19618055555555555,
+          "edge_f1": 0.28125,
+          "operation_macro_recall": 0.1111111111111111,
+          "mse": 0.09057099017437764
+        }
+      ],
+      "candidate_action_counts_keep_type0_type1_remove": [
+        231,
+        0,
+        0,
+        25
+      ],
+      "training_action_target_counts_keep_type0_type1_remove": [
+        80.0,
+        16.0,
+        0.0,
+        32.0
+      ],
+      "class_balancing_weights": [
+        0.5333333611488342,
+        2.6666667461395264,
+        0.0,
+        1.3333333730697632
+      ],
+      "hard_mutation_count": 128,
+      "mean_single_edge_deletion_abs_prediction_change": 0.10620302732000832,
+      "mean_single_edge_deletion_delta_mse": 0.016205051462335376,
+      "fraction_edge_deletions_that_worsen_mse": 0.5630252100840336,
+      "model_parameters": 11102,
+      "training_updates": 500
+    },
+    "structure_supervised": {
+      "validation": {
+        "mse": 0.15294890090808622,
+        "mae": 0.32047672488261014,
+        "edge_f1": 0.24375,
+        "empty_edge_graph_count": 17,
+        "evaluated_graph_count": 64,
+        "edge_precision": 0.24786324786324787,
+        "edge_precision_numerator": 29,
+        "edge_precision_denominator": 117,
+        "edge_recall": 0.453125,
+        "edge_recall_numerator": 29,
+        "edge_recall_denominator": 64,
+        "strength_mae": 0.08025845659190209,
+        "operation_scores": {
+          "add": {
+            "expected_count": 0,
+            "predicted_count": 56,
+            "correct_count": 0,
+            "precision": 0.0,
+            "recall": null
+          },
+          "remove": {
+            "expected_count": 64,
+            "predicted_count": 67,
+            "correct_count": 34,
+            "precision": 0.5074626865671642,
+            "recall": 0.53125
+          },
+          "retype": {
+            "expected_count": 37,
+            "predicted_count": 34,
+            "correct_count": 21,
+            "precision": 0.6176470588235294,
+            "recall": 0.5675675675675675
+          },
+          "set_strength": {
+            "expected_count": 27,
+            "predicted_count": 27,
+            "correct_count": 8,
+            "precision": 0.2962962962962963,
+            "recall": 0.2962962962962963
+          }
+        }
+      },
+      "validation_train_mean_mse": 0.13459542393684387,
+      "selected_threshold": 0.3,
+      "threshold_trials": [
+        {
+          "threshold": 0.2,
+          "selection_score": 0.354393977310644,
+          "edge_f1": 0.24375,
+          "operation_macro_recall": 0.46503795462128794,
+          "mse": 0.15294890090808622
+        },
+        {
+          "threshold": 0.3,
+          "selection_score": 0.354393977310644,
+          "edge_f1": 0.24375,
+          "operation_macro_recall": 0.46503795462128794,
+          "mse": 0.15294890090808622
+        },
+        {
+          "threshold": 0.5,
+          "selection_score": 0.32525520311978645,
+          "edge_f1": 0.2390625,
+          "operation_macro_recall": 0.4114479062395729,
+          "mse": 0.14270806133555425
+        },
+        {
+          "threshold": 0.75,
+          "selection_score": 0.140625,
+          "edge_f1": 0.28125,
+          "operation_macro_recall": 0.0,
+          "mse": 0.08389803469560775
+        }
+      ],
+      "candidate_action_counts_keep_type0_type1_remove": [
+        21,
+        105,
+        0,
+        130
+      ],
+      "training_action_target_counts_keep_type0_type1_remove": [
+        80.0,
+        16.0,
+        0.0,
+        32.0
+      ],
+      "class_balancing_weights": [
+        0.5333333611488342,
+        2.6666667461395264,
+        0.0,
+        1.3333333730697632
+      ],
+      "hard_mutation_count": 184,
+      "mean_single_edge_deletion_abs_prediction_change": 0.08028369154940304,
+      "mean_single_edge_deletion_delta_mse": -0.0047347787070923285,
+      "fraction_edge_deletions_that_worsen_mse": 0.46153846153846156,
+      "model_parameters": 11102,
+      "training_updates": 500
+    },
+    "hard_calibrated": {
+      "validation": {
+        "mse": 0.12065711583773009,
+        "mae": 0.2915698097785935,
+        "edge_f1": 0.278125,
+        "empty_edge_graph_count": 0,
+        "evaluated_graph_count": 64,
+        "edge_precision": 0.20114942528735633,
+        "edge_precision_numerator": 35,
+        "edge_precision_denominator": 174,
+        "edge_recall": 0.546875,
+        "edge_recall_numerator": 35,
+        "edge_recall_denominator": 64,
+        "strength_mae": 0.11343823841639926,
+        "operation_scores": {
+          "add": {
+            "expected_count": 0,
+            "predicted_count": 46,
+            "correct_count": 0,
+            "precision": 0.0,
+            "recall": null
+          },
+          "remove": {
+            "expected_count": 64,
+            "predicted_count": 0,
+            "correct_count": 0,
+            "precision": null,
+            "recall": 0.0
+          },
+          "retype": {
+            "expected_count": 37,
+            "predicted_count": 14,
+            "correct_count": 8,
+            "precision": 0.5714285714285714,
+            "recall": 0.21621621621621623
+          },
+          "set_strength": {
+            "expected_count": 27,
+            "predicted_count": 114,
+            "correct_count": 27,
+            "precision": 0.23684210526315788,
+            "recall": 1.0
+          }
+        }
+      },
+      "validation_train_mean_mse": 0.13459542393684387,
+      "selected_threshold": 0.2,
+      "threshold_trials": [
+        {
+          "threshold": 0.2,
+          "selection_score": 0.3417652027027027,
+          "edge_f1": 0.278125,
+          "operation_macro_recall": 0.40540540540540543,
+          "mse": 0.12065711583773009
+        },
+        {
+          "threshold": 0.3,
+          "selection_score": 0.15297067901234568,
+          "edge_f1": 0.28125,
+          "operation_macro_recall": 0.024691358024691357,
+          "mse": 0.10153812829048547
+        },
+        {
+          "threshold": 0.5,
+          "selection_score": 0.140625,
+          "edge_f1": 0.28125,
+          "operation_macro_recall": 0.0,
+          "mse": 0.09603815302853036
+        },
+        {
+          "threshold": 0.75,
+          "selection_score": 0.140625,
+          "edge_f1": 0.28125,
+          "operation_macro_recall": 0.0,
+          "mse": 0.09803547725488215
+        }
+      ],
+      "candidate_action_counts_keep_type0_type1_remove": [
+        172,
+        82,
+        2,
+        0
+      ],
+      "training_action_target_counts_keep_type0_type1_remove": [
+        80.0,
+        16.0,
+        0.0,
+        32.0
+      ],
+      "class_balancing_weights": [
+        0.5333333611488342,
+        2.6666667461395264,
+        0.0,
+        1.3333333730697632
+      ],
+      "hard_mutation_count": 174,
+      "mean_single_edge_deletion_abs_prediction_change": 0.058985752706555115,
+      "mean_single_edge_deletion_delta_mse": 0.004689090839939968,
+      "fraction_edge_deletions_that_worsen_mse": 0.5114942528735632,
+      "model_parameters": 11102,
+      "training_updates": 500
+    }
+  }
+}

@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "experiment_id": "message-aggregation-extended-budget-confirmation",
+  "device": "mps",
+  "allow_fallback": false,
+  "data": {
+    "train_sizes": {
+      "set_sum": [
+        4,
+        16,
+        64
+      ],
+      "grouped_binding": [
+        2,
+        4,
+        8
+      ]
+    },
+    "size_extrapolation_validation": {
+      "set_sum": 256,
+      "grouped_binding": 16
+    },
+    "train_samples_per_family": 2048,
+    "validation_samples_per_family": 256,
+    "sealed_test_samples_per_family": 512,
+    "seed_base": 64000
+  },
+  "model": {
+    "input_size": 2,
+    "hidden_size": 32,
+    "message_size": 2,
+    "edge_types": 2,
+    "set_transformer_heads": 4,
+    "weight_sets_per_model": 1
+  },
+  "training": {
+    "seeds": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "batch_size": 32,
+    "optimizer": "AdamW",
+    "learning_rate": 0.001,
+    "weight_decay": 0.0001,
+    "same_samples_and_updates_for_candidates": true,
+    "train_families_with_one_shared_model": true,
+    "epochs": 32,
+    "loss_normalization": "squared residual divided by contact count; equalizes raw sum target scale across input sizes"
+  },
+  "decision_rules": {
+    "set_sum_mae": 0.05,
+    "grouped_binding_mae": 0.05,
+    "permutation_max_abs_delta": 0.01,
+    "minimum_relative_mse_improvement_over_sum_on_binding": 0.2,
+    "report_parameter_count_and_forward_backward_cost": true,
+    "sealed_test_used_after_candidate_and_threshold_freeze": true
+  },
+  "capabilities": {
+    "set_sum": "sum(values) with shared model; group feature zero and role type zero",
+    "grouped_binding": "sum_g(A_g * B_g); group ID is an observable payload feature and role is edge type",
+    "grouped_binding_counterexample": {
+      "values": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "roles": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "aligned_groups": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "crossed_groups": [
+        0,
+        1,
+        1,
+        0
+      ],
+      "expected_targets": [
+        14,
+        10
+      ],
+      "purpose": "same global linear role/group/value sums but different group pairings"
+    }
+  },
+  "candidates": [
+    "global_sum",
+    "pyg_deep_sets"
+  ]
+}

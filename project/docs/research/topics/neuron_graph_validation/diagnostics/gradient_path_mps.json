@@ -1,0 +1,150 @@
+{
+  "device": "mps",
+  "git_commit": "4247105df556b121816a2f657af5d3927e69f908",
+  "source_sha256": {
+    "project/scripts/experiments/training/neurons/diagnostics/diagnose_graph_gradient_paths.py": "a466d0e20e16401ff91f0b5b1f30c0a9f0a2ff53255766d447b3c0f72334e11e",
+    "project/configs/models_training/learning/neuron_comparisons/topology_evolution/modelized_neuron_training_baseline.json": "f78b727969556d86ad839670734574a11d482bea74c5d5f7b4001434bf170f79",
+    "src/newera/neuron/composition.py": "753d6f63fe4f7876c9fbbdf46e126bb520691d09d6547c64bacb8bf6e04e1a4c",
+    "src/newera/neuron/graph/policy.py": "049c56f8621955220b021ab52cc969aa770b90b59c38c5a0848686b995ed6134",
+    "src/newera/neuron/graph/layer.py": "00bd1aa393515a28ecc4ab8b24efd4fdb765717dcbdc7fce3a102bc08d5db2c5"
+  },
+  "data": {
+    "task": "single_link_retrieval",
+    "seed": 91001,
+    "samples": 4,
+    "diagnostic_sample_index": 0
+  },
+  "target": -0.5442367196083069,
+  "comparisons": {
+    "single_neuron": {
+      "loss": 0.4485439658164978,
+      "prediction": 0.125497505068779,
+      "gradient_coverage": {
+        "model": {
+          "parameters": 12,
+          "connected": 10,
+          "finite": 10,
+          "nonzero": 9,
+          "l2_norm": 4.867543913424015
+        }
+      }
+    },
+    "fixed_oracle_route": {
+      "loss": 0.24083657562732697,
+      "prediction": -0.053485676646232605,
+      "oracle_edge_count": 1,
+      "gradient_coverage": {
+        "model": {
+          "parameters": 12,
+          "connected": 12,
+          "finite": 12,
+          "nonzero": 10,
+          "l2_norm": 3.4385614674538374
+        }
+      }
+    },
+    "soft_candidate_route": {
+      "loss": 0.6119729280471802,
+      "prediction": 0.23805031180381775,
+      "action_counts_keep_connect_type0_connect_type1_remove": [
+        0,
+        0,
+        4,
+        0
+      ],
+      "gradient_coverage": {
+        "shared_neuron": {
+          "parameters": 10,
+          "connected": 10,
+          "finite": 10,
+          "nonzero": 10,
+          "l2_norm": 4.418386310338974
+        },
+        "policy": {
+          "parameters": 8,
+          "connected": 8,
+          "finite": 8,
+          "nonzero": 8,
+          "l2_norm": 0.03254157677292824
+        },
+        "readout": {
+          "parameters": 2,
+          "connected": 2,
+          "finite": 2,
+          "nonzero": 2,
+          "l2_norm": 2.6476937532424927
+        }
+      }
+    },
+    "straight_through_hard_forward": {
+      "loss": 0.5585453510284424,
+      "prediction": 0.20312222838401794,
+      "action_counts_keep_connect_type0_connect_type1_remove": [
+        0,
+        0,
+        4,
+        0
+      ],
+      "gradient_coverage": {
+        "shared_neuron": {
+          "parameters": 10,
+          "connected": 10,
+          "finite": 10,
+          "nonzero": 10,
+          "l2_norm": 3.9929644986987114
+        },
+        "policy": {
+          "parameters": 8,
+          "connected": 8,
+          "finite": 8,
+          "nonzero": 8,
+          "l2_norm": 0.05551653273869306
+        },
+        "readout": {
+          "parameters": 2,
+          "connected": 2,
+          "finite": 2,
+          "nonzero": 2,
+          "l2_norm": 2.629702091217041
+        }
+      }
+    },
+    "discrete_hard_inference": {
+      "loss": 0.5498661994934082,
+      "prediction": 0.19729292392730713,
+      "action_counts_keep_connect_type0_connect_type1_remove": [
+        0,
+        0,
+        4,
+        0
+      ],
+      "gradient_coverage": {
+        "shared_neuron": {
+          "parameters": 10,
+          "connected": 10,
+          "finite": 10,
+          "nonzero": 10,
+          "l2_norm": 4.441822491586208
+        },
+        "policy": {
+          "parameters": 8,
+          "connected": 0,
+          "finite": 0,
+          "nonzero": 0,
+          "l2_norm": 0.0
+        },
+        "readout": {
+          "parameters": 2,
+          "connected": 2,
+          "finite": 2,
+          "nonzero": 2,
+          "l2_norm": 2.4904011487960815
+        }
+      },
+      "hard_mutation_count": 0,
+      "hard_mutation_types": []
+    }
+  },
+  "cross_path_prediction_variance": 0.010901167057454586,
+  "scope": "single-step diagnostic only; no model selection or sealed-test use"
+}

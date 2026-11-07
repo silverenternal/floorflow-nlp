@@ -1,0 +1,13 @@
+title = "NewEra secret scanning"
+minVersion = "v8.25.0"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Exact non-secret patterns confirmed in the legacy NLP configuration and import statement"
+regexTarget = "line"
+regexes = [
+  '''^\s*"(?:tokenizer_config_sha256|special_tokens_map_sha256|added_tokens_sha256)"\s*:\s*"[0-9a-f]{64}",?\s*$''',
+  '''^\s*from transformers import AutoTokenizer, T5ForConditionalGeneration\s*$''',
+]

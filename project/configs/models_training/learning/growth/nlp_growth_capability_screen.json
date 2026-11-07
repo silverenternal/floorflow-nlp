@@ -1,0 +1,49 @@
+{
+  "version": "nlp-growth-capability-screen-v1",
+  "status": "awaiting_gpu_authorization",
+  "tier": "P5M",
+  "seeds": [19, 29],
+  "tokenizer": ".data/nlp/tokenizer_v1/tokenizer.json",
+  "corpus_manifest": ".data/nlp/p5m_v2/manifest.json",
+  "train_shards": [
+    ".data/nlp/mixed_v1/corpus_v1/train.jsonl",
+    ".data/nlp/p5m_v2/delta_train.jsonl"
+  ],
+  "validation_shards": [
+    ".data/nlp/mixed_v1/corpus_v1/validation.jsonl",
+    ".data/nlp/p5m_v2/delta_validation.jsonl"
+  ],
+  "benchmark_manifest": "project/configs/evaluation/benchmarks/nlp_benchmark_manifest.json",
+  "executor_contract": "project/configs/other/contracts_runtime/contracts_control_engineering/nlp_executor_contracts.json",
+  "token_budget": 92000000,
+  "target_parameters": 4600000,
+  "parameter_tolerance": 0.02,
+  "context_length": 512,
+  "batch_size": 8,
+  "training_steps": 20000,
+  "inference": {
+    "temperature": 0.0,
+    "samples_per_task": 1,
+    "best_of_n": false,
+    "max_new_tokens": 512
+  },
+  "arms": {
+    "G0": {"intermediate_size": 598},
+    "G1": {"intermediate_size": 577},
+    "G2": {"intermediate_size": 542},
+    "G3": {"intermediate_size": 527},
+    "G4": {"intermediate_size": 514},
+    "G5": {"intermediate_size": 519}
+  },
+  "primary_tracks": [
+    "humaneval_plus",
+    "mbpp_plus",
+    "multipl_e_rust",
+    "multipl_e_cpp",
+    "repository_patch",
+    "linux_diagnostic",
+    "triton_correctness",
+    "language_retention"
+  ],
+  "evidence_boundary": "Preflight and exact execution plan only until GPU authorization and completed paired capability runs exist."
+}

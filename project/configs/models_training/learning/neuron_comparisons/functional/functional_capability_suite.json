@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "suite_id": "synthetic-functional-capability-suite",
+  "status": "specification_frozen",
+  "device_policy": {
+    "required": "mps",
+    "allow_fallback": false
+  },
+  "data": {
+    "provenance": "synthetic-generated-by-newera",
+    "license": "project-license",
+    "generator_revision": "git-commit-recorded-at-run-time",
+    "splits": {
+      "train": {"seed": 23001, "identity_prefix": "train"},
+      "validation": {"seed": 23002, "identity_prefix": "validation"},
+      "sealed_test": {"seed": 23003, "identity_prefix": "sealed-test", "read_only_until_frozen": true},
+      "size_extrapolation_validation": {"seed": 23004, "identity_prefix": "size-extrapolation-validation"}
+    }
+  },
+  "tasks": {
+    "set_sum": {
+      "train_sizes": [4, 16, 64], "held_out_sizes": [256],
+      "train_samples": 4096, "validation_samples": 512, "sealed_test_samples": 512,
+      "target": "sum(values)", "mae_threshold": 0.05, "relative_error_threshold": 0.01,
+      "permutation_max_abs_delta": 0.01
+    },
+    "grouped_binding": {
+      "train_group_counts": [2, 4, 8], "held_out_group_counts": [16],
+      "train_samples": 4096, "validation_samples": 512, "sealed_test_samples": 512,
+      "target": "sum_g(sum(role=0,group=g)*sum(role=1,group=g))",
+      "mae_threshold": 0.05, "relative_error_threshold": 0.01,
+      "permutation_max_abs_delta": 0.01
+    },
+    "interference_recall": {
+      "train_lengths": [8, 16, 32], "held_out_lengths": [64, 128],
+      "train_samples": 4096, "validation_samples": 512, "sealed_test_samples": 512,
+      "target": "last value written to query key",
+      "mae_threshold": 0.05, "exact_recall_accuracy": 0.99,
+      "state_replay_accuracy": 0.99
+    },
+    "conditional_routing": {
+      "candidate_counts": [2, 4, 8], "held_out_candidate_counts": [16],
+      "train_samples": 4096, "validation_samples": 512, "sealed_test_samples": 512,
+      "accuracy_threshold": 0.99,
+      "permutation_equivariance_threshold": 0.99
+    },
+    "rule_composition": {
+      "domain_size": 16, "held_out_rule_combinations": 2,
+      "accuracy_threshold": 0.99, "held_out_accuracy_threshold": 0.95
+    }
+  },
+  "clrs": {
+    "candidate": "BFS",
+    "upstream": "https://github.com/google-deepmind/clrs",
+    "commit": "6d5728b9efadf8648413c8c473929a733caacced",
+    "license": "Apache-2.0",
+    "decision": "defer-adoption-until-three-task-closed-loop",
+    "reason": "official training example uses JAX; PyTorch thin data adapter not yet verified"
+  },
+  "training": {
+    "thresholds_frozen_before_sealed_test": true,
+    "oracle_is_independent_of_model": true,
+    "oracle_or_train_mean_baselines_required": true,
+    "training_hints_enabled": false
+  }
+}

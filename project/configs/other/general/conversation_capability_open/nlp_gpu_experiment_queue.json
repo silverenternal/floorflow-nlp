@@ -1,0 +1,46 @@
+{
+  "version": "nlp-gpu-experiment-queue-v21",
+  "status": "v20_interrupted_by_foreign_gpu_activity",
+  "concurrency": 1,
+  "lock_path": "outputs/.locks/nlp_gpu_training.lock",
+  "training_allowed_now": false,
+  "activation_rule": "Run only after preflight passes and cuda:1 remains exclusively idle; stop NLP if any foreign process enters. Do not interrupt or compete with another project line.",
+  "experiments": [
+    {
+      "task_id": "NLP-068-STRICT-AST-CLOSURE",
+      "work_package_id": "WP-068-B",
+      "experiment_id": "nlp-structure-matched-v20",
+      "config": "project/configs/structured_generation/structure_matched/matched_structure_core_definitions/nlp_structure_matched_core_recovery_definition.json",
+      "status": "externally_interrupted_no_retry_or_checkpoint_reuse",
+      "device": "cuda:1",
+      "seed_set": [
+        151,
+        157,
+        163
+      ],
+      "arms": [
+        "flat",
+        "local_mask",
+        "lexical_mask",
+        "hierarchical"
+      ],
+      "budget": {
+        "max_gpu_hours_total": 18,
+        "max_gpu_hours_per_seed": 6,
+        "max_training_examples": 60000,
+        "max_optimizer_steps": 7500,
+        "max_action_tokens": 13000000,
+        "max_attempts_per_arm_seed": 1,
+        "minimum_free_memory_mib": 24000,
+        "failure_policy": "stop_and_report_without_retry_or_best_of_n"
+      },
+      "training_split": "train",
+      "metrics_split": "validation",
+      "test_content_allowed": false,
+      "validation_selection_allowed": false,
+      "retry_allowed": false,
+      "checkpoint_reuse_allowed": false,
+      "winner_selection_allowed": false
+    }
+  ]
+}

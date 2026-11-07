@@ -1,0 +1,75 @@
+{
+  "schema_version": "newera-neuron-identity-validation-v4",
+  "run_id": "neuron-identity-task-learned-links-v4",
+  "purpose": "Test task-trained, discrete dynamic links among persistent non-token neuron identities; compare parameter and linear-MAC controls and measure MPS training and scaling costs.",
+  "task": {
+    "name": "persistent_keyed_memory_neurons",
+    "memory_neurons": 8,
+    "identity_rule": "Each memory neuron has a stable key identity 0..7 across examples; one separate readout neuron receives a query key. Node identities are not token positions.",
+    "tasks": [
+      "single_link_retrieval",
+      "two_link_composition"
+    ],
+    "training_examples": 512,
+    "validation_examples": 128,
+    "test_examples": 128,
+    "data": "Independent random values and queries; targets are values at the queried stable key, or the sum at the queried key and its cyclic successor. No edge labels are provided to training."
+  },
+  "model": {
+    "hidden_size": 32,
+    "candidate_set": "all memory-neuron to readout-neuron links",
+    "initial_topology": "empty",
+    "policy_initial_action_bias": 0.0
+  },
+  "training": {
+    "seeds": [
+      11,
+      23,
+      37,
+      41,
+      53,
+      67
+    ],
+    "steps": 1000,
+    "batch_size": 32,
+    "optimizer": "AdamW",
+    "learning_rate": 0.004,
+    "device": "mps",
+    "threads": 1
+  },
+  "controls": {
+    "parameter_matched": "flat MLP with nearest integer hidden width to graph model parameter count",
+    "compute_matched": "flat MLP with nearest integer hidden width to graph model per-example linear MAC count",
+    "linear_mac_contract": "Counts Linear output elements times input width for batch size one. Excludes scatter/reduction, nonlinearities, optimizer, memory traffic and dispatch; report actual ratio and do not describe this as total FLOPs."
+  },
+  "decision_rules": {
+    "hard_link_threshold": 0.5,
+    "parameter_and_mac_match_tolerance": 0.05,
+    "minimum_edge_precision_and_recall": 0.8,
+    "minimum_query_conditioned_link_change_rate": 0.75,
+    "quality_effect": "A task quality gain is supported only when graph test MSE improves over both controls by at least 20% in relative terms and the paired-seed 95% confidence interval of the relative delta excludes zero in the favorable direction.",
+    "interpretation": "Failure to meet a threshold is an honest negative or inconclusive result; thresholds are evaluation rules, not training objectives.",
+    "minimum_relative_mse_improvement": 0.2
+  },
+  "memory_sampling_interval_microseconds": 2000,
+  "scaling": {
+    "node_counts": [
+      8,
+      16,
+      32,
+      64,
+      128
+    ],
+    "candidate_set": "all directed non-self node pairs",
+    "warmup_calls": 3,
+    "measured_calls": 11
+  },
+  "limitations": [
+    "Two synthetic keyed-memory tasks do not establish broad neuron capabilities or natural-language benefit.",
+    "Stable identities are exercised across examples; remap_node_ids supports in-experiment reorder, addition and deletion while preserving surviving links. Saving identity registries across independent training runs remains caller-owned.",
+    "The policy is trained end-to-end through differentiable expected edge weights, then evaluated as discrete mutations at the fixed threshold.",
+    "The MLP controls match parameter count or a linear-MAC proxy separately; neither match captures scatter, nonlinear, optimizer or memory costs.",
+    "MPS and host memory are sampled every 2 ms and may miss shorter peaks; allocator counters are not exact per-model peak memory.",
+    "The scale sweep is a synthetic microbenchmark, not a production throughput guarantee."
+  ]
+}

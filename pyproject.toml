@@ -1,8 +1,8 @@
 [project]
-name = "floorflow-nlp"
+name = "newera"
 version = "0.1.0"
-description = "Structured NLP, code AST generation, and evaluation research from FloorFlow"
-readme = "README.md"
+description = "Structured NLP and code-generation research"
+readme = "project/README.md"
 requires-python = ">=3.11"
 dependencies = [
     "numpy>=1.26",
@@ -11,7 +11,11 @@ dependencies = [
     "tree-sitter-python==0.25.0",
     "tree-sitter-rust==0.24.2",
     "tree-sitter-cpp==0.23.4",
+    "torch-geometric>=2.8,<3",
 ]
+
+[project.scripts]
+newera-gate = "newera.gates.__main__:main"
 
 [project.optional-dependencies]
 pretrained = [
@@ -19,6 +23,7 @@ pretrained = [
     "tokenizers>=0.22",
 ]
 dev = [
+    "psutil>=7.0",
     "pytest>=8.0",
     "ruff>=0.11",
 ]
@@ -29,13 +34,17 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["floorflow*"]
+include = ["newera*"]
 namespaces = false
 
 [tool.pytest.ini_options]
-pythonpath = ["src", "scripts"]
-testpaths = ["tests"]
+pythonpath = ["src"]
+testpaths = ["project/tests"]
 
 [tool.ruff]
 line-length = 120
 target-version = "py311"
+
+[tool.uv]
+environments = ["sys_platform == 'darwin' and platform_machine == 'arm64'"]
+required-environments = ["sys_platform == 'darwin' and platform_machine == 'arm64'"]

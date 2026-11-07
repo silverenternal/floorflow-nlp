@@ -1,0 +1,139 @@
+{
+  "version": "nlp-cross-domain-v1",
+  "status": "planning_contract",
+  "objective": "Cross-domain validation of typed hierarchical token-state flow on natural-language modeling.",
+  "scientific_question": "Under a matched backbone, tokenizer, dataset, parameter budget, training exposure, and inference budget, does typed hierarchical token-state flow improve constrained language generation without material NLL regression?",
+  "budget_contract": {
+    "plan": "project/configs/data/corpus/nlp_corpus_plan.json",
+    "total_corpus_tokens_per_parameter": 20,
+    "provisional_tier": "pilot",
+    "primary_claim_parameter_cap": 23000000,
+    "absolute_experiment_parameter_cap": 46000000,
+    "net_parameter_growth_allowed": false,
+    "parameter_scope": "unique trainable parameters including embeddings, output projection, typed adapters, hierarchy heads, and decoder heads"
+  },
+  "inference_contract": {
+    "required_inputs": [
+      "prompt_or_context",
+      "explicit_constraints",
+      "tokenizer_id"
+    ],
+    "forbidden_inputs": [
+      "target_texts",
+      "reference_labels",
+      "oracle_plan",
+      "test_metrics"
+    ],
+    "target_free": true
+  },
+  "arms": {
+    "control": {
+      "architecture": "compact_decoder_with_invariant_global_state",
+      "backbone": "compact_hierarchical_decoder_core",
+      "tokenizer": "nlp_bpe_train_only_v1",
+      "dataset_manifest": ".data/nlp/tinystories_small_v1/manifest.json",
+      "training_exposures": 40000000,
+      "micro_batch_size": 8,
+      "optimizer": "adamw_lr_1e-4_wd_0.01",
+      "sampling_budget": "max_1024_generated_tokens"
+    },
+    "candidate": {
+      "architecture": "compact_decoder_with_typed_hierarchy_and_module_factory",
+      "backbone": "compact_hierarchical_decoder_core",
+      "tokenizer": "nlp_bpe_train_only_v1",
+      "dataset_manifest": ".data/nlp/tinystories_small_v1/manifest.json",
+      "training_exposures": 40000000,
+      "micro_batch_size": 8,
+      "optimizer": "adamw_lr_1e-4_wd_0.01",
+      "sampling_budget": "max_1024_generated_tokens"
+    },
+    "shared_fields": [
+      "backbone",
+      "tokenizer",
+      "dataset_manifest",
+      "training_exposures",
+      "micro_batch_size",
+      "optimizer",
+      "sampling_budget"
+    ]
+  },
+  "hierarchy": [
+    {
+      "id": "L0",
+      "name": "document_plan",
+      "role": "global topic, intent, length, and required entities",
+      "max_state_tokens": 16
+    },
+    {
+      "id": "L1",
+      "name": "segment_structure",
+      "role": "paragraph, section, clause, and discourse roles",
+      "max_state_tokens": 128
+    },
+    {
+      "id": "L2",
+      "name": "token_span_surface",
+      "role": "surface token and span flow state",
+      "max_state_tokens": 1024
+    },
+    {
+      "id": "L3",
+      "name": "symbol_execution_engineering_anchors",
+      "role": "symbols, API relations, tests, build/runtime feedback, and engineering constraints",
+      "max_state_tokens": 256
+    }
+  ],
+  "typed_channels": [
+    "syntax",
+    "symbol",
+    "discourse",
+    "execution",
+    "engineering"
+  ],
+  "stage_sequence": [
+    "NLP-PHASE-CONTRACT",
+    "NLP-PHASE-INFRA",
+    "NLP-PHASE-DATA",
+    "NLP-PHASE-BENCHMARK",
+    "NLP-PHASE-MODEL",
+    "NLP-PHASE-SCREEN",
+    "NLP-PHASE-SPECIALIZE",
+    "NLP-PHASE-EVALUATE",
+    "NLP-PHASE-CERTIFY"
+  ],
+  "required_task_metrics": [
+    "held_out_token_nll",
+    "perplexity",
+    "constraint_success",
+    "grammar_validity",
+    "segment_boundary_f1",
+    "unique_ngram_ratio",
+    "heldout_coverage",
+    "decoder_nfe",
+    "tokens_per_second"
+  ],
+  "promotion_gates": {
+    "G0_LEAKAGE": "No target text, reference label, oracle plan, or test metric is available at inference or selection.",
+    "G1_MATCHING": "Shared backbone, tokenizer, data, exposures, optimizer, and sampling budget are hash- or value-identical.",
+    "G1B_CORPUS_BUDGET": "Unique trainable parameters equal total corpus tokens divided by 20 within 2%.",
+    "G2_PARAMETERS": "candidate_params / control_params <= 1.05",
+    "G3_LANGUAGE": "relative held-out NLL regression <= 0.01",
+    "G4_TASK": "constraint_success or another preregistered task metric improves by at least 0.05 with a paired 95% bootstrap interval excluding zero",
+    "G5_COST": "candidate decoder work <= 1.10x control at the primary endpoint",
+    "G6_REPLICATION": "the direction persists on at least two validation seeds and a frozen unseen suite"
+  },
+  "forbidden_claims": [
+    "general-purpose LLM SOTA",
+    "superiority over untuned public chat models",
+    "test-selected result presented as validation-selected",
+    "constraint validity obtained only through hidden retries",
+    "any transfer claim without the matched control",
+    "GPT-class parameter/data scaling as the main contribution",
+    "absolute SOTA against models outside the declared low-capability class"
+  ],
+  "engineering": {
+    "source_root": "src/newera/nlp_flow",
+    "first_party_python_max_lines": 599,
+    "evidence_boundary": "This config establishes a plan and contract only; it contains no language-quality evidence."
+  }
+}

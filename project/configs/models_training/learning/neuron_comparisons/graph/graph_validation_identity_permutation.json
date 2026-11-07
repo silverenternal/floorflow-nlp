@@ -1,0 +1,80 @@
+{
+  "schema_version": "newera-neuron-identity-evolution-v5",
+  "run_id": "neuron-identity-permutation-evolution-v5",
+  "purpose": "Test stable-identity routing under arbitrary slot permutations and variable pool sizes, while learning add/remove/retype/strength topology changes from task loss.",
+  "task": {
+    "name": "permuted_keyed_memory",
+    "key_space": 16,
+    "training_memory_neurons": 8,
+    "evaluation_memory_neurons": [
+      4,
+      8,
+      12,
+      16
+    ],
+    "tasks": [
+      "single_link_retrieval",
+      "two_link_composition"
+    ],
+    "training_examples": 512,
+    "validation_examples": 128,
+    "test_examples": 128,
+    "slot_permutation": "Each example independently places valid stable identities in random slots among padded positions; the readout slot also varies.",
+    "initial_topology": "Two persistent edges per sample: one query edge with a randomized relation type and strength, plus one distractor edge. No edge/action labels are supplied to the task optimizer.",
+    "targets": "Single-link task routes 0.60 times the queried value. Two-link task routes 0.60 times the queried value plus 0.35 times its cyclic successor. Correct topology requires add, remove, retype, and strength update actions across examples."
+  },
+  "model": {
+    "hidden_size": 32,
+    "edge_types": 2,
+    "policy_initial_keep_bias": 0.0,
+    "predict_edge_strengths": true,
+    "hard_link_threshold": 0.5,
+    "strength_update_threshold": 0.05,
+    "candidate_set": "all valid memory-identity to readout-identity links"
+  },
+  "training": {
+    "seeds": [
+      11,
+      23,
+      37,
+      41,
+      53,
+      67
+    ],
+    "steps": 800,
+    "batch_size": 24,
+    "optimizer": "AdamW",
+    "learning_rate": 0.004,
+    "device": "mps",
+    "threads": 1,
+    "topology_gradient": "straight-through hard-action forward with softmax task-loss gradient; no edge/action labels"
+  },
+  "controls": {
+    "parameter_matched": "stable-identity-canonicalized flat MLP with nearest integer hidden width to graph model parameter count",
+    "linear_mac_matched": "stable-identity-canonicalized flat MLP with nearest integer hidden width to graph model per-example linear MAC count",
+    "linear_mac_contract": "Counts Linear output elements times input width for batch size one; scatter, reductions, pointwise ops, optimizer and memory traffic are excluded. Wall time is separately measured.",
+    "identity_canonicalization": "Scatter valid neurons into stable identity-indexed slots; padding contributes zeros, so comparisons do not penalize controls for arbitrary slot permutations."
+  },
+  "decision_rules": {
+    "minimum_edge_f1": 0.8,
+    "minimum_operation_recall": 0.75,
+    "maximum_strength_mae": 0.2,
+    "maximum_permutation_relative_mse_drift": 0.02,
+    "minimum_permutation_identity_edge_jaccard": 0.95,
+    "minimum_relative_mse_improvement": 0.2,
+    "quality_ci": "Paired per-seed relative MSE delta; 95% two-sided t interval upper bound must be below zero.",
+    "interpretation": "Thresholds are fixed before the run; unmet results stay unmet and are not tuned after observing test data."
+  },
+  "memory_sampling_interval_microseconds": 2000,
+  "scaling": {
+    "warmup_calls": 3,
+    "measured_calls": 11
+  },
+  "limitations": [
+    "Synthetic retrieval/composition tasks do not establish natural-language or broad capability claims.",
+    "The stable identity registry is caller-owned; this experiment varies node slots and uses remap_node_ids tests, but does not serialize registries across process restarts.",
+    "Linear MAC is a transparent proxy rather than total FLOPs; empirical MPS step time is the end-to-end cost measure.",
+    "MPS and host memory use 2 ms sampling and can miss shorter peaks.",
+    "Pool-size generalization is tested only over 4 to 16 memory neurons in this run."
+  ]
+}

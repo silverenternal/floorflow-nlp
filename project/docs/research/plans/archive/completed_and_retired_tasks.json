@@ -1,0 +1,635 @@
+{
+  "schema_version": "newera-roadmap-history-v1",
+  "archived_at": "2026-11-07",
+  "purpose": "Completed or retired tasks are kept here for traceability; this file is not an active work queue.",
+  "completed_tasks": [
+    {
+      "id": "NE-001",
+      "stage": "foundation",
+      "priority": "P0",
+      "status": "done",
+      "depends_on": [],
+      "title": "建立本地开发与测试基线",
+      "actions": [
+        "确认 Python、PyTorch 和依赖版本；记录环境与现有测试结果。",
+        "区分代码失败、缺少外部数据和未执行项目；修复阻碍最小闭环的直接问题。"
+      ],
+      "acceptance": [
+        "可在 CPU 执行现有神经元候选的前向/反向 smoke 和聚焦测试；新协议测试在 NE-003 随接口实现。",
+        "记录命令、环境、结果与未覆盖项；不得把缺数据的检查记为通过。"
+      ],
+      "evidence": "project/docs/research/environment_baseline.md；当前全量测试 551 passed / 21 个旧产物相关用例明确 skipped；CPU 前反向 smoke、MPS 可用性和依赖环境均有记录。"
+    },
+    {
+      "id": "NE-002",
+      "stage": "foundation",
+      "priority": "P0",
+      "status": "done",
+      "depends_on": [],
+      "title": "盘点并划定神经元核心与既有实现",
+      "actions": [
+        "检查现有 neuron_module、competence、expert_factory 和训练流程的职责与依赖。",
+        "给出最小垂直切片、复用或替换决策及与旧实验代码的边界。"
+      ],
+      "acceptance": [
+        "明确哪些功能可以直接复用、哪些仅作为对照以及哪些不纳入首个切片。",
+        "确定候选代码位置且遵循目录约束；不为旧内部 API 创建兼容层。"
+      ],
+      "evidence": "project/docs/research/plans/neuron/neuron_framework_boundary.md；首个切片放在 src/newera/neuron/，采用小型控制实现与现有 NeuronModule 候选对照。"
+    },
+    {
+      "id": "NE-003",
+      "stage": "foundation",
+      "priority": "P0",
+      "status": "done",
+      "depends_on": [
+        "NE-002"
+      ],
+      "title": "定义最小神经元行为契约",
+      "actions": [
+        "以 trait 风格定义最小行为、输入输出及必要的状态传递语义，保持能力实现与核心契约解耦。",
+        "说明可训练参数、状态初始化/重置和错误边界；把可选行为拆开，不把候选内部机制强塞进公共接口。"
+      ],
+      "acceptance": [
+        "至少两个不同实现可由同一调用方使用且无需依赖具体类。",
+        "契约对无状态实现与有状态实现的处理明确，并有必要的契约测试。"
+      ],
+      "evidence": "src/newera/neuron/behavior.py：泛型 Protocol 与 NeuronResult；project/tests/models_training/contract_scopes_stage/neuron/test_neuron_behavior.py：无状态/有状态结构化替换、caller-owned reset 与 autograd 测试（3 passed）。"
+    },
+    {
+      "id": "NE-004",
+      "stage": "foundation",
+      "priority": "P0",
+      "status": "done",
+      "depends_on": [
+        "NE-001",
+        "NE-003"
+      ],
+      "title": "构建可运行的简单对照单元",
+      "actions": [
+        "实现标量神经元或小型 MLP 作为最小基线，提供可重复初始化和训练示例。"
+      ],
+      "acceptance": [
+        "CPU 前向、反向与参数更新可运行，输出与状态满足契约。",
+        "记录参数量、训练及推理计算和最小示例结果，不将其宣称为先进模型。"
+      ],
+      "evidence": "src/newera/neuron/cells/baselines.py：MLPNeuron；project/tests/models_training/contract_scopes_stage/neuron/test_neuron_baseline.py（3 passed）；project/docs/research/plans/neuron/neuron_baseline.md：CPU 合成训练记录、65 参数、48 前向 MAC/样本、80 步 MSE 2.05217 → 0.006378。"
+    },
+    {
+      "id": "NE-005",
+      "stage": "neuron",
+      "priority": "P0",
+      "status": "done",
+      "depends_on": [
+        "NE-003",
+        "NE-004"
+      ],
+      "title": "实现首个神经元子模型候选",
+      "actions": [
+        "选择一个最小可替换候选，说明局部计算与可选状态的假设。",
+        "实现初始化、前向、学习所需参数以及适用的状态重置；其余机制保持可选。"
+      ],
+      "acceptance": [
+        "候选与基线可通过同一调用方运行，CPU 梯度和数值行为经测试。",
+        "记录参数、内存、延迟和已知限制；结果不得声称验证全能性。"
+      ],
+      "evidence": "src/newera/neuron/cells/candidates.py：StatefulMLPNeuron；CPU 候选/基线共用调用测试、状态重置和梯度测试通过；project/docs/research/plans/neuron/neuron_framework_boundary.md 记录 482 参数、约 424 MAC/步及限制。"
+    },
+    {
+      "id": "NE-006",
+      "stage": "neuron",
+      "priority": "P1",
+      "status": "done",
+      "depends_on": [
+        "NE-005"
+      ],
+      "title": "验证单元组合及状态隔离",
+      "actions": [
+        "实现最小串联或并联组合；明确批次、序列、设备及状态生命周期。",
+        "验证不同样本与运行之间不存在意外状态串扰。"
+      ],
+      "acceptance": [
+        "多单元组合可前向、反向并重置；有状态与无状态行为均按其契约正确运行。",
+        "记录组合的参数和计算成本，识别内部复杂度转移。"
+      ],
+      "evidence": "src/newera/neuron/composition.py：SequentialNeuron；混合状态、批次/单样本等价、整体重置、状态 bundle 校验与梯度测试通过；project/docs/research/plans/neuron/neuron_framework_boundary.md 记录成本代理。"
+    },
+    {
+      "id": "NE-007",
+      "stage": "neuron",
+      "priority": "P1",
+      "status": "done",
+      "depends_on": [
+        "NE-005"
+      ],
+      "title": "构建最小训练与恢复闭环",
+      "actions": [
+        "使用可控合成任务执行数据生成、训练、验证、保存和恢复。",
+        "固定每次正式实验的配置、随机种子与预算，保留失败记录。"
+      ],
+      "acceptance": [
+        "对一个小任务完成 CPU 训练；中断恢复正确恢复适用状态并与连续运行在声明容差内比较。",
+        "明确哪些记录可自动验证、哪些尚为告警；保留已有专用训练门禁。"
+      ],
+      "evidence": "project/scripts/experiments/training/neurons/capabilities/run_neuron_smoke.py；project/tests/models_training/contract_scopes_stage/neuron/test_neuron_baseline.py 对比 80 步连续训练与 35+45 步恢复，最终模型 SHA-256 和训练/验证指标一致。"
+    },
+    {
+      "id": "NE-008",
+      "stage": "capabilities",
+      "priority": "P1",
+      "status": "done",
+      "depends_on": [
+        "NE-003",
+        "NE-006"
+      ],
+      "title": "定义能力实现与任务适配边界",
+      "actions": [
+        "以 trait/Protocol 风格定义最小能力接口和适配点，隔离任务输入输出与神经元内部实现。",
+        "明确组合模型、训练器与任务适配器的职责和依赖方向。"
+      ],
+      "acceptance": [
+        "能力调用方不依赖具体神经元子类；不相关能力无需实现彼此的方法。",
+        "提供可替换的示例及错误/状态契约测试。"
+      ],
+      "evidence": "src/newera/capabilities/contracts.py：Capability 与 TaskAdapter 泛型 Protocol；同一调用方替换两个能力的测试、真实 MLP regression adapter 测试通过。"
+    },
+    {
+      "id": "NE-009",
+      "stage": "capabilities",
+      "priority": "P1",
+      "status": "done",
+      "depends_on": [
+        "NE-007",
+        "NE-008"
+      ],
+      "title": "完成首个具体验证能力",
+      "actions": [
+        "选择一个小型、可重复且无需私有数据的任务，实现具体能力适配器和评估。"
+      ],
+      "acceptance": [
+        "从输入、训练/推理到结果评估形成端到端 CPU 闭环。",
+        "验证集选择与测试隔离清楚，记录基线和失败案例。"
+      ],
+      "evidence": "project/scripts/experiments/training/neurons/capabilities/run_regression_capability.py 与 project/docs/research/plans/neuron/neuron_baseline.md；CPU 训练/独立验证；聚焦测试自动运行 CLI。"
+    },
+    {
+      "id": "NE-010",
+      "stage": "capabilities",
+      "priority": "P1",
+      "status": "done",
+      "depends_on": [
+        "NE-009"
+      ],
+      "title": "验证第二种能力与实现替换",
+      "actions": [
+        "为不同类型的小任务实现第二种能力；在不修改调用方的情况下切换神经元基线和候选。"
+      ],
+      "acceptance": [
+        "两个能力实现共享最小行为契约，但任务逻辑相互独立。",
+        "明确哪些泛化是实际测量结果、哪些仍是研究假设。"
+      ],
+      "evidence": "SequenceSumCapability / SequenceTaskAdapter；用同一 Capability Protocol 替换回归与序列求和能力；CPU 序列闭环与指标见 project/docs/research/plans/neuron/neuron_baseline.md。"
+    },
+    {
+      "id": "NE-011",
+      "stage": "evidence",
+      "priority": "P1",
+      "status": "done",
+      "depends_on": [
+        "NE-004",
+        "NE-005",
+        "NE-010"
+      ],
+      "title": "开展预算对齐的正式对照与消融",
+      "actions": [
+        "预先定义数据划分、指标、种子及停止条件，对照标量/小型 MLP 与候选。",
+        "分别比较参数、训练计算、数据量和推理成本；对可选机制做消融。"
+      ],
+      "acceptance": [
+        "报告所有运行、误差、成本及失败；不能同时对齐的预算分别披露。",
+        "给出不成立或无优势时的结论，不以最好一次结果替代整体。"
+      ],
+      "evidence": "project/configs/models_training/learning/neuron_comparisons/capabilities/sequence_sum.json；project/docs/research/topics/neuron_budget_comparison/neuron_budget_comparison.json（5 seeds × 4 models）；project/docs/research/topics/neuron_budget_comparison/neuron_budget_comparison.md 汇总、预算差异和限制。stateful 候选相对参数匹配 MLP 没有明显效益，计算更贵。"
+    },
+    {
+      "id": "NE-013",
+      "stage": "evidence",
+      "priority": "P2",
+      "status": "done",
+      "depends_on": [
+        "NE-011"
+      ],
+      "title": "决定是否接入现有 NLP 与结构化生成能力",
+      "actions": [
+        "根据对照结果选择现有能力作为适配器或维持独立实验；评估迁移与运行成本。"
+      ],
+      "acceptance": [
+        "接入不改变核心神经元行为契约，现有专用安全与评估门禁不被绕过。",
+        "明确依赖和未验证部分，不将旧实验结果自动归因于新机制。"
+      ],
+      "evidence": "决策：当前不迁入旧 NLP/结构化生成实现；独立神经元候选在最小序列求和任务上未显示相对 MLP 的明确收益。见 project/docs/research/topics/neuron_budget_comparison/neuron_budget_comparison.md。"
+    },
+    {
+      "id": "NE-015",
+      "stage": "neuron",
+      "priority": "P1",
+      "status": "done",
+      "depends_on": [
+        "NE-003",
+        "NE-006",
+        "NE-011"
+      ],
+      "title": "实现可变度稀疏神经元图并接入 NLP 主模型",
+      "actions": [
+        "以嵌入作为输入适配器，在 Transformer 解码块前运行共享神经元图层，并保持主模型既有参数预算。",
+        "用稀疏边表表达任意可变入度和出度；独立配置候选搜索预算与全图硬边预算，不设单神经元连接上限。",
+        "训练时使用可微期望边类型权重；调用边界显式执行硬拓扑修改，并支持等长序列增量追加拓扑。",
+        "让图与解码层共同遵守 padding/packed segment 边界，定义加权消息聚合，并验证 MPS 确定性路径。"
+      ],
+      "acceptance": [
+        "图、注意力、候选生成和 next-token loss 均排除 padding、跨 segment、跨 batch 与未来信息；负 segment ID 一律无效。",
+        "打包训练数据实际生成 segment_ids；batch_loss 只监督同 segment 的有效相邻 token。",
+        "主任务 token loss 可对策略参数产生非零梯度；可选监督动作损失接入 batch_loss。",
+        "策略评估集合始终包含已有有效边；预算约束实际候选生成，offset 分段扫描不回绕；已存边和单节点连接度不受候选预算截断。",
+        "任何硬拓扑更新都要求有限整图边预算；静态图仍可不设置预算；非法跨 segment/padding 更新被拒绝。",
+        "重复的静态拓扑边和自定义候选边被拒绝；加权归约中零权边无影响；增量追加正确重映射多 batch 边索引。",
+        "MPS 普通与 deterministic 前后向有实际设备测试；文档列明两种路径的成本与边界。"
+      ],
+      "evidence": "DynamicNeuronGraphLayer/NeuronGraphTopology/TopologyController/LinkProposalPolicy；训练打包器生成 segment_ids（padding 为 -1），batch_loss 屏蔽跨段和 padding next-token 目标，PackedTokenDataset 多 worker 下共享 max_sequences 总上限；候选按 segment 三角索引直接采样或 offset 切片，分段扫描不回绕，旧边始终进入评分；重复边、负 segment 和跨 segment/padding 硬更新均有拒绝测试；硬拓扑修改要求有限 neuron_graph_max_edges。测试覆盖候选预算、短 segment 填充、offset 完整遍历、MPS 带 segment 候选生成、数据多 worker 配额、20 入度、增删改、全图预算、样本隔离、非零梯度、增量 batch 重映射及 MPS 普通/deterministic 完整模型前后向。uv run --no-sync pytest -q：573 passed / 21 skipped；相关 Ruff 检查和 newera-gate --stage explore 均通过。未验证内容：候选策略是否提高任务质量、生产长序列吞吐，以及 跨任务神经元注册表和 token 位置之外的动态增殖机制。 拓扑新增 stable neuron_node_ids；可复用拓扑要求精确身份匹配，PackedTokenDataset 支持按 namespace 生成 token 身份；硬更新仅 eval 模式允许。"
+    },
+    {
+      "id": "NE-016",
+      "stage": "neuron",
+      "priority": "P1",
+      "status": "done",
+      "depends_on": [
+        "NE-015"
+      ],
+      "title": "固定神经元拓扑身份契约并验证候选图收益与成本",
+      "actions": [
+        "为可复用拓扑绑定稳定节点 ID，拒绝 ID 缺失、重复或与当前节点顺序不符的复用。",
+        "将硬拓扑更新与可微训练候选分成互斥执行模式，并提供可复现实验。",
+        "评估候选预算下的合成任务效果、长序列候选构造成本、分配量和端到端时延。"
+      ],
+      "acceptance": [
+        "数据打包器可按显式 namespace 生成跨 epoch 稳定节点 ID，padding 身份明确。",
+        "复用拓扑必须逐节点 ID 精确匹配；增量追加需为新增节点提供新 ID。",
+        "训练态拒绝硬拓扑修改；eval 态硬更新受有限整图预算控制。",
+        "固定配置、种子、数据摘要和代码摘要；报告任务指标、预算敏感性、候选构造与端到端成本及内存度量的口径。",
+        "负向或不确定结果如实记录，不据探索任务结果宣称自然语言能力提升。"
+      ],
+      "evidence": "稳定拓扑 node_ids 契约：缺失/不匹配/重复 ID 拒绝；追加节点必须新 ID；训练数据可用 node_identity_namespace 编码 namespace/来源行/token 偏移，padding 为 -1；训练态硬更新直接拒绝，eval 硬更新受 neuron_graph_max_edges 限制。设计及原始结果见 project/docs/research/topics/neuron_graph_validation/validations/historical_baseline/design_validation.md 和 historical_baseline/design_validation.json；配置与实现见 project/configs/models_training/learning/neuron_comparisons/graph/graph_validation_modular_recurrence.json 与 project/scripts/experiments/training/neurons/graph/run_neuron_graph_validation.py。固定两种子、80 步、同一 Transformer 初始权重的模加递归任务未显示图模型收益，参数高 44.5%；候选预算 16/64/256 的平均训练耗时约为无图 2.6/3.3/6.2 倍。CPU 512 token 候选搜索中位耗时约 0.032/0.033/0.038 ms，profiler 正算子分配合计约 32.5/54.9/84.7 KB；端到端 batch=8 latency 与口径已记录。uv run --no-sync pytest -q：575 passed / 21 skipped；相关 Ruff、JSON 解析和 newera-gate --stage explore 均通过。结论仅是本机合成任务筛查，不是 NLP 质量或峰值内存结论。"
+    },
+    {
+      "id": "NE-017",
+      "stage": "neuron",
+      "priority": "P1",
+      "status": "done",
+      "depends_on": [
+        "NE-015",
+        "NE-016"
+      ],
+      "title": "建立动态神经元图层质量、结构、梯度与成本指标",
+      "actions": [
+        "将有效秩、加权 Dirichlet energy、结构规模和策略动作统计实现为可复用诊断函数。",
+        "在图层验证实验中加入配对无图质量差、无消息/度数匹配随机图消融、长距离梯度采样、动作稳定率、时延与进程峰值 RSS。",
+        "保留 padding、segment、batch 与因果隔离作为独立正确性门禁；记录开源代码复用审查及指标口径。"
+      ],
+      "acceptance": [
+        "诊断对有向稀疏边表、有效节点和 segment 分组定义明确；预算未配置时不伪报预算利用率。",
+        "度数匹配随机图消融保持目标入度并只从因果前缀采样来源；关闭消息消融与任务评估共享同一个训练后模型。",
+        "有效秩与 Dirichlet energy 作为互补诊断；任务相关梯度传递和策略动作稳定性可复现地输出。",
+        "明确区分进程峰值 RSS、profiler 分配总量与单模型峰值内存；smoke 不冒充质量结论。",
+        "开源仓库源码已克隆审查；不适配的实现记录数据模型/语义原因，不引入无必要依赖或错误移植。"
+      ],
+      "evidence": "指标实现现位于 src/newera/neuron/graph/diagnostics/metrics.py（v2 历史 JSON 保留当时记录的源路径与哈希），提供结构密度/入度分位数、归一化有效秩、加权有向 Dirichlet energy、策略动作分布、要求稳定 node ID 的边集合 Jaccard、任务梯度传递采样；图层运行诊断补充仅统计有效节点的入度分位数与活跃评分边数。验证 runner 加入配对 NLL 差值、关闭图消息/度数匹配随机因果图、训练前后共有候选动作一致率、梯度采样、前向 P95 与进程峰值 RSS。v2 指标契约及结果见 metrics_contract.md、sparse_neuron_run/design_validation.md 和 sparse_neuron_run/design_validation.json。两种子下预算 16/64/256 的 CE 配对差值均值为 +0.084/+0.096/+0.110；所有候选动作均 keep，尚未学出新拓扑；图模型慢于无图基线。克隆审查 GSLB 与 PyG 后确认其 dense adjacency/静态图假设不适配本层，保留 PyTorch 依赖，不复制不匹配代码。完整测试：582 passed / 21 skipped；Ruff、JSON 解析与 newera-gate explore 通过。"
+    },
+    {
+      "id": "NE-018",
+      "stage": "neuron",
+      "priority": "P1",
+      "status": "done",
+      "depends_on": [
+        "NE-017"
+      ],
+      "title": "补齐拓扑匹配消融、按距离梯度、参数匹配和 MPS 内存成本证据",
+      "actions": [
+        "新增保留目标入度、edge type、strength 与 segment 的随机重连；添加可配置比例的边删除消融。",
+        "把长距离梯度采样扩为因果距离分桶，并将有效秩/Dirichlet 诊断扩展到图层输入、图层输出和最终解码表示。",
+        "训练评估增加参数量匹配的无图 FFN 控制和更多随机种子；MPS 上测端到端前向与候选搜索。",
+        "将 host RSS、MPS allocated/driver 快照、参数字节数、profiler 分配与整进程高水位分开记录。",
+        "保留 v1/v2 历史证据，按目录命名规则分组并生成独立 v3 结果。"
+      ],
+      "acceptance": [
+        "重连拓扑保持每目标节点的入度、edge type/strength 统计与有效 segment，并严格满足因果方向；删除消融确定性可复现。",
+        "梯度结果按距离桶报告样本数与范数，不将少量局部梯度样本解释为过挤压证明。",
+        "图模型与参数匹配控制参数总数相同；多个种子的配对差值附样本标准差和逐种子值。",
+        "MPS 不可用时显式失败，不静默切换设备；内存字段明确标注采样/快照/峰值口径。",
+        "有效秩与 raw/scale-normalized Dirichlet 在多表示层记录并声明不设孤立的 pass threshold。",
+        "旧结果路径有效、项目目录最多 5 项，完整测试/格式/工程 gate 均通过。"
+      ],
+      "evidence": "新增 rewire_topology_matched 与 drop_topology_edges，并通过测试验证稳定随机种子、按目标度数和类型/权重保持、segment/因果拒绝；梯度指标输出 1-3/4-7/8-15 等距离桶，表示诊断记录 graph input/output/final decoder 的有效秩和 raw/relative Dirichlet。v3 在六种子、80 步的两个 segment 合成递归任务上运行；FFN widened parameter-matched control 和图模型均为 14,960 参数。训练 CE 配对差值、matched rewire、25%/50% deletion、zero-message、MPS latency/candidate search、按 2ms 采样的 host RSS 与 MPS current/driver allocation 均见 project/docs/research/topics/neuron_graph_validation/validations/identity_metrics_run/design_validation.md 及 design_validation.json。图策略仍全 keep；图未优于 matched control，MPS 图前向约 10.6-10.8ms。psutil 7.2.2 为 dev-only BSD-3-Clause 依赖，用于 Process RSS 采样；MPS current 与 driver allocation 均为 2ms 采样窗口估计，不冒称精确峰值。GSLB/PyG/psutil 源码均已克隆审查，仅复用 psutil 官方 API，不复制第三方代码。完整测试：585 passed / 21 skipped；Ruff、uv lock --check、JSON 解析与 newera-gate explore 通过。"
+    },
+    {
+      "id": "NE-019",
+      "stage": "neuron",
+      "priority": "P0",
+      "status": "done",
+      "depends_on": [
+        "NE-018"
+      ],
+      "title": "验证稳定身份神经元上的任务驱动动态连线与完整成本",
+      "actions": [
+        "建立节点身份独立于 token 位置的固定神经元池实验，并允许同一稳定身份在独立 batch graph 中重复。",
+        "通过任务损失训练连续候选边权，再按预先固定阈值离散化；比较随机等边数拓扑与参数匹配、线性 MAC 匹配控制。",
+        "在两种需要单边/多边路由的合成任务上运行多种子 held-out 测试，记录连线精确率/召回率、查询条件下的拓扑变化、配对置信区间。",
+        "在 MPS 上记录训练时长和采样内存，并测节点/候选边规模增长曲线；区分线性 MAC proxy 与总 FLOPs。",
+        "定义任务质量与结构学习的预注册判定规则，修正 v3 MPS 内存口径文案，并保留完整原始结果。"
+      ],
+      "acceptance": [
+        "无边标签监督时，策略能在 held-out 查询上学到随稳定节点身份变化的离散连接；报告结构指标和负向结果。",
+        "同一身份允许在 batch 中的各 graph 重复出现，但每张 graph 内有效 ID 唯一；未知身份、padding 与 batch 边界仍有正确性门禁。",
+        "参数数与线性 MAC proxy 各自匹配并报告误差；完整 FLOPs 未被代理值冒充，训练耗时作为实测成本单独报告。",
+        "结果包含两个任务、六种子配对统计、MPS 训练成本、采样内存与多规模推理曲线。",
+        "预注册结构/质量规则自动判定；未达到阈值时标记未通过或不确定，不调整规则追逐结果。",
+        "聚焦测试、完整测试、Ruff、JSON、uv lock 和 newera-gate explore 均通过。"
+      ],
+      "evidence": "配置、运行器和原始逐样本结果见 project/configs/models_training/learning/neuron_comparisons/graph/graph_validation_learned_identity_links.json、project/scripts/experiments/training/neurons/graph/run_neuron_identity_validation.py 与 project/docs/research/topics/neuron_graph_validation/validations/learned_identity_run/design_validation.md/json。固定 ID 的 8 个记忆神经元和 readout 神经元不对应 token 位置；两个无边标签监督的任务（单边检索、双边组合）均用 MPS、六种子、1000 步验证。两任务六种子的离散拓扑 edge precision/recall/F1 和查询变化率均为 1.0；相对参数匹配及线性 MAC 匹配控制的测试 MSE 均达到预注册 20% 相对改善与配对 95% t 区间门槛。参数误差 0.048%，线性 MAC proxy 误差 0.082%；线性 MAC 不冒充完整 FLOPs。图模型 MPS 训练约 16.61 秒/1000 步，两个控制约 0.43/0.45 秒；候选规模 56 到 16256 边的时延曲线及 2ms 采样内存见原始结果，采样峰值明确标注可能漏采。新增 NeuronGraphTopology.remap_node_ids：支持跨 batch graph 复用稳定 ID、重排、加节点、删节点并保留幸存连边；因果倒序拒绝；相应单测覆盖。MPS 成本较高、规模测量为合成微基准、身份注册表跨进程持久化仍由调用方负责，不宣称一般神经元或 NLP 能力。完整验证：591 passed / 21 skipped；Ruff、uv lock --check、JSON/hash 检查与 newera-gate --stage explore 均通过。"
+    },
+    {
+      "id": "NE-020",
+      "stage": "neuron",
+      "priority": "P0",
+      "status": "done",
+      "depends_on": [
+        "NE-019"
+      ],
+      "title": "验证稳定身份置换、变量池规模与离散拓扑操作",
+      "actions": [
+        "实现并评估 set_strength 操作与可选连接强度预测，保持拓扑硬更新的边界校验。",
+        "在稳定 ID 与随机槽位布局下验证不同神经元池规模、双任务、多种子与 MPS 成本。",
+        "使用身份规范化的参数/MAC 匹配控制，报告置换一致性、任务质量、连接结构与操作级指标。",
+        "检查软任务损失与离散拓扑策略的错位；尝试不使用边/操作标签的直通硬动作梯度，保留负向结果。"
+      ],
+      "acceptance": [
+        "实验配置预先固定任务、种子、成本口径与结构/质量阈值；控制模型不受随机节点槽位偏差。",
+        "逐种子结果记录变量池、置换漂移、身份边一致性、add/remove/retype/strength 指标、MPS 时延和采样内存。",
+        "结构阈值未达成时明确标记未通过，不以任务 MSE 替代结构学习证据；用全新测试集确认后续训练策略。",
+        "完整测试、Ruff、lock、JSON 与 explore gate 通过。"
+      ],
+      "evidence": "实现及实验配置：project/scripts/experiments/training/neurons/graph/run_neuron_identity_evolution.py、project/configs/models_training/learning/neuron_comparisons/graph/graph_validation_identity_permutation.json；结果见 project/docs/research/topics/neuron_graph_validation/validations/archive/legacy_runs/permutation_evolution_run/design_validation.md。软训练改善合成任务 MSE，但 edge F1 0.341/0.250，remove/retype/add 操作召回不足；straight-through 硬动作降低任务质量，结构阈值仍未通过。两轮复用同种子测试样本，结论为探索性；已新增 NE-021 处理软目标/离散拓扑错位并用新种子测试。全量验证：595 passed / 21 skipped；Ruff、uv lock --check、JSON 与 newera-gate --stage explore 通过。"
+    },
+    {
+      "id": "NE-030",
+      "stage": "engineering",
+      "priority": "P0",
+      "status": "done",
+      "depends_on": [],
+      "title": "先建立可信的训练与评估基线",
+      "actions": [
+        "修复有效 batch size 与配置不一致，按有效样本数/优化器步数记录训练预算；明确变拓扑样本采用真实批处理还是显式梯度累积。",
+        "校准空图 Jaccard、无正例 precision/recall、padding/零输入和相对误差分母；添加同一数据切分上的常数/均值、解析 oracle 和简单 MLP/GRU 控制。",
+        "把数据采样、训练、评估和产物保存抽出版本实验脚本供复用，复用 Capability/TaskAdapter 和已有 checkpoint 工具；每阶段报告进度。",
+        "保存一个共享神经元参数集及图级参数、优化器/采样/RNG/独立节点状态；做单批过拟合、梯度连通和中断恢复诊断。"
+      ],
+      "steps": [
+        {
+          "id": "NE-030.1",
+          "status": "done",
+          "work": "修复有效 batch size 与配置不一致，按有效样本数/优化器步数记录训练预算；明确变拓扑样本采用真实批处理还是显式梯度累积。",
+          "output": "现有 v9 runner 的训练采样/预算修正；results 中 requested_batch_size、effective_batch_size、seen_examples。",
+          "done_when": "配置与实际消费样本一致；若模型仅支持单图调用，梯度累积等价性有小例子验证；不宣称跨图 batch 已向量化。"
+        },
+        {
+          "id": "NE-030.2",
+          "status": "done",
+          "work": "校准空图 Jaccard、无正例 precision/recall、padding/零输入和相对误差分母；添加同一数据切分上的常数/均值、解析 oracle 和简单 MLP/GRU 控制。",
+          "output": "现有指标修正、控制预测和单个小型基线报告。",
+          "done_when": "两空图可判为排列一致但另计空图塌缩率；无定义指标为 null 并报告分母；oracle 达标；图模型相对同数据上的零/均值控制有可复核比较。"
+        },
+        {
+          "id": "NE-030.3",
+          "status": "done",
+          "work": "把数据采样、训练、评估和产物保存抽出版本实验脚本供复用，复用 Capability/TaskAdapter 和已有 checkpoint 工具；每阶段报告进度。",
+          "output": "src/newera/capabilities/evaluation/ 中最小共用 runner；project/scripts/experiments/training/neurons/ 下薄入口。",
+          "done_when": "同一入口可运行 baseline、训练、验证和指定 checkpoint 评估；配置不含无效字段；任务 adapter 不执行完整答案算法。"
+        },
+        {
+          "id": "NE-030.4",
+          "status": "done",
+          "work": "保存一个共享神经元参数集及图级参数、优化器/采样/RNG/独立节点状态；做单批过拟合、梯度连通和中断恢复诊断。",
+          "output": "每个 run 的模型/恢复状态与精简诊断记录；历史 v9 产物不覆盖。",
+          "done_when": "checkpoint 可继续同一采样序列；恢复容差预先声明；过拟合与梯度失败能定位到组件；失败结果可复现并交给 NE-022。"
+        }
+      ],
+      "acceptance": [
+        "有效样本预算、指标和解析控制可信；CPU/MPS 的设备选择显式且无静默切换。",
+        "每个实验可从已存 checkpoint 复查动作分布和预测，无需为查看诊断重新训练。",
+        "本任务可在模型尚未学会任务时完成；它验收测量正确性，不把失败实验改成通过。"
+      ],
+      "decision_rule": "完整性/指标错误先修；若小样本不能过拟合或不优于常数，暂停大规模架构搜索并执行 NE-022。",
+      "evidence": "实现与记录：src/newera/capabilities/evaluation/{runner.py,checkpoint.py}；project/scripts/experiments/training/neurons/run_modelized_neuron_graph_validation.py；project/configs/models_training/learning/neuron_comparisons/topology_evolution/modelized_neuron_training_baseline.json；project/docs/research/topics/neuron_graph_validation/validations/modelized_neuron_training_baseline/design_validation.md。CPU 与 MPS smoke 各完成两任务训练/验证/测试及 checkpoint 恢复；CPU 独立指定 checkpoint 评估输出预测和动作。梯度累积与完整批次线性模型更新等价；实际 runner 分段恢复与连续训练权重一致；20/20 图模型参数张量在首微批次产生有限非零梯度。六个聚焦测试通过，Ruff 与 newera-gate explore 通过。诊断显示单链预测塌缩为空图，且未优于均值控制；这是可复现失败证据，交由 NE-022，未运行正式六种子确认。"
+    },
+    {
+      "id": "NE-023",
+      "stage": "specification",
+      "priority": "P0",
+      "status": "done",
+      "depends_on": [],
+      "title": "把目标落成最小能力套件与数据契约",
+      "actions": [
+        "固定第一版五个能力族：集合归约、分组非线性绑定、带干扰的时序回忆、条件路由、组合任务；为每族选一个最小任务。",
+        "固定数据生成/来源与划分：样本种子、输入规模、长度、分组模式和规则组合分开留出；核查生成器与独立参考解。",
+        "冻结首轮规模与阈值并接入 NE-030 runner；初始集合大小 4/16/64，外推 256；序列训练长度 8/16/32，外推 64/128。"
+      ],
+      "acceptance": [
+        "首轮产出可执行任务而非只写抽象说明；暂不扩展模态或接入完整生物仿真。",
+        "合成、仿真、真实观测的来源/许可/划分与外推边界单独记录；真实数据不是第一闭环的硬依赖。",
+        "同一任务的生成器、adapter、评分器职责清楚；表示细节允许快速替换。"
+      ],
+      "evidence": "能力矩阵、五族合成任务契约与生成器（含独立 oracle）、固定训练/验证/封存测试 seed 身份、共享 ModelNeuron/NE-030 runner、阈值及 CPU/MPS smoke 已交付。MPS 正式基线每族4096训练样本，验证和规模外推各512样本；四项被测能力均未达目标，结果如实记录，sealed test 未读取。CLRS BFS 采用决策暂缓至后续兼容评估，详见 capability_matrix.md 和 functional_capability_baseline/report.md。",
+      "completed_at": "2026-11-07"
+    },
+    {
+      "id": "NE-029",
+      "stage": "core",
+      "priority": "P0",
+      "status": "done",
+      "depends_on": [
+        "NE-023"
+      ],
+      "title": "筛选开源组件并验证适配可行性",
+      "actions": [
+        "按能力缺口先检查现有 PyTorch/PyG API，再 clone 原作者源码阅读与最小实验；每种机制最多比较两个新增候选。",
+        "对待选聚合组件做 CPU/MPS 前反向与上游等价性检查，覆盖 mask、变长、空输入、重复接触、确定性要求和实际 PyTorch 版本。",
+        "为首选组件只实现薄 adapter；依赖通过 uv.lock 固定，摘取源码保留版权/许可证、commit 与本地修改清单。"
+      ],
+      "acceptance": [
+        "至少一个可直接用于 NE-024 的聚合组件在 CPU/MPS 上通过兼容性检查；候选不等于已通过或已安装。",
+        "标准算子、优化器、checkpoint 和常规指标优先复用成熟实现；仅新接口语义与研究算法写本地代码。",
+        "若所有候选不适合，记录具体不兼容点及最小必要自研范围，不无边界移植大型框架。"
+      ],
+      "evidence": "PyG SetTransformerAggregation 2.8.1（MIT，源码提交 6bc98104b5a3472176a2bec4187a65f9fc429213）经官方源码 clone 检查并通过 uv 锁定；Set Transformer 官方仓库也已核对许可/实现。NewEra 薄 adapter 明确空输入、mask、重复消息和单集合语义，已注册为 ModelNeuron 子模块。CPU/MPS 前反向、排列、mask、空输入、重复接触及权重注册测试 13 项通过；微型耗时/内存结果与上游空输入限制记录于 neuron_capabilities/reuse/component_selection.md。",
+      "completed_at": "2026-11-07"
+    },
+    {
+      "id": "NE-022",
+      "title": "在现有模型上定位并修复未学习与连线塌缩",
+      "stage": "learning",
+      "priority": "P0",
+      "status": "done",
+      "depends_on": [],
+      "inputs": [
+        "src/newera/neuron/composition.py",
+        "src/newera/neuron/graph/policy.py",
+        "project/docs/research/topics/neuron_graph_validation/validations/modelized_neuron_shared_weights/",
+        "project/docs/research/topics/neuron_graph_validation/validations/modelized_neuron_training_baseline/design_validation.md"
+      ],
+      "reuse": [
+        "pytorch",
+        "torchmetrics"
+      ],
+      "steps": [
+        {
+          "id": "NE-022.1",
+          "status": "completed",
+          "work": "在固定小数据上分别验证单个 ModelNeuron、固定 oracle 路由、软候选路由、硬路由四条梯度链，记录预测方差/动作分布/参数梯度。",
+          "output": "一个可复现故障样例及组件诊断报告。",
+          "done_when": "知道问题来自输入表示、模型可学习性、策略信用分配、软硬错位或指标；不把接近零预测当作成功。"
+        },
+        {
+          "id": "NE-022.2",
+          "status": "completed",
+          "work": "固定模型与数据，单因素比较任务损失、结构辅助训练和硬动作校准；从最多两个修复候选中按验证集选一个。",
+          "output": "实现修复及训练/验证消融，记录每项监督是否可用于推理。",
+          "done_when": "小任务能超过同切分常数控制并接近任务容差；有用边在删除/替换干预下产生可测影响，动作不全退化为 remove。"
+        },
+        {
+          "id": "NE-022.3",
+          "status": "completed",
+          "work": "冻结修复后用新封存测试、多种子和多步 hard rollout 确认；将不同问题交接给 NE-024/026。",
+          "output": "新 run 的 checkpoint、任务/结构/成本结果及采用或拒绝结论。",
+          "done_when": "按任务是否结构可辨识决定 exact-edge F1/strength 是否为硬门槛；空图、无定义指标、软硬误差单独报告。"
+        }
+      ],
+      "acceptance": [
+        "模型确实学习目标任务，优于同切分常数基线；参数/MAC 匹配强控制公平消费同样有效样本。",
+        "在结构可辨识任务上报告动作/边精确性；在等价结构可解任务上以干预效用、任务质量和成本评价，不强求任意指定的唯一边权。",
+        "诊断可在原聚合器上完成，不等待 NE-024 改写；若需改表示，以最小反例交接而非继续盲扫超参。"
+      ],
+      "decision_rule": "代码/训练错误必须修复；如果数据不足以识别唯一拓扑，修改测量问题并另做有监督结构 sanity，不能把预设 oracle 当成唯一正确解。",
+      "evidence": "NE-022.1 梯度路径报告及 CPU/MPS JSON 已定位离散 hard policy 无任务梯度；NE-022.2 五条件 500-step 验证消融选择 task-only 软路由，移除稀疏惩罚和 STE。NE-022.3 使用六个新 seed、256/128/128 train/validation/sealed-test、每模型 1200 更新及每 seed 16-step hard rollout 确认：图模型平均测试 MSE 0.0832，较零/训练均值/参数匹配 MLP/MAC 匹配 MLP 改善 32.4%/32.3%/47.3%/42.2%，所有 paired 95% CI 上界低于零，满足任务质量判据。拓扑结构判据仍失败：edge F1 0.337、remove/retype recall 为 0、set-strength recall 0.995；96 次 rollout 平均 step MSE 0.130、edge F1 0.132、identity-edge churn 1.417。结论仅确认任务质量，不宣称硬路由解决；交接到 NE-026。详情见 neuron_graph_validation/diagnostics/route_supervision/report.md 与 confirmation_results.json。"
+    },
+    {
+      "id": "NE-025",
+      "title": "先验证现有状态，再按证据扩展记忆和输出",
+      "stage": "core",
+      "priority": "P0",
+      "status": "done",
+      "depends_on": [
+        "NE-023",
+        "NE-030"
+      ],
+      "inputs": [
+        "src/newera/neuron/composition.py",
+        "src/newera/neuron/cells/candidates.py",
+        "src/newera/capabilities/sequence.py"
+      ],
+      "reuse": [
+        "pytorch"
+      ],
+      "steps": [
+        {
+          "id": "NE-025.1",
+          "status": "completed",
+          "work": "用当前 GRUCell 跑延迟回忆、次序识别和干扰恢复；分开训练长度与外推长度，建立真实状态价值对照。",
+          "output": "现有状态单元的能力/容量基线；state-reset 与无状态控制。",
+          "done_when": "随机丢弃状态会按任务要求影响输出；reset、身份重排/增删和 checkpoint 恢复不混入其他实例记忆。"
+        },
+        {
+          "id": "NE-025.2",
+          "status": "completed",
+          "work": "只有已定位容量不足时，优先组合 PyTorch GRU/LSTM 或已兼容的注意力记忆；最多新增两种状态候选。",
+          "output": "一个获验证的记忆改进或保留现有 GRU 的决定；必要时 src/newera/neuron/cells/memory/。",
+          "done_when": "更长跨度/干扰性能增益在等参数或等计算对照中成立；无收益不加多时标/外部记忆；Mamba 等另经 NE-029 兼容性检查。"
+        },
+        {
+          "id": "NE-025.3",
+          "status": "completed",
+          "work": "为同一消息接口支持多通道输出/可见任务上下文，区分任务 decoder 与神经元状态；测试上下文切换与多步组合。",
+          "output": "一份共享神经元 checkpoint 下的连续/分类输出 adapter 与多步样例。",
+          "done_when": "adapter 只编解码；所有可训练头计入参数/预算；没有每身份或每任务复制核心参数，也不引入持久在线快权重。"
+        }
+      ],
+      "acceptance": [
+        "至少一个记忆任务达到预声明容差，并报告 2x/4x 长度外推；失败长度明确记录。",
+        "逐实例状态有稳定身份归属及明确生命周期；状态与共享训练权重分开序列化。",
+        "不等待聚合器重写即可测现有 GRU；临时生理模拟不作为记忆能力的前提。"
+      ],
+      "decision_rule": "现有实现满足任务则结束本轮扩展；长期容量不足须由可复现反例驱动。用户暂缓动态权重，优先改状态和通信。",
+      "evidence": "NE-025 完成共享 ModelNeuron GRU 的延迟回忆/次序识别/覆盖干扰任务及独立 reset、随机丢状态、重放/恢复对照；状态图按稳定 ID 重排/增删测试通过，模型权重与调用方状态分开序列化。6 seed sealed test：训练长度内延迟回忆 MAE 0.0484、顺序准确率 100%，覆盖写入 MAE 0.0712；64/128 外推 MAE/准确率分别为 0.2105、89.9%、0.3478，明确失败。参数匹配 PyTorch LSTMCell 在三任务均更差，决定保留 GRU。三输出 adapter 以一份 25,987 参数 ModelNeuron checkpoint 支持三任务输出解码，且记录单输出/多输出对照；精度收益只在顺序外推明显，连续回忆和覆盖写入略降。报告 `neuron_capabilities/runs/memory_capability/report.md`；六 seed 结果、配置和 shared_model_state.pt 同目录及子目录。"
+    }
+  ],
+  "retired_tasks": [
+    {
+      "task": {
+        "id": "NE-012",
+        "stage": "evidence",
+        "priority": "P2",
+        "status": "planned",
+        "depends_on": [
+          "NE-011"
+        ],
+        "decision": "NE-011 未显示值得继续增加复杂度的收益，暂不做动态增长/持续学习；若后续要研究状态机制，先改为严格因果/流式任务。",
+        "title": "按结果探索适应、增长与持续学习",
+        "actions": [
+          "仅在已有证据支持且资源预算允许时，比较局部适应、状态、多输出或动态生长等候选机制。",
+          "对比固定容量方案，测量遗忘、效率和结构复杂度。"
+        ],
+        "acceptance": [
+          "每个机制有可证伪假设、对照和预算；负面结果同样记录。",
+          "没有证明价值的机制可替换或删除，不作为核心行为强制要求。"
+        ],
+        "evidence": "机制假设、对照与决策记录"
+      },
+      "archive_reason": "通用探索项过于宽泛，适应/记忆/结构演化已拆进当前能力路线。",
+      "replaced_by": [
+        "NE-025",
+        "NE-026",
+        "NE-027"
+      ]
+    },
+    {
+      "task": {
+        "id": "NE-021",
+        "stage": "neuron",
+        "priority": "P0",
+        "status": "deferred",
+        "depends_on": [
+          "NE-020"
+        ],
+        "title": "评估共享图路由代理的离散拓扑行为与工程成本",
+        "actions": [
+          "在训练集训练软候选权重并在最后阶段做直通硬动作微调；只在验证集选择操作置信阈值，不向优化器提供边/操作标签。",
+          "固定策略后使用未参与 v5 迭代的新种子和测试集做一次性确认，报告质量与结构指标及配对区间。",
+          "将神经元池扩大到 64，并逐帧携带拓扑、按稳定身份重映射，在多步变化序列中测边操作、结构质量和 churn。",
+          "实现可保存/恢复且不复用已分配 ID 的稳定身份注册表，并将注册表快照与摘要写入实验产物。",
+          "记录 MPS 训练/推理/采样内存；给出 Linear MAC 与乘加 FLOPs 小计，并明确当前 profiler 无 MPS activity，不能声称总 FLOPs。"
+        ],
+        "acceptance": [
+          "图路由代理结果明确标记为共享参数下的节点向量实验，不称为模型化神经元验证。",
+          "持久身份注册表 round-trip 后既有身份不变，新身份单调分配且 namespace 无碰撞。",
+          "代理评估覆盖 4–64 节点和连续 32 帧；任务质量与结构操作阈值分别报告，未达标则明确保留失败。",
+          "记录 MPS 训练/推理/采样内存、Linear MAC 小计和无法统计的总 FLOPs 边界。",
+          "完整测试、Ruff、uv lock、JSON 与 newera-gate explore 通过。"
+        ],
+        "evidence": "v6–v8 均是共享策略网络处理身份化节点向量的稀疏图路由代理，不能验证“一个神经元是一个模型”。v8 运行配置与结果位于 project/configs/models_training/learning/neuron_comparisons/topology_evolution/topology_evolution_invariant_fastpath.json 与 project/docs/research/topics/neuron_graph_validation/validations/archive/legacy_runs/invariant_fastpath_run/；任务 MSE 对照通过，但 edge F1、离散操作和持续拓扑质量未通过。身份置换 Jaccard 为 1.0；MPS 前向中位时延 3.48–3.55 ms（4–64 节点）。固定形状身份排序、子批次边索引向量化和删除重复 rollout 指标计算后，单个图模型训练均值约 8.08 秒/1200 步（v7 报告约 79.09 秒，非严格配对基准）。代理不再作为神经元本体阶段的前置实验；待 NE-022 定义模型化神经元的实现与组合契约后再决定是否保留或重写。"
+      },
+      "archive_reason": "v6-v8 是节点向量路由代理阶段，实验与证据已归档；后续工作以模型化神经元为对象。",
+      "replaced_by": [
+        "NE-022",
+        "NE-026"
+      ]
+    }
+  ]
+}

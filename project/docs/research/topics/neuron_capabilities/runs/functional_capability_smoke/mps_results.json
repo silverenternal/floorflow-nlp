@@ -1,0 +1,110 @@
+{
+  "device": "mps",
+  "seed": 23000,
+  "git_commit": "4247105df556b121816a2f657af5d3927e69f908",
+  "architecture": "one shared ModelNeuron(input=3, hidden=32, message=1)",
+  "config_path": "project/configs/models_training/learning/neuron_comparisons/functional/functional_capability_suite.json",
+  "split_seeds": {
+    "train": 23001,
+    "validation": 23002,
+    "sealed_test": 23003,
+    "size_extrapolation_validation": 23004
+  },
+  "sealed_test_used": false,
+  "set_sum": {
+    "training_sample_count": 8,
+    "validation_sample_count": 8,
+    "sealed_test_sample_count": 512,
+    "train": {
+      "samples": 8,
+      "mean_loss": 11.487266883254051,
+      "optimizer_steps": 1
+    },
+    "validation": {
+      "sample_count": 8,
+      "mae": 2.9527713395655155,
+      "normalized_mae": 1.037693909158595,
+      "zero_baseline_mae": 2.8455128371715546,
+      "train_mean_baseline_mae": 3.109856041148305,
+      "oracle_mae": 0.0,
+      "permutation_max_abs_delta": 0.02126753330230713,
+      "exact_recall_accuracy": null,
+      "max_absolute_error": 6.1789825558662415
+    },
+    "size_extrapolation_diagnostic": {
+      "sample_count": 8,
+      "mae": 12.000200271606445,
+      "normalized_mae": 0.9910688982618233,
+      "zero_baseline_mae": 12.108341097831726,
+      "train_mean_baseline_mae": 12.717100949957967,
+      "oracle_mae": 0.0,
+      "permutation_max_abs_delta": 0.047767817974090576,
+      "exact_recall_accuracy": null,
+      "max_absolute_error": 22.28493094444275
+    }
+  },
+  "grouped_binding": {
+    "training_sample_count": 8,
+    "validation_sample_count": 8,
+    "sealed_test_sample_count": 512,
+    "train": {
+      "samples": 8,
+      "mean_loss": 6.326617830869509,
+      "optimizer_steps": 1
+    },
+    "validation": {
+      "sample_count": 8,
+      "mae": 1.4751195684075356,
+      "normalized_mae": 1.0781626990368376,
+      "zero_baseline_mae": 1.3681790046393871,
+      "train_mean_baseline_mae": 1.370538592338562,
+      "oracle_mae": 0.0,
+      "permutation_max_abs_delta": 0.06388330459594727,
+      "exact_recall_accuracy": null,
+      "max_absolute_error": 6.000236213207245
+    },
+    "size_extrapolation_diagnostic": {
+      "sample_count": 8,
+      "mae": 2.8650718703866005,
+      "normalized_mae": 1.0238061066903243,
+      "zero_baseline_mae": 2.7984516322612762,
+      "train_mean_baseline_mae": 2.71843896061182,
+      "oracle_mae": 0.0,
+      "permutation_max_abs_delta": 0.08795079588890076,
+      "exact_recall_accuracy": null,
+      "max_absolute_error": 4.788360983133316
+    }
+  },
+  "interference_recall": {
+    "training_sample_count": 8,
+    "validation_sample_count": 8,
+    "sealed_test_sample_count": 512,
+    "train": {
+      "samples": 8,
+      "mean_loss": 1.5766795050585642,
+      "optimizer_steps": 1
+    },
+    "validation": {
+      "sample_count": 8,
+      "mae": 1.1645528804510832,
+      "normalized_mae": 0.9219022715234134,
+      "zero_baseline_mae": 1.2632064335048199,
+      "train_mean_baseline_mae": 1.3596161045134068,
+      "oracle_mae": 0.0,
+      "permutation_max_abs_delta": null,
+      "exact_recall_accuracy": 0.0,
+      "max_absolute_error": 2.901504099369049
+    },
+    "size_extrapolation_diagnostic": {
+      "sample_count": 8,
+      "mae": 0.7516695153899491,
+      "normalized_mae": 0.9679653687633533,
+      "zero_baseline_mae": 0.7765458761714399,
+      "train_mean_baseline_mae": 1.045753055717796,
+      "oracle_mae": 0.0,
+      "permutation_max_abs_delta": null,
+      "exact_recall_accuracy": 0.0,
+      "max_absolute_error": 1.879953384399414
+    }
+  }
+}

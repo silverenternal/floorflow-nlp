@@ -1,0 +1,464 @@
+{
+  "actual_steps_per_model": 250,
+  "code_revision": "4247105df556b121816a2f657af5d3927e69f908",
+  "config": {
+    "alignment": "All models use identical training and validation examples, optimizer, step count, and batch size. Stateful candidate is compared separately against a near-equal parameter MLP and a near-equal forward-MAC MLP because those budgets cannot both be matched; the state-reset ablation matches candidate parameters and compute.",
+    "hypothesis": "Explicit state improves sequence-sum fit over a state-reset ablation; accuracy and efficiency depend on whether parameter or compute budget is matched.",
+    "limitations": [
+      "Synthetic train and validation data share one fixed sum rule; there is no held-out task or test split.",
+      "MAC counts include affine matrix products only, not bias, activations, optimizer, memory traffic, or framework overhead.",
+      "CPU latency is an observational microbenchmark and not a device-independent performance claim."
+    ],
+    "metrics": [
+      "train_mse",
+      "validation_mse",
+      "validation_mae",
+      "parameter_count",
+      "forward_linear_macs_per_example",
+      "training_forward_linear_mac_proxy",
+      "median_cpu_inference_ms_per_32_examples",
+      "model_sha256",
+      "train_data_sha256",
+      "validation_data_sha256"
+    ],
+    "models": {
+      "compute_matched_mlp": {
+        "hidden_size": 333,
+        "implementation": "MLPNeuron",
+        "input_size": 5,
+        "output_size": 1
+      },
+      "parameter_matched_mlp": {
+        "hidden_size": 65,
+        "implementation": "MLPNeuron",
+        "input_size": 5,
+        "output_size": 1
+      },
+      "state_reset_ablation": {
+        "implementation": "StatefulMLPNeuron",
+        "input_size": 1,
+        "output_size": 1,
+        "state_policy": "reset to None before each of the 5 positions",
+        "state_size": 8
+      },
+      "stateful_candidate": {
+        "implementation": "StatefulMLPNeuron",
+        "input_size": 1,
+        "output_size": 1,
+        "state_policy": "carry state across all 5 sequence positions",
+        "state_size": 8
+      }
+    },
+    "purpose": "Compare a recurrent stateful neuron candidate with flat MLP controls on the same synthetic sequence-sum task.",
+    "run_id": "neuron-sequence-sum-budget-matched-v1",
+    "runs": {
+      "batching": "full batch",
+      "device": "cpu",
+      "initialization_seed_offset": 1000,
+      "learning_rate": 0.02,
+      "optimizer": "Adam",
+      "seeds": [
+        41,
+        42,
+        43,
+        44,
+        45
+      ],
+      "steps": 250,
+      "threads": 1
+    },
+    "schema_version": "newera-neuron-comparison-v1",
+    "stopping": "Exactly 250 optimizer steps per model; no tuning against validation results.",
+    "task": {
+      "feature_range": [
+        -1.0,
+        1.0
+      ],
+      "name": "sum_five_values",
+      "sequence_length": 5,
+      "split": "independent fixed seeds per run; no test split",
+      "target": "sum(sequence)",
+      "train_examples": 128,
+      "validation_examples": 64
+    }
+  },
+  "config_sha256": "140c1834cd8da9af329ef537b5160d9c59acc367f2852bb3968322933d2e16a2",
+  "data_fingerprints": [
+    {
+      "seed": 41,
+      "train_data_sha256": "625aaf33b3054bc44ef0dfcec217a01b7eaa0133967a512316171f716eb28bdf",
+      "validation_data_sha256": "17a9f13d002a33bb51e96824153eadd2b4a897df0c54a3d07b878af914589db3"
+    },
+    {
+      "seed": 42,
+      "train_data_sha256": "7b2bb98cba53c8a89dcfcfc4bc5cd8c68714a131bd0a62783b74d0e987802a4f",
+      "validation_data_sha256": "6eaf0133c1ddcef111abedb595f49fa96925e6100981e789e2da580db94af4e6"
+    },
+    {
+      "seed": 43,
+      "train_data_sha256": "e7d38fe5c77e5b86901a3bb905ea871b65f81e1f2465afc3be14825bcd611a97",
+      "validation_data_sha256": "8ddf5e612150d40bf49d52bbbef31d8e5148ddeb2b9da579030d3795908a4775"
+    },
+    {
+      "seed": 44,
+      "train_data_sha256": "c008cc1d5df9767e29423198195e38dc0eb8976b3ce01e76853b6fc221cfae61",
+      "validation_data_sha256": "b5421605c241810457374cfd71b8b40ca11e9dc8212020307f6231b644d14a8d"
+    },
+    {
+      "seed": 45,
+      "train_data_sha256": "3a7f2bd41a5821f0cdd87b2f80cdcc444b9495218c4d41bb2bd1f4f2c619b8ea",
+      "validation_data_sha256": "f6fcbe7a6530cff52df16646fdd8d469dccf1bd6fe2bcfbdbb73a5c681aed87b"
+    }
+  ],
+  "environment": {
+    "device": "cpu",
+    "platform": "macOS-27.2-arm64-arm-64bit-Mach-O",
+    "python": "3.13.15",
+    "torch": "2.15.0",
+    "torch_threads": 1
+  },
+  "run_id": "neuron-sequence-sum-budget-matched-v1",
+  "runs": [
+    {
+      "forward_linear_macs_per_example": 2000,
+      "median_cpu_inference_ms_per_32_examples": 0.09808300092117861,
+      "model": "stateful_candidate",
+      "model_sha256": "c5c8e4743d31bfd1b6cfb6c7102e5179969295480ce28ec8c2aee20af0bc0582",
+      "optimizer_steps": 250,
+      "parameters": 457,
+      "seed": 41,
+      "train_mse": 0.0004986529238522053,
+      "training_examples": 128,
+      "training_forward_linear_mac_proxy": 64000000,
+      "validation_examples": 64,
+      "validation_mae": 0.022854957729578018,
+      "validation_mse": 0.0014151404611766338
+    },
+    {
+      "forward_linear_macs_per_example": 390,
+      "median_cpu_inference_ms_per_32_examples": 0.013374999980442226,
+      "model": "parameter_matched_mlp",
+      "model_sha256": "3af19bb6a7d7506bc9d878f26e3dc8605eabc5f0faceecebd7c807ea0c94d646",
+      "optimizer_steps": 250,
+      "parameters": 456,
+      "seed": 41,
+      "train_mse": 0.0006946150679141283,
+      "training_examples": 128,
+      "training_forward_linear_mac_proxy": 12480000,
+      "validation_examples": 64,
+      "validation_mae": 0.0271258857101202,
+      "validation_mse": 0.0015460080467164516
+    },
+    {
+      "forward_linear_macs_per_example": 1998,
+      "median_cpu_inference_ms_per_32_examples": 0.03679200017359108,
+      "model": "compute_matched_mlp",
+      "model_sha256": "fbfaa2072094d543fb5225fa79307a6fa69ad477f149432b40cda663fdf977d2",
+      "optimizer_steps": 250,
+      "parameters": 2332,
+      "seed": 41,
+      "train_mse": 0.016264015808701515,
+      "training_examples": 128,
+      "training_forward_linear_mac_proxy": 63936000,
+      "validation_examples": 64,
+      "validation_mae": 0.11375169456005096,
+      "validation_mse": 0.014008875004947186
+    },
+    {
+      "forward_linear_macs_per_example": 2000,
+      "median_cpu_inference_ms_per_32_examples": 0.10045900125987828,
+      "model": "state_reset_ablation",
+      "model_sha256": "5d7a3803ecb9b7f53df2cd2455d4ed12b94c63625b9fcc62c43ee161446c4b6e",
+      "optimizer_steps": 250,
+      "parameters": 457,
+      "seed": 41,
+      "train_mse": 1.408359169960022,
+      "training_examples": 128,
+      "training_forward_linear_mac_proxy": 64000000,
+      "validation_examples": 64,
+      "validation_mae": 0.9740175008773804,
+      "validation_mse": 1.3328237533569336
+    },
+    {
+      "forward_linear_macs_per_example": 2000,
+      "median_cpu_inference_ms_per_32_examples": 0.09841699647950009,
+      "model": "stateful_candidate",
+      "model_sha256": "8e8f275e3f3d0ec1d7687200079107014613b16252716c43ac3b23463b5b0e94",
+      "optimizer_steps": 250,
+      "parameters": 457,
+      "seed": 42,
+      "train_mse": 0.00046990608097985387,
+      "training_examples": 128,
+      "training_forward_linear_mac_proxy": 64000000,
+      "validation_examples": 64,
+      "validation_mae": 0.026529084891080856,
+      "validation_mse": 0.001368529861792922
+    },
+    {
+      "forward_linear_macs_per_example": 390,
+      "median_cpu_inference_ms_per_32_examples": 0.013249999028630555,
+      "model": "parameter_matched_mlp",
+      "model_sha256": "32856f19054b832a20bc510de0f52fc096dd48de2bda3d771924e762abf9584e",
+      "optimizer_steps": 250,
+      "parameters": 456,
+      "seed": 42,
+      "train_mse": 0.0010079944040626287,
+      "training_examples": 128,
+      "training_forward_linear_mac_proxy": 12480000,
+      "validation_examples": 64,
+      "validation_mae": 0.030611364170908928,
+      "validation_mse": 0.0017318999161943793
+    },
+    {
+      "forward_linear_macs_per_example": 1998,
+      "median_cpu_inference_ms_per_32_examples": 0.03687499702209607,
+      "model": "compute_matched_mlp",
+      "model_sha256": "ceea623b5d7eee99d6151777a32aebbc6fa7d18e4e46704e1287cd3f2353a584",
+      "optimizer_steps": 250,
+      "parameters": 2332,
+      "seed": 42,
+      "train_mse": 0.0005059150862507522,
+      "training_examples": 128,
+      "training_forward_linear_mac_proxy": 63936000,
+      "validation_examples": 64,
+      "validation_mae": 0.02463001012802124,
+      "validation_mse": 0.0011593163944780827
+    },
+    {
+      "forward_linear_macs_per_example": 2000,
+      "median_cpu_inference_ms_per_32_examples": 0.09875000250758603,
+      "model": "state_reset_ablation",
+      "model_sha256": "653122127b2c6fe7af775cd9490fb266bbdedeb19cedb363a00f76f7bfb5eed8",
+      "optimizer_steps": 250,
+      "parameters": 457,
+      "seed": 42,
+      "train_mse": 1.4483065605163574,
+      "training_examples": 128,
+      "training_forward_linear_mac_proxy": 64000000,
+      "validation_examples": 64,
+      "validation_mae": 1.0396547317504883,
+      "validation_mse": 1.6684805154800415
+    },
+    {
+      "forward_linear_macs_per_example": 2000,
+      "median_cpu_inference_ms_per_32_examples": 0.09824999870033935,
+      "model": "stateful_candidate",
+      "model_sha256": "8e687f3e9c39eaef2d33d980ace941f2b9092d7cfad59c7d6c3c82b95e43c74e",
+      "optimizer_steps": 250,
+      "parameters": 457,
+      "seed": 43,
+      "train_mse": 0.0003309117164462805,
+      "training_examples": 128,
+      "training_forward_linear_mac_proxy": 64000000,
+      "validation_examples": 64,
+      "validation_mae": 0.01774083450436592,
+      "validation_mse": 0.000900843006093055
+    },
+    {
+      "forward_linear_macs_per_example": 390,
+      "median_cpu_inference_ms_per_32_examples": 0.013249999028630555,
+      "model": "parameter_matched_mlp",
+      "model_sha256": "97508a4c849af562186ce707d1f7b511839bf4d8b56ec48ecc8854f7835d6e92",
+      "optimizer_steps": 250,
+      "parameters": 456,
+      "seed": 43,
+      "train_mse": 0.0006167755927890539,
+      "training_examples": 128,
+      "training_forward_linear_mac_proxy": 12480000,
+      "validation_examples": 64,
+      "validation_mae": 0.025504037737846375,
+      "validation_mse": 0.0015887739136815071
+    },
+    {
+      "forward_linear_macs_per_example": 1998,
+      "median_cpu_inference_ms_per_32_examples": 0.03666600241558626,
+      "model": "compute_matched_mlp",
+      "model_sha256": "da61424a0e1f85fee9c662122586ea0d8fc424ddfebfe1f49ef7d681ae9bcdd2",
+      "optimizer_steps": 250,
+      "parameters": 2332,
+      "seed": 43,
+      "train_mse": 0.0006671440205536783,
+      "training_examples": 128,
+      "training_forward_linear_mac_proxy": 63936000,
+      "validation_examples": 64,
+      "validation_mae": 0.025197947397828102,
+      "validation_mse": 0.001265953411348164
+    },
+    {
+      "forward_linear_macs_per_example": 2000,
+      "median_cpu_inference_ms_per_32_examples": 0.09845800377661362,
+      "model": "state_reset_ablation",
+      "model_sha256": "22852c8285c576971554e26d1c1d868c1e40a77d506a575fd2cab30b524edaa2",
+      "optimizer_steps": 250,
+      "parameters": 457,
+      "seed": 43,
+      "train_mse": 1.163097620010376,
+      "training_examples": 128,
+      "training_forward_linear_mac_proxy": 64000000,
+      "validation_examples": 64,
+      "validation_mae": 1.0942091941833496,
+      "validation_mse": 1.7877944707870483
+    },
+    {
+      "forward_linear_macs_per_example": 2000,
+      "median_cpu_inference_ms_per_32_examples": 0.0977910021902062,
+      "model": "stateful_candidate",
+      "model_sha256": "c838260367197645d2199136480ce0002b9ca57151bb9d4f72947f99e652a28b",
+      "optimizer_steps": 250,
+      "parameters": 457,
+      "seed": 44,
+      "train_mse": 0.0006034931866452098,
+      "training_examples": 128,
+      "training_forward_linear_mac_proxy": 64000000,
+      "validation_examples": 64,
+      "validation_mae": 0.026231665164232254,
+      "validation_mse": 0.0019279650878161192
+    },
+    {
+      "forward_linear_macs_per_example": 390,
+      "median_cpu_inference_ms_per_32_examples": 0.013208999007474631,
+      "model": "parameter_matched_mlp",
+      "model_sha256": "c38c1fe05296a8cd51ae870edace79fa2550cc8d5ede33703bb45a564ca3fd3f",
+      "optimizer_steps": 250,
+      "parameters": 456,
+      "seed": 44,
+      "train_mse": 0.0007541764643974602,
+      "training_examples": 128,
+      "training_forward_linear_mac_proxy": 12480000,
+      "validation_examples": 64,
+      "validation_mae": 0.02552766725420952,
+      "validation_mse": 0.0013862844789400697
+    },
+    {
+      "forward_linear_macs_per_example": 1998,
+      "median_cpu_inference_ms_per_32_examples": 0.03691599704325199,
+      "model": "compute_matched_mlp",
+      "model_sha256": "571263320c8a924559339f18e1761b28e22bda88a139f95c041a662c032e720c",
+      "optimizer_steps": 250,
+      "parameters": 2332,
+      "seed": 44,
+      "train_mse": 0.0004125643754377961,
+      "training_examples": 128,
+      "training_forward_linear_mac_proxy": 63936000,
+      "validation_examples": 64,
+      "validation_mae": 0.020739102736115456,
+      "validation_mse": 0.0007445919327437878
+    },
+    {
+      "forward_linear_macs_per_example": 2000,
+      "median_cpu_inference_ms_per_32_examples": 0.10162499529542401,
+      "model": "state_reset_ablation",
+      "model_sha256": "6c613a74faef37e53407987ef8962767ab361eb42c063198c2bfbe37c2e1c9e2",
+      "optimizer_steps": 250,
+      "parameters": 457,
+      "seed": 44,
+      "train_mse": 1.4549146890640259,
+      "training_examples": 128,
+      "training_forward_linear_mac_proxy": 64000000,
+      "validation_examples": 64,
+      "validation_mae": 0.8827959895133972,
+      "validation_mse": 1.3054587841033936
+    },
+    {
+      "forward_linear_macs_per_example": 2000,
+      "median_cpu_inference_ms_per_32_examples": 0.09737499931361526,
+      "model": "stateful_candidate",
+      "model_sha256": "bdfc96e9f8e7db6ef171c72e1bc4577b2881d9197918cb25f7a28f711859e6c6",
+      "optimizer_steps": 250,
+      "parameters": 457,
+      "seed": 45,
+      "train_mse": 0.001984786242246628,
+      "training_examples": 128,
+      "training_forward_linear_mac_proxy": 64000000,
+      "validation_examples": 64,
+      "validation_mae": 0.04498771205544472,
+      "validation_mse": 0.0024473126977682114
+    },
+    {
+      "forward_linear_macs_per_example": 390,
+      "median_cpu_inference_ms_per_32_examples": 0.013208999007474631,
+      "model": "parameter_matched_mlp",
+      "model_sha256": "4e68e34b6028431817d91dae27a501f2e34e0f2b9a794d4daec7d2d96b7230a6",
+      "optimizer_steps": 250,
+      "parameters": 456,
+      "seed": 45,
+      "train_mse": 0.0005679325549863279,
+      "training_examples": 128,
+      "training_forward_linear_mac_proxy": 12480000,
+      "validation_examples": 64,
+      "validation_mae": 0.03298607096076012,
+      "validation_mse": 0.0022710682824254036
+    },
+    {
+      "forward_linear_macs_per_example": 1998,
+      "median_cpu_inference_ms_per_32_examples": 0.03683400427689776,
+      "model": "compute_matched_mlp",
+      "model_sha256": "d9bd6d995fbf0123cf109404d184cc82b77ea69938d476afe2f59293a4ab897f",
+      "optimizer_steps": 250,
+      "parameters": 2332,
+      "seed": 45,
+      "train_mse": 0.00041430446435697377,
+      "training_examples": 128,
+      "training_forward_linear_mac_proxy": 63936000,
+      "validation_examples": 64,
+      "validation_mae": 0.02844908833503723,
+      "validation_mse": 0.0015552426921203732
+    },
+    {
+      "forward_linear_macs_per_example": 2000,
+      "median_cpu_inference_ms_per_32_examples": 0.09991700062528253,
+      "model": "state_reset_ablation",
+      "model_sha256": "7dfdb0651983e0089f31c0960c3307ac531f219fd87999e0e661d6b301b955fb",
+      "optimizer_steps": 250,
+      "parameters": 457,
+      "seed": 45,
+      "train_mse": 1.0705856084823608,
+      "training_examples": 128,
+      "training_forward_linear_mac_proxy": 64000000,
+      "validation_examples": 64,
+      "validation_mae": 1.0333422422409058,
+      "validation_mse": 1.5888065099716187
+    }
+  ],
+  "schema_version": "newera-neuron-comparison-result-v1",
+  "started_at_local_date": "2026-11-06",
+  "summaries": {
+    "compute_matched_mlp": {
+      "forward_linear_macs_per_example": 1998,
+      "median_cpu_inference_ms_per_32_examples_mean": 0.03681660018628463,
+      "parameters": 2332,
+      "training_forward_linear_mac_proxy": 63936000,
+      "validation_mae_mean": 0.0425535686314106,
+      "validation_mse_mean": 0.003746795887127519,
+      "validation_mse_stdev": 0.005744041071518514
+    },
+    "parameter_matched_mlp": {
+      "forward_linear_macs_per_example": 390,
+      "median_cpu_inference_ms_per_32_examples_mean": 0.01325859921053052,
+      "parameters": 456,
+      "training_forward_linear_mac_proxy": 12480000,
+      "validation_mae_mean": 0.028351005166769028,
+      "validation_mse_mean": 0.0017048069275915623,
+      "validation_mse_stdev": 0.0003396775114681833
+    },
+    "state_reset_ablation": {
+      "forward_linear_macs_per_example": 2000,
+      "median_cpu_inference_ms_per_32_examples_mean": 0.0998418006929569,
+      "parameters": 457,
+      "training_forward_linear_mac_proxy": 64000000,
+      "validation_mae_mean": 1.0048039317131043,
+      "validation_mse_mean": 1.5366728067398072,
+      "validation_mse_stdev": 0.21104954754670413
+    },
+    "stateful_candidate": {
+      "forward_linear_macs_per_example": 2000,
+      "median_cpu_inference_ms_per_32_examples_mean": 0.0979831995209679,
+      "parameters": 457,
+      "training_forward_linear_mac_proxy": 64000000,
+      "validation_mae_mean": 0.027668850868940352,
+      "validation_mse_mean": 0.0016119582229293882,
+      "validation_mse_stdev": 0.0005918946036356308
+    }
+  },
+  "working_tree_dirty": true
+}

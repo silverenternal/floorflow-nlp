@@ -1,0 +1,72 @@
+{
+  "version": "nlp-structure-matched-v11",
+  "status": "pre_registered_cpu_dry_run_only",
+  "shared": {
+    "corpus_contract": "project/configs/structured_generation/ast_corpus_diagnostic/corpus_ast/nlp_ast_corpus_grammar_extended.json",
+    "transition_grammar": "project/configs/structured_generation/transition_grammar_ast/ast_grammar_transition/nlp_ast_transition_grammar_cpp_extended.json",
+    "languages": ["python", "rust", "cpp"],
+    "seed": 20261103,
+    "epochs": 4,
+    "batch_rows": 8,
+    "optimizer": "ScheduleFreeAdamW",
+    "learning_rate_schedule": "same per-arm schedule and optimizer steps",
+    "training_order": "same frozen training row order and batch boundaries",
+    "prompt_contract": "project/configs/structured_generation/tree_action_corpus/nlp_tree_action_corpus_all_splits.json",
+    "hidden_size": 128,
+    "decoder_layers": 4,
+    "attention_heads": 8,
+    "maximum_action_steps": 768,
+    "maximum_nodes": 256,
+    "validation_use": "metrics only; never used for model selection or prompt derivation",
+    "test_use": "closed until external identity freeze and separate approval gate"
+  },
+  "arms": [
+    {
+      "id": "flat",
+      "description": "Causal prefix decoder without local grammar masks or a predicted blueprint.",
+      "local_transition_mask": false,
+      "terminalizable_completion_mask": false,
+      "predicted_blueprint_conditioning": false
+    },
+    {
+      "id": "local_mask",
+      "description": "Same causal prefix decoder with immediate grammar transition masks.",
+      "local_transition_mask": true,
+      "terminalizable_completion_mask": false,
+      "predicted_blueprint_conditioning": false
+    },
+    {
+      "id": "hierarchical",
+      "description": "Local and terminalizable masks with prompt-predicted blueprint memory conditioning.",
+      "local_transition_mask": true,
+      "terminalizable_completion_mask": true,
+      "predicted_blueprint_conditioning": true
+    }
+  ],
+  "metric_schema": [
+    {"name": "exact_tree_match", "unit": "fraction", "range": [0, 1], "aggregation": "case mean"},
+    {"name": "parser_validity", "unit": "fraction", "range": [0, 1], "aggregation": "case mean"},
+    {"name": "node_type_f1", "unit": "fraction", "range": [0, 1], "aggregation": "micro F1"},
+    {"name": "lexical_f1", "unit": "fraction", "range": [0, 1], "aggregation": "micro F1"},
+    {"name": "typed_edge_f1", "unit": "fraction", "range": [0, 1], "aggregation": "micro F1"},
+    {"name": "scope_relation_f1", "unit": "fraction", "range": [0, 1], "aggregation": "micro F1"},
+    {"name": "normalized_tree_edit_distance", "unit": "fraction", "range": [0, 1], "aggregation": "case mean"},
+    {"name": "teacher_action_reachability", "unit": "fraction", "range": [0, 1], "aggregation": "all frozen validation actions"},
+    {"name": "invalid_action_rate", "unit": "fraction", "range": [0, 1], "aggregation": "generated structural decisions"},
+    {"name": "completion_failure_rate", "unit": "fraction", "range": [0, 1], "aggregation": "generation attempts"},
+    {"name": "budget_exhaustion_rate", "unit": "fraction", "range": [0, 1], "aggregation": "generation attempts"},
+    {"name": "node_budget_mae", "unit": "nodes", "range": [0, null], "aggregation": "case mean absolute error"},
+    {"name": "parameter_count", "unit": "parameters", "range": [1, null], "aggregation": "single model count"},
+    {"name": "peak_memory_bytes", "unit": "bytes", "range": [0, null], "aggregation": "peak per device"},
+    {"name": "latency_ms_per_case", "unit": "milliseconds", "range": [0, null], "aggregation": "case median and p95"},
+    {"name": "optimizer_steps", "unit": "steps", "range": [0, null], "aggregation": "training ledger"},
+    {"name": "trainable_parameters", "unit": "parameters", "range": [1, null], "aggregation": "single model count"}
+  ],
+  "report": "outputs/reports/nlp_structure_matched_dry_run_v11.json",
+  "decision_policy": {
+    "winner_selection": false,
+    "selection_metric": null,
+    "rule": "Report all registered metrics and uncertainty. No arm is promoted by this dry run."
+  },
+  "evidence_boundary": "Matched experiment specification only; no data rows, training, checkpoint, GPU, or test content are read."
+}

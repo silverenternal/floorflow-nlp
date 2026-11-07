@@ -1,0 +1,894 @@
+{
+  "schema_version": "newera-modelized-neuron-graph-v1",
+  "run_id": "ne030-mps-smoke",
+  "device": "mps",
+  "python": "3.13.15",
+  "torch": "2.15.0",
+  "config_sha256": "68dd962e2868e838a81f000f656dd3efc32f9ace56cf1cff3a4ffc08e34ba9d9",
+  "code_sha256": {
+    "src/newera/neuron/composition.py": "a4b467e311ebce6c8e92b120ed80b85364130ee191995f0a4155f2169930449f",
+    "src/newera/neuron/graph/layer.py": "00bd1aa393515a28ecc4ab8b24efd4fdb765717dcbdc7fce3a102bc08d5db2c5",
+    "src/newera/neuron/graph/policy.py": "049c56f8621955220b021ab52cc969aa770b90b59c38c5a0848686b995ed6134",
+    "src/newera/neuron/graph/topology.py": "de6c3c866bd4f770ab07a8045f0a442500bb86b8d21ca1b12f691c99f56be182",
+    "project/scripts/experiments/training/neurons/run_modelized_neuron_graph_validation.py": "7dc0aca17b64096855038bddad7bf047c248b7a7a62efa80e830f61e003a1a52",
+    "project/scripts/experiments/training/neurons/graph/run_neuron_graph_sparse_evolution.py": "d45b7eccdeea25b822001e0d7fe93d6066a1159b9d1c514a16f7692adf80bf56",
+    "src/newera/capabilities/evaluation/checkpoint.py": "cc23194911690f774a5af855c09173e71118cea1073bab0262e5da36a9ccb9cf",
+    "src/newera/capabilities/evaluation/runner.py": "9e43552cc5de555066a8b8903451534d4da99a1fdcc81912cdede4ff860f5f8f"
+  },
+  "task_contract": {
+    "name": "permuted_keyed_memory_with_registry",
+    "key_space": 64,
+    "identity_namespace": 19,
+    "training_memory_neurons": 4,
+    "evaluation_memory_neurons": [
+      4
+    ],
+    "tasks": [
+      "single_link_retrieval",
+      "two_link_composition"
+    ],
+    "training_examples": 16,
+    "validation_examples": 4,
+    "test_examples": 4,
+    "slot_permutation": "Every frame independently places stable identities and readout in random slots; padding identity is -1.",
+    "targets": "Single-link routes 0.60 times the queried value. Two-link adds 0.35 times the cyclic successor value.",
+    "data_separation": "Fresh training, validation, test, and rollout seeds not used by v5-v7. Validation selects the action threshold. The sealed test split is evaluated once after strategy and threshold selection."
+  },
+  "model_contract": {
+    "architecture": [
+      14,
+      8,
+      8,
+      2,
+      "ModelNeuron"
+    ],
+    "neuron_weight_sets": 1,
+    "parameter_count": 1286,
+    "linear_and_gru_macs_per_graph_step": 11016,
+    "multiply_add_flops_subtotal": 22032,
+    "total_flops_exactly_counted": false,
+    "profiler_supported_activities": [
+      "ProfilerActivity.CPU"
+    ],
+    "identity_registry_persistence": {
+      "disk_round_trip_ok": true,
+      "count_after_restart": 66,
+      "path": "identity_registry.json",
+      "sha256": "66140e5cf6774689e754599d880fc56d49bd7a8179e757b35fe01d1e1dbce822"
+    }
+  },
+  "training_budget": {
+    "optimizer_steps_per_model": 3,
+    "requested_batch_size": 2,
+    "effective_batch_size": 2,
+    "batch_implementation": "per_sample_gradient_accumulation; ModelNeuronGraph currently processes one graph per forward",
+    "samples_per_model": 6,
+    "samples_per_task_seed_across_three_trained_models": 18
+  },
+  "decision_rules": {
+    "maximum_oracle_label_error": 1e-06,
+    "minimum_edge_f1": 0.8,
+    "minimum_operation_recall": 0.75,
+    "maximum_strength_mae": 0.2,
+    "maximum_permutation_relative_mse_drift": 0.02,
+    "relative_error_denominator_epsilon": 1e-12,
+    "minimum_permutation_identity_edge_jaccard": 0.95,
+    "maximum_permutation_empty_graph_fraction": 0.01,
+    "minimum_relative_mse_improvement": 0.2,
+    "quality_ci": "Paired per-seed relative MSE delta; 95% two-sided t interval upper bound must be below zero.",
+    "interpretation": "Fixed before the new test set is evaluated. Validation may select only the action confidence threshold."
+  },
+  "training_time_mean_seconds": {
+    "modelized_neuron_graph": 0.0,
+    "parameter_matched_mlp": 0.0,
+    "linear_mac_matched_mlp": 0.0
+  },
+  "training_cases": [
+    {
+      "task": "single_link_retrieval",
+      "seed": 901,
+      "models": {
+        "zero_predictor": {
+          "test": {
+            "mse": 0.004171411041170359,
+            "mae": 0.05921705812215805
+          },
+          "kind": "constant_control"
+        },
+        "train_mean_predictor": {
+          "test": {
+            "mse": 0.0040002549067139626,
+            "mae": 0.059217050671577454
+          },
+          "prediction": -0.04191386699676514,
+          "kind": "constant_control_fit_on_train_split"
+        },
+        "generator_oracle": {
+          "test": {
+            "mse": 1.3877787807814457e-17,
+            "mae": 1.862645149230957e-09,
+            "max_absolute_label_error": 7.450580596923828e-09,
+            "max_absolute_label_error_by_split": {
+              "train": 2.9802322387695312e-08,
+              "validation": 2.9802322387695312e-08,
+              "test": 7.450580596923828e-09
+            }
+          },
+          "kind": "identity_edge_reference_solution_not_an_inference_adapter"
+        },
+        "modelized_neuron_graph": {
+          "validation": {
+            "mse": 0.4714084044098854,
+            "mae": 0.6621483564376831,
+            "edge_f1": 0.0,
+            "empty_edge_graph_count": 4,
+            "evaluated_graph_count": 4,
+            "edge_precision": null,
+            "edge_precision_numerator": 0,
+            "edge_precision_denominator": 0,
+            "edge_recall": 0.0,
+            "edge_recall_numerator": 0,
+            "edge_recall_denominator": 4,
+            "strength_mae": null,
+            "operation_scores": {
+              "add": {
+                "expected_count": 0,
+                "predicted_count": 0,
+                "correct_count": 0,
+                "precision": null,
+                "recall": null
+              },
+              "remove": {
+                "expected_count": 4,
+                "predicted_count": 8,
+                "correct_count": 4,
+                "precision": 0.5,
+                "recall": 1.0
+              },
+              "retype": {
+                "expected_count": 3,
+                "predicted_count": 0,
+                "correct_count": 0,
+                "precision": null,
+                "recall": 0.0
+              },
+              "set_strength": {
+                "expected_count": 1,
+                "predicted_count": 0,
+                "correct_count": 0,
+                "precision": null,
+                "recall": 0.0
+              }
+            }
+          },
+          "test": {
+            "mse": 0.11909673176705837,
+            "mae": 0.33865781128406525,
+            "edge_f1": 0.0,
+            "empty_edge_graph_count": 4,
+            "evaluated_graph_count": 4,
+            "edge_precision": null,
+            "edge_precision_numerator": 0,
+            "edge_precision_denominator": 0,
+            "edge_recall": 0.0,
+            "edge_recall_numerator": 0,
+            "edge_recall_denominator": 4,
+            "strength_mae": null,
+            "operation_scores": {
+              "add": {
+                "expected_count": 0,
+                "predicted_count": 0,
+                "correct_count": 0,
+                "precision": null,
+                "recall": null
+              },
+              "remove": {
+                "expected_count": 4,
+                "predicted_count": 8,
+                "correct_count": 4,
+                "precision": 0.5,
+                "recall": 1.0
+              },
+              "retype": {
+                "expected_count": 2,
+                "predicted_count": 0,
+                "correct_count": 0,
+                "precision": null,
+                "recall": 0.0
+              },
+              "set_strength": {
+                "expected_count": 2,
+                "predicted_count": 0,
+                "correct_count": 0,
+                "precision": null,
+                "recall": 0.0
+              }
+            }
+          },
+          "pool_generalization": {
+            "4": {
+              "mse": 0.10105502979422454,
+              "mae": 0.2082965150475502,
+              "edge_f1": 0.0,
+              "empty_edge_graph_count": 4,
+              "evaluated_graph_count": 4,
+              "edge_precision": null,
+              "edge_precision_numerator": 0,
+              "edge_precision_denominator": 0,
+              "edge_recall": 0.0,
+              "edge_recall_numerator": 0,
+              "edge_recall_denominator": 4,
+              "strength_mae": null,
+              "operation_scores": {
+                "add": {
+                  "expected_count": 0,
+                  "predicted_count": 0,
+                  "correct_count": 0,
+                  "precision": null,
+                  "recall": null
+                },
+                "remove": {
+                  "expected_count": 4,
+                  "predicted_count": 8,
+                  "correct_count": 4,
+                  "precision": 0.5,
+                  "recall": 1.0
+                },
+                "retype": {
+                  "expected_count": 1,
+                  "predicted_count": 0,
+                  "correct_count": 0,
+                  "precision": null,
+                  "recall": 0.0
+                },
+                "set_strength": {
+                  "expected_count": 3,
+                  "predicted_count": 0,
+                  "correct_count": 0,
+                  "precision": null,
+                  "recall": 0.0
+                }
+              }
+            }
+          },
+          "threshold": 0.2,
+          "threshold_trials": [
+            {
+              "threshold": 0.2,
+              "selection_score": 0.16666666666666666,
+              "edge_f1": 0.0,
+              "operation_macro_recall": 0.3333333333333333,
+              "mse": 0.4714084044098854
+            },
+            {
+              "threshold": 0.3,
+              "selection_score": 0.08333333333333333,
+              "edge_f1": 0.16666666666666666,
+              "operation_macro_recall": 0.0,
+              "mse": 0.49717414751648903
+            },
+            {
+              "threshold": 0.5,
+              "selection_score": 0.08333333333333333,
+              "edge_f1": 0.16666666666666666,
+              "operation_macro_recall": 0.0,
+              "mse": 0.49717414751648903
+            },
+            {
+              "threshold": 0.75,
+              "selection_score": 0.08333333333333333,
+              "edge_f1": 0.16666666666666666,
+              "operation_macro_recall": 0.0,
+              "mse": 0.49717414751648903
+            }
+          ],
+          "permutation_identity_edge_jaccard": 1.0,
+          "permutation_both_empty_graph_rate": 1,
+          "permutation_empty_graph_fraction": 1.0,
+          "permutation_relative_mse_drift": 0.0,
+          "permutation_relative_mse_drift_defined_pairs": 4,
+          "evolution": {
+            "sequence_count": 1,
+            "steps_per_sequence": 2,
+            "total_transitions": 2,
+            "mean_step_mse": 0.11915874481201172,
+            "mean_edge_f1": 0.0,
+            "mean_hard_edge_count": 0,
+            "mean_identity_edge_state_churn": 0
+          },
+          "train_seconds": 0.0,
+          "training_memory": {
+            "optimizer_steps": 3,
+            "samples_seen": 6,
+            "requested_batch_size": 2,
+            "effective_batch_size": 2,
+            "effective_batch_mode": "per_sample_gradient_accumulation",
+            "resumed_complete_checkpoint": true,
+            "gradient_coverage": {
+              "parameter_tensor_count": 20,
+              "gradient_connected_count": 20,
+              "finite_gradient_count": 20,
+              "nonzero_gradient_count": 20,
+              "disconnected_parameters": [],
+              "nonfinite_gradient_parameters": []
+            },
+            "single_sample_overfit_probe": {
+              "single_sample": true,
+              "optimizer_steps": 5,
+              "initial_mse": 2.0317125745350495e-05,
+              "final_mse": 0.00041418836917728186,
+              "loss_decreased": false
+            },
+            "checkpoint": "project/docs/research/topics/neuron_graph_validation/validations/modelized_neuron_training_baseline/mps_smoke/results_checkpoints/single_link_retrieval/seed_901/modelized_neuron_graph.pt"
+          },
+          "single_sample_overfit_probe": {
+            "single_sample": true,
+            "optimizer_steps": 5,
+            "initial_mse": 2.0317125745350495e-05,
+            "final_mse": 0.00041418836917728186,
+            "loss_decreased": false
+          },
+          "parameter_count": 1286
+        },
+        "parameter_matched_mlp": {
+          "test": {
+            "mse": 0.7302844524383545,
+            "mae": 0.8510367274284363
+          },
+          "train_seconds": 0.0,
+          "training_memory": {
+            "optimizer_steps": 3,
+            "samples_seen": 6,
+            "requested_batch_size": 2,
+            "effective_batch_size": 2,
+            "effective_batch_mode": "per_sample_gradient_accumulation",
+            "resumed_complete_checkpoint": true,
+            "gradient_coverage": {
+              "parameter_tensor_count": 4,
+              "gradient_connected_count": 4,
+              "finite_gradient_count": 4,
+              "nonzero_gradient_count": 4,
+              "disconnected_parameters": [],
+              "nonfinite_gradient_parameters": []
+            },
+            "single_sample_overfit_probe": {
+              "single_sample": true,
+              "optimizer_steps": 5,
+              "initial_mse": 0.26251885294914246,
+              "final_mse": 0.06504331529140472,
+              "loss_decreased": true
+            },
+            "checkpoint": "project/docs/research/topics/neuron_graph_validation/validations/modelized_neuron_training_baseline/mps_smoke/results_checkpoints/single_link_retrieval/seed_901/parameter_matched_mlp.pt"
+          },
+          "single_sample_overfit_probe": {
+            "single_sample": true,
+            "optimizer_steps": 5,
+            "initial_mse": 0.26251885294914246,
+            "final_mse": 0.06504331529140472,
+            "loss_decreased": true
+          },
+          "parameter_count": 913
+        },
+        "linear_mac_matched_mlp": {
+          "test": {
+            "mse": 0.04985792934894562,
+            "mae": 0.2155952751636505
+          },
+          "train_seconds": 0.0,
+          "training_memory": {
+            "optimizer_steps": 3,
+            "samples_seen": 6,
+            "requested_batch_size": 2,
+            "effective_batch_size": 2,
+            "effective_batch_mode": "per_sample_gradient_accumulation",
+            "resumed_complete_checkpoint": true,
+            "gradient_coverage": {
+              "parameter_tensor_count": 4,
+              "gradient_connected_count": 4,
+              "finite_gradient_count": 4,
+              "nonzero_gradient_count": 4,
+              "disconnected_parameters": [],
+              "nonfinite_gradient_parameters": []
+            },
+            "single_sample_overfit_probe": {
+              "single_sample": true,
+              "optimizer_steps": 5,
+              "initial_mse": 0.026094792410731316,
+              "final_mse": 0.006670351605862379,
+              "loss_decreased": true
+            },
+            "checkpoint": "project/docs/research/topics/neuron_graph_validation/validations/modelized_neuron_training_baseline/mps_smoke/results_checkpoints/single_link_retrieval/seed_901/linear_mac_matched_mlp.pt"
+          },
+          "single_sample_overfit_probe": {
+            "single_sample": true,
+            "optimizer_steps": 5,
+            "initial_mse": 0.026094792410731316,
+            "final_mse": 0.006670351605862379,
+            "loss_decreased": true
+          },
+          "parameter_count": 10945
+        }
+      }
+    },
+    {
+      "task": "two_link_composition",
+      "seed": 901,
+      "models": {
+        "zero_predictor": {
+          "test": {
+            "mse": 0.0504961833357811,
+            "mae": 0.21231797337532043
+          },
+          "kind": "constant_control"
+        },
+        "train_mean_predictor": {
+          "test": {
+            "mse": 0.050698280334472656,
+            "mae": 0.21231797337532043
+          },
+          "prediction": -0.017383523285388947,
+          "kind": "constant_control_fit_on_train_split"
+        },
+        "generator_oracle": {
+          "test": {
+            "mse": 0.0,
+            "mae": 0.0,
+            "max_absolute_label_error": 0.0,
+            "max_absolute_label_error_by_split": {
+              "train": 5.960464477539063e-08,
+              "validation": 1.862645149230957e-09,
+              "test": 0.0
+            }
+          },
+          "kind": "identity_edge_reference_solution_not_an_inference_adapter"
+        },
+        "modelized_neuron_graph": {
+          "validation": {
+            "mse": 0.12683268077671528,
+            "mae": 0.35019970685243607,
+            "edge_f1": 0.3333333333333333,
+            "empty_edge_graph_count": 0,
+            "evaluated_graph_count": 4,
+            "edge_precision": 0.25,
+            "edge_precision_numerator": 4,
+            "edge_precision_denominator": 16,
+            "edge_recall": 0.5,
+            "edge_recall_numerator": 4,
+            "edge_recall_denominator": 8,
+            "strength_mae": 0.19645035117864607,
+            "operation_scores": {
+              "add": {
+                "expected_count": 4,
+                "predicted_count": 8,
+                "correct_count": 4,
+                "precision": 0.5,
+                "recall": 1.0
+              },
+              "remove": {
+                "expected_count": 4,
+                "predicted_count": 0,
+                "correct_count": 0,
+                "precision": null,
+                "recall": 0.0
+              },
+              "retype": {
+                "expected_count": 2,
+                "predicted_count": 4,
+                "correct_count": 2,
+                "precision": 0.5,
+                "recall": 1.0
+              },
+              "set_strength": {
+                "expected_count": 2,
+                "predicted_count": 4,
+                "correct_count": 2,
+                "precision": 0.5,
+                "recall": 1.0
+              }
+            }
+          },
+          "test": {
+            "mse": 0.12983669822278898,
+            "mae": 0.2946179769933224,
+            "edge_f1": 0.3333333333333333,
+            "empty_edge_graph_count": 0,
+            "evaluated_graph_count": 4,
+            "edge_precision": 0.25,
+            "edge_precision_numerator": 4,
+            "edge_precision_denominator": 16,
+            "edge_recall": 0.5,
+            "edge_recall_numerator": 4,
+            "edge_recall_denominator": 8,
+            "strength_mae": 0.19761158376932142,
+            "operation_scores": {
+              "add": {
+                "expected_count": 4,
+                "predicted_count": 8,
+                "correct_count": 4,
+                "precision": 0.5,
+                "recall": 1.0
+              },
+              "remove": {
+                "expected_count": 4,
+                "predicted_count": 0,
+                "correct_count": 0,
+                "precision": null,
+                "recall": 0.0
+              },
+              "retype": {
+                "expected_count": 2,
+                "predicted_count": 5,
+                "correct_count": 2,
+                "precision": 0.4,
+                "recall": 1.0
+              },
+              "set_strength": {
+                "expected_count": 2,
+                "predicted_count": 3,
+                "correct_count": 2,
+                "precision": 0.6666666666666666,
+                "recall": 1.0
+              }
+            }
+          },
+          "pool_generalization": {
+            "4": {
+              "mse": 0.04668919718824327,
+              "mae": 0.18708224967122078,
+              "edge_f1": 0.3333333333333333,
+              "empty_edge_graph_count": 0,
+              "evaluated_graph_count": 4,
+              "edge_precision": 0.25,
+              "edge_precision_numerator": 4,
+              "edge_precision_denominator": 16,
+              "edge_recall": 0.5,
+              "edge_recall_numerator": 4,
+              "edge_recall_denominator": 8,
+              "strength_mae": 0.1959629565477371,
+              "operation_scores": {
+                "add": {
+                  "expected_count": 4,
+                  "predicted_count": 8,
+                  "correct_count": 4,
+                  "precision": 0.5,
+                  "recall": 1.0
+                },
+                "remove": {
+                  "expected_count": 4,
+                  "predicted_count": 0,
+                  "correct_count": 0,
+                  "precision": null,
+                  "recall": 0.0
+                },
+                "retype": {
+                  "expected_count": 1,
+                  "predicted_count": 3,
+                  "correct_count": 1,
+                  "precision": 0.3333333333333333,
+                  "recall": 1.0
+                },
+                "set_strength": {
+                  "expected_count": 3,
+                  "predicted_count": 5,
+                  "correct_count": 3,
+                  "precision": 0.6,
+                  "recall": 1.0
+                }
+              }
+            }
+          },
+          "threshold": 0.2,
+          "threshold_trials": [
+            {
+              "threshold": 0.2,
+              "selection_score": 0.5416666666666666,
+              "edge_f1": 0.3333333333333333,
+              "operation_macro_recall": 0.75,
+              "mse": 0.12683268077671528
+            },
+            {
+              "threshold": 0.3,
+              "selection_score": 0.125,
+              "edge_f1": 0.25,
+              "operation_macro_recall": 0.0,
+              "mse": 0.13955995254218578
+            },
+            {
+              "threshold": 0.5,
+              "selection_score": 0.125,
+              "edge_f1": 0.25,
+              "operation_macro_recall": 0.0,
+              "mse": 0.13955995254218578
+            },
+            {
+              "threshold": 0.75,
+              "selection_score": 0.125,
+              "edge_f1": 0.25,
+              "operation_macro_recall": 0.0,
+              "mse": 0.13955995254218578
+            }
+          ],
+          "permutation_identity_edge_jaccard": 1.0,
+          "permutation_both_empty_graph_rate": 0,
+          "permutation_empty_graph_fraction": 0.0,
+          "permutation_relative_mse_drift": 0.0,
+          "permutation_relative_mse_drift_defined_pairs": 4,
+          "evolution": {
+            "sequence_count": 1,
+            "steps_per_sequence": 2,
+            "total_transitions": 2,
+            "mean_step_mse": 0.27329088002443314,
+            "mean_edge_f1": 0.3333333333333333,
+            "mean_hard_edge_count": 4,
+            "mean_identity_edge_state_churn": 2
+          },
+          "train_seconds": 0.0,
+          "training_memory": {
+            "optimizer_steps": 3,
+            "samples_seen": 6,
+            "requested_batch_size": 2,
+            "effective_batch_size": 2,
+            "effective_batch_mode": "per_sample_gradient_accumulation",
+            "resumed_complete_checkpoint": true,
+            "gradient_coverage": {
+              "parameter_tensor_count": 20,
+              "gradient_connected_count": 20,
+              "finite_gradient_count": 20,
+              "nonzero_gradient_count": 20,
+              "disconnected_parameters": [],
+              "nonfinite_gradient_parameters": []
+            },
+            "single_sample_overfit_probe": {
+              "single_sample": true,
+              "optimizer_steps": 5,
+              "initial_mse": 0.013150038197636604,
+              "final_mse": 0.0012066233903169632,
+              "loss_decreased": true
+            },
+            "checkpoint": "project/docs/research/topics/neuron_graph_validation/validations/modelized_neuron_training_baseline/mps_smoke/results_checkpoints/two_link_composition/seed_901/modelized_neuron_graph.pt"
+          },
+          "single_sample_overfit_probe": {
+            "single_sample": true,
+            "optimizer_steps": 5,
+            "initial_mse": 0.013150038197636604,
+            "final_mse": 0.0012066233903169632,
+            "loss_decreased": true
+          },
+          "parameter_count": 1286
+        },
+        "parameter_matched_mlp": {
+          "test": {
+            "mse": 0.8103958368301392,
+            "mae": 0.8734978437423706
+          },
+          "train_seconds": 0.0,
+          "training_memory": {
+            "optimizer_steps": 3,
+            "samples_seen": 6,
+            "requested_batch_size": 2,
+            "effective_batch_size": 2,
+            "effective_batch_mode": "per_sample_gradient_accumulation",
+            "resumed_complete_checkpoint": true,
+            "gradient_coverage": {
+              "parameter_tensor_count": 4,
+              "gradient_connected_count": 4,
+              "finite_gradient_count": 4,
+              "nonzero_gradient_count": 4,
+              "disconnected_parameters": [],
+              "nonfinite_gradient_parameters": []
+            },
+            "single_sample_overfit_probe": {
+              "single_sample": true,
+              "optimizer_steps": 5,
+              "initial_mse": 0.37738823890686035,
+              "final_mse": 0.19895905256271362,
+              "loss_decreased": true
+            },
+            "checkpoint": "project/docs/research/topics/neuron_graph_validation/validations/modelized_neuron_training_baseline/mps_smoke/results_checkpoints/two_link_composition/seed_901/parameter_matched_mlp.pt"
+          },
+          "single_sample_overfit_probe": {
+            "single_sample": true,
+            "optimizer_steps": 5,
+            "initial_mse": 0.37738823890686035,
+            "final_mse": 0.19895905256271362,
+            "loss_decreased": true
+          },
+          "parameter_count": 913
+        },
+        "linear_mac_matched_mlp": {
+          "test": {
+            "mse": 0.07596845924854279,
+            "mae": 0.23148182034492493
+          },
+          "train_seconds": 0.0,
+          "training_memory": {
+            "optimizer_steps": 3,
+            "samples_seen": 6,
+            "requested_batch_size": 2,
+            "effective_batch_size": 2,
+            "effective_batch_mode": "per_sample_gradient_accumulation",
+            "resumed_complete_checkpoint": true,
+            "gradient_coverage": {
+              "parameter_tensor_count": 4,
+              "gradient_connected_count": 4,
+              "finite_gradient_count": 4,
+              "nonzero_gradient_count": 4,
+              "disconnected_parameters": [],
+              "nonfinite_gradient_parameters": []
+            },
+            "single_sample_overfit_probe": {
+              "single_sample": true,
+              "optimizer_steps": 5,
+              "initial_mse": 0.003819056088104844,
+              "final_mse": 0.00040901399916037917,
+              "loss_decreased": true
+            },
+            "checkpoint": "project/docs/research/topics/neuron_graph_validation/validations/modelized_neuron_training_baseline/mps_smoke/results_checkpoints/two_link_composition/seed_901/linear_mac_matched_mlp.pt"
+          },
+          "single_sample_overfit_probe": {
+            "single_sample": true,
+            "optimizer_steps": 5,
+            "initial_mse": 0.003819056088104844,
+            "final_mse": 0.00040901399916037917,
+            "loss_decreased": true
+          },
+          "parameter_count": 10945
+        }
+      }
+    }
+  ],
+  "summary": {
+    "single_link_retrieval": {
+      "seed_count": 1,
+      "zero_predictor": {
+        "mean": 27.5507063656915,
+        "sample_std": 0.0,
+        "ci95": [
+          27.5507063656915,
+          27.5507063656915
+        ],
+        "criterion_met": false
+      },
+      "edge_f1_mean": 0.0,
+      "train_mean_predictor": {
+        "mean": 28.77228565288886,
+        "sample_std": 0.0,
+        "ci95": [
+          28.77228565288886,
+          28.77228565288886
+        ],
+        "criterion_met": false
+      },
+      "parameter_matched_mlp": {
+        "mean": -0.8369173390322017,
+        "sample_std": 0.0,
+        "ci95": [
+          -0.8369173390322017,
+          -0.8369173390322017
+        ],
+        "criterion_met": true
+      },
+      "linear_mac_matched_mlp": {
+        "mean": 1.388721981081972,
+        "sample_std": 0.0,
+        "ci95": [
+          1.388721981081972,
+          1.388721981081972
+        ],
+        "criterion_met": false
+      },
+      "permutation_edge_jaccard_mean": 1.0,
+      "permutation_both_empty_graph_rate": 1,
+      "permutation_empty_graph_fraction": 1.0,
+      "permutation_mse_drift_mean": 0.0,
+      "permutation_mse_drift_defined_seeds": 1,
+      "operation_recall": {
+        "add": null,
+        "remove": 1.0,
+        "retype": 0.0,
+        "set_strength": 0.0
+      },
+      "operation_expected_counts": {
+        "add": 0,
+        "remove": 4,
+        "retype": 2,
+        "set_strength": 2
+      },
+      "strength_mae_mean": null,
+      "structure_criterion_met": false,
+      "mean_test_mse": 0.11909673176705837,
+      "pool_generalization": {
+        "4": {
+          "mse_mean": 0.10105502979422454,
+          "edge_f1_mean": 0.0,
+          "strength_mae_mean": null
+        }
+      }
+    },
+    "two_link_composition": {
+      "seed_count": 1,
+      "zero_predictor": {
+        "mean": 1.5712180534402485,
+        "sample_std": 0.0,
+        "ci95": [
+          1.5712180534402485,
+          1.5712180534402485
+        ],
+        "criterion_met": false
+      },
+      "edge_f1_mean": 0.3333333333333333,
+      "train_mean_predictor": {
+        "mean": 1.5609684858384751,
+        "sample_std": 0.0,
+        "ci95": [
+          1.5609684858384751,
+          1.5609684858384751
+        ],
+        "criterion_met": false
+      },
+      "parameter_matched_mlp": {
+        "mean": -0.8397860745057072,
+        "sample_std": 0.0,
+        "ci95": [
+          -0.8397860745057072,
+          -0.8397860745057072
+        ],
+        "criterion_met": true
+      },
+      "linear_mac_matched_mlp": {
+        "mean": 0.7090868961552552,
+        "sample_std": 0.0,
+        "ci95": [
+          0.7090868961552552,
+          0.7090868961552552
+        ],
+        "criterion_met": false
+      },
+      "permutation_edge_jaccard_mean": 1.0,
+      "permutation_both_empty_graph_rate": 0,
+      "permutation_empty_graph_fraction": 0.0,
+      "permutation_mse_drift_mean": 0.0,
+      "permutation_mse_drift_defined_seeds": 1,
+      "operation_recall": {
+        "add": 1.0,
+        "remove": 0.0,
+        "retype": 1.0,
+        "set_strength": 1.0
+      },
+      "operation_expected_counts": {
+        "add": 4,
+        "remove": 4,
+        "retype": 2,
+        "set_strength": 2
+      },
+      "strength_mae_mean": 0.19761158376932142,
+      "structure_criterion_met": false,
+      "mean_test_mse": 0.12983669822278898,
+      "pool_generalization": {
+        "4": {
+          "mse_mean": 0.04668919718824327,
+          "edge_f1_mean": 0.3333333333333333,
+          "strength_mae_mean": 0.1959629565477371
+        }
+      }
+    }
+  },
+  "scaling": [
+    {
+      "memory_neurons": 4,
+      "parameter_count": 1286,
+      "median_forward_ms": 8.781750002526678,
+      "p95_forward_ms": 9.188500000163913
+    }
+  ],
+  "limitations": [
+    "Synthetic key-value retrieval/composition does not establish language or broad capability claims.",
+    "The neuron model has one shared parameter set across all graph positions; independent state is not a per-neuron weight set.",
+    "Pool sizes cover 4 to 64 memory neurons and do not establish asymptotic scaling.",
+    "Identity persistence is a local atomic JSON contract; concurrent writers and remote stores are outside this test.",
+    "Host and MPS memory are sampled and may miss transient peaks.",
+    "Total MPS FLOPs are not exactly countable in this PyTorch build; Linear MAC and multiply-add subtotals are reported separately.",
+    "A batch is represented as gradient accumulation across independent one-graph forwards; it is not graph-batched/vectorized.",
+    "The evaluation oracle is an upper-bound control derived from labels and is not an inference adapter or deployable model."
+  ]
+}

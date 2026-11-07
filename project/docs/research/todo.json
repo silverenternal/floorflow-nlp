@@ -1,0 +1,714 @@
+{
+  "schema_version": "newera-roadmap-v2",
+  "project": "NewEra",
+  "title": "共享神经元模型的可执行能力路线图",
+  "status": "in_progress",
+  "updated_at": "2026-11-07",
+  "purpose": "构建一个所有运行实例共享同一架构和一份权重的通用神经元计算模型：能聚合任意数量输入，具备更强的非线性、记忆、通信与能力组合潜力；目标是功能能力而非逐项模拟生物细胞。",
+  "interpretation": {
+    "neuron": "所有神经元实例共享同一模型架构和一份权重；每个实例有独立运行状态。一个神经元是可聚合、可训练、可组合的计算模型，不是必须忠实复刻的生物细胞。",
+    "capability": "能力由可复现任务和输入输出契约定义；可使用或超越生物神经元计算能力。生理细节仅在其贡献目标能力、数据解释或工程收益时实现。",
+    "aggregation": "任意数量输入的聚合属于单个模型内部功能，不是另一个独立模型。内部可包含多个可学习计算阶段，但参数仍属于共享神经元模型。",
+    "surpassing_biology": "更强须按具体维度验证，如可扩展的输入规模、记忆跨度、输出并行度、精确度或组合泛化；不以“全能”口号代替量化证据。",
+    "evidence_boundary": "不声称覆盖全部真实神经元类型或全部任务。生物研究用于提出有价值的能力假设与数据基准，不要求复制与任务无关的生理细节。"
+  },
+  "execution_policy": {
+    "scope": "本文件只含未完成任务；step.output 中的新文件/入口是计划产物，不表示已实现。每个 step 完成后移出活动列表并将产物/结论写入对应记录。",
+    "wip": "单人一次推进一个模型工作项；独立的小型测试/数据检查可并行，不同时改聚合器、状态和拓扑学习。",
+    "order": [
+      "NE-024",
+      "NE-026",
+      "NE-027",
+      "NE-028"
+    ],
+    "quick_checks": "单个代码片先做形状/梯度/小样本诊断，使用训练/验证数据；不为文档或只镜像实现的行为新增测试。",
+    "run_tiers": {
+      "diagnostic": "1-2 个预设训练/验证种子，小数据先确认可学习性；每轮最多比较两个新增机制。记录有效样本、更新数与时长，预算在启动前写入配置。",
+      "confirmation": "冻结候选、数据与阈值后，按任务需要至少六种子配对正式测试；已查看的测试只能保留为开发证据，新主张使用新封存测试。",
+      "performance": "每次新增组件即测 CPU/MPS 前反向与一个资源点；完整多尺度曲线在候选稳定后运行。"
+    },
+    "baselines": "先 oracle、零/训练均值、已有简单模型，再参数/MAC 匹配强控制；有效 batch、看到的样本数和训练预算必须对齐。",
+    "structural_metrics": "exact-edge/type/strength 指标只有在任务或监督能识别该真值时才是能力硬门槛；否则报告任务等价性、边干预效用、稀疏度与成本。",
+    "result_handling": "诊断/选型任务以测量正确且决策明确为完成；假设可被否定。能力交付仍需通过预注册任务，失败不会被记为能力完成，也不无边界追逐指标。",
+    "done": "有具体代码/数据/配置/报告及一次可运行入口后才完成；只跑必要的相关检查。完成条目归档且活动 depends_on 引用同步移除。"
+  },
+  "open_source_policy": {
+    "preference": [
+      "已安装框架的成熟 API",
+      "受维护组件包的稳定 API",
+      "原作者/维护者的最小许可源码适配",
+      "缺口确凿时才写本地研究代码"
+    ],
+    "selection": [
+      "满足具体能力和接口",
+      "CPU/MPS 前反向及确定性适配",
+      "许可证与来源清楚",
+      "依赖/性能成本合理",
+      "有可核查测试或小型原实现",
+      "修改范围与后续维护负担可控"
+    ],
+    "acquisition": "需读/改源码时 clone 上游固定 commit 到任务外部缓存，只把实际采用的许可文件/组件及修改说明带入项目；直接包依赖用 uv 管理并锁版本。",
+    "registration": "每个采用项记录 URL、release/commit、具体文件/API、许可证/版权、取得方式、本地改动、兼容性结果；无需为未采用候选建立大型治理系统。",
+    "adapter_boundary": "只适配输入/输出、mask、group、状态与资源契约；模型算子参数归同一 ModelNeuron；避免多层抽象和框架嵌套。",
+    "device_policy": "配置指定实现与设备，无法运行显式报错；CPU 与 MPS 是分别验证的模式，不做静默 fallback 或保留旧产物兼容链。",
+    "catalog_status": "以下为 2026-11-07 基于官方代码/文档的候选表；除项目现用 PyTorch 外，不表示已安装、已固定 commit 或已通过 MPS。",
+    "candidates": [
+      {
+        "id": "pytorch",
+        "upstream": "https://github.com/pytorch/pytorch",
+        "license": "BSD-style（采用版本的 LICENSE 为准）",
+        "components": [
+          "nn.GRUCell/LSTMCell",
+          "nn.MultiheadAttention/functional.scaled_dot_product_attention",
+          "DataLoader/optim/state_dict",
+          "utils.benchmark/profiler"
+        ],
+        "adoption": "优先复用已安装原生 API，复用 uv.lock 的版本；设备行为按所用 API 实测。",
+        "review_status": "项目已在用 PyTorch；新增组件 CPU/MPS、mask/零长度与确定性仍需逐项确认。",
+        "sources": [
+          "https://raw.githubusercontent.com/pytorch/pytorch/main/LICENSE",
+          "https://docs.pytorch.org/docs/stable/generated/torch.nn.functional.scaled_dot_product_attention.html"
+        ]
+      },
+      {
+        "id": "set_transformer",
+        "upstream": "https://github.com/juho-lee/set_transformer",
+        "license": "MIT",
+        "components": [
+          "modules.py:MAB/ISAB/PMA"
+        ],
+        "adoption": "clone 固定 commit，优先适配原作者最小组件；用于模型内部的集合交互/诱导注意力聚合。",
+        "review_status": "已阅读 modules.py 与 LICENSE；原 API 无 padding mask/空输入契约，改用 SDPA 时注意原 attention scaling 与默认 head_dim scaling 不同；兼容性未实测。",
+        "sources": [
+          "https://raw.githubusercontent.com/juho-lee/set_transformer/master/modules.py",
+          "https://raw.githubusercontent.com/juho-lee/set_transformer/master/LICENSE"
+        ]
+      },
+      {
+        "id": "pyg",
+        "upstream": "https://github.com/pyg-team/pytorch_geometric",
+        "license": "MIT",
+        "components": [
+          "DeepSetsAggregation",
+          "SetTransformerAggregation/AttentionalAggregation"
+        ],
+        "adoption": "优先检查聚合 API 是否可轻量依赖；不整套替换 NewEra 的神经元协议、身份或调度。",
+        "review_status": "已核查 API 和 LICENSE；具体版本、torch-scatter/pyg-lib 需求、MPS 反向与确定性未实测，不能按纯 PyTorch 名称推断支持。",
+        "sources": [
+          "https://pytorch-geometric.readthedocs.io/en/stable/modules/nn.html",
+          "https://raw.githubusercontent.com/pyg-team/pytorch_geometric/master/LICENSE"
+        ]
+      },
+      {
+        "id": "torchmetrics",
+        "upstream": "https://github.com/Lightning-AI/torchmetrics",
+        "license": "Apache-2.0",
+        "components": [
+          "classification/regression functional metrics"
+        ],
+        "adoption": "仅在复用确有价值时采用所需函数；项目特有图身份/边干预指标保留薄实现，不为简单均值引入整个训练框架。",
+        "review_status": "已核查仓库和 LICENSE；依赖开销、缺省 zero_division/空集行为与 MPS 未实测。",
+        "sources": [
+          "https://github.com/Lightning-AI/torchmetrics",
+          "https://raw.githubusercontent.com/Lightning-AI/torchmetrics/master/LICENSE"
+        ]
+      },
+      {
+        "id": "clrs",
+        "upstream": "https://github.com/google-deepmind/clrs",
+        "license": "Apache-2.0（代码；下载数据/第三方资源另核查）",
+        "components": [
+          "一个 minimum/search/BFS 任务的官方 sampler/probing/spec 或官方预生成数据"
+        ],
+        "adoption": "优先适配官方样本/参考解，保留官方切分；只做 NumPy 到任务张量的薄 adapter。",
+        "review_status": "已核查 README/许可证；官方模型示例使用 JAX、数据管线涉及 TF，是否能隔离 sampler 与导入依赖待验证；不直接套入其 GNN processor。",
+        "sources": [
+          "https://raw.githubusercontent.com/google-deepmind/clrs/master/README.md",
+          "https://raw.githubusercontent.com/google-deepmind/clrs/master/LICENSE"
+        ]
+      }
+    ],
+    "watchlist": [
+      {
+        "upstream": "https://github.com/state-spaces/mamba",
+        "reason": "官方 README 当前说明 Linux/加速内核要求；新版默认可不构建 CUDA 扩展也不等于已支持 MPS。仅在记忆基准暴露瓶颈后做独立可行性检查，不作为首期硬依赖。",
+        "source": "https://raw.githubusercontent.com/state-spaces/mamba/main/README.md"
+      }
+    ]
+  },
+  "development_boundaries": {
+    "neuron": "src/newera/neuron/：共享模型、内部聚合与状态；现有 neuron/cells/ 可按 aggregation/memory 功能拆分，每目录至多五项。",
+    "graph": "src/newera/neuron/graph/：身份、接触、拓扑、动作；不把每个节点降成纯向量算子以替代模型调用。",
+    "tasks": "src/newera/capabilities/：任务 adapter/数据/评估；复用 Capability/TaskAdapter，公共 runner 只抽取已被两个实际任务使用的部分。",
+    "entrypoints": "project/scripts/experiments/training/neurons/：薄命令入口；project/configs/models_training/learning/neuron_comparisons/functional/：计划中的功能配置。",
+    "artifacts": "新能力记录计划置于 project/docs/research/topics/neuron_capabilities/，按 specification/reuse/runs 等功能分组；训练大产物使用现有忽略目录并在报告引用。",
+    "change_control": "每个工作项聚焦一个能力或一个工程缺口；完成旧入口职责抽取后移除重复路径，不为历史复现引入 fallback。"
+  },
+  "working_rules": [
+    "单人开发，优先建立可运行的能力闭环；模块可快速演进，不为探索原型强制兼容。",
+    "能力先定义任务和误差指标，再选择机制；不因生物术语本身添加无任务收益的模拟细节。",
+    "所有神经元位置共用一份模型权重；状态可因实例而异，聚合与内部计算不拆成另一个模型。",
+    "对真实数据记录来源、许可、模态、划分和偏差；合成数据、机制仿真、真实测量分开报告。",
+    "禁止测试集参与训练、阈值选择或结构调试；同一来源实体按细胞/任务族隔离，避免伪泛化。",
+    "工程检查服务于训练可靠性、复现或用户目标；删除只有审计仪式而无故障覆盖价值的检查。",
+    "负面结果保留为证据；修复以能力/结构变化和预算匹配对照证明，不因测试任务失败而临时改门槛。",
+    "原则上先适配开源好代码，再写新算子；通用基础设施复用既有实现，研究所需的少量新任务/语义可自研并说明原因。",
+    "Git 是唯一版本历史、本地只保留一个检出工作树；文件和目录使用稳定功能名，禁止用 v数字、backup、final2 等副本名保存迭代。",
+    "全能性验证最终要求多个任务使用同一份训练后核心权重；单任务独立训练仅是诊断控制。",
+    "用户暂缓动态权重：独立节点状态、上下文、可学习边和训练期优化可以演进；不默认引入每身份权重或推理时 fast weights。"
+  ],
+  "status_vocabulary": {
+    "planned": "尚未开始；不表示依赖、运行环境或数据已具备",
+    "in_progress": "正在进行",
+    "done": "验收条件已满足并保留证据",
+    "blocked": "存在已记录且无法自行消除的具体阻碍",
+    "deferred": "因项目抽象或前置设计未落实而暂缓；重新排期前记录原因，不表示实现已通过或外部受阻。"
+  },
+  "stages": [
+    {
+      "id": "engineering",
+      "name": "工程保障",
+      "outcome": "本地门禁与 CI 可稳定复现，不拖慢探索。"
+    },
+    {
+      "id": "specification",
+      "name": "能力与数据定义",
+      "outcome": "将“神经元全能性”拆为可测试、可扩展的能力族和可信数据层级。"
+    },
+    {
+      "id": "core",
+      "name": "共享权重神经元核心",
+      "outcome": "构建内部高容量聚合、非线性计算、状态和多输出能力。"
+    },
+    {
+      "id": "learning",
+      "name": "状态适应与动态通信",
+      "outcome": "让模型按任务学习、维护和改变神经元间的信息路由。"
+    },
+    {
+      "id": "capabilities",
+      "name": "能力组合与超越",
+      "outcome": "验证不同能力可组合，并量化相对基线的扩展维度。"
+    },
+    {
+      "id": "evidence",
+      "name": "规模、鲁棒性与成本",
+      "outcome": "界定能力在规模、噪声、数据漂移和硬件预算下的边界。"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "NE-024",
+      "title": "适配模型内部的非线性可变入度聚合",
+      "stage": "core",
+      "priority": "P0",
+      "status": "in_progress",
+      "depends_on": [],
+      "inputs": [
+        "src/newera/neuron/composition.py",
+        "src/newera/neuron/graph/topology.py"
+      ],
+      "reuse": [
+        "pytorch",
+        "pyg",
+        "set_transformer"
+      ],
+      "steps": [
+        {
+          "id": "NE-024.1",
+          "status": "completed",
+          "work": "以消息集合为接口，在需要时携带 group/contact/type 信息；只为独立分组反例扩展多重接触标识，复用稳定 neuron ID。",
+          "output": "ModelNeuron.step 消息集合契约、全局求和不可区分的精确分组绑定反例和 contract 测试。",
+          "done_when": "源/目标相同但接触组不同的输入差异保留；无序输入置换与重复消息的多重集合语义明确，空输入不产生 NaN。"
+        },
+        {
+          "id": "NE-024.2",
+          "status": "completed",
+          "work": "将 NE-029 选中的 DeepSets 或诱导注意力组件接入 ModelNeuron；保留现有求和为显式实验控制。",
+          "output": "PyG SetTransformer adapter 的 CPU/MPS、padded batch/mask/empty、共享权重适配；全局求和保持默认。",
+          "done_when": "聚合属于同一个模型；上游无 mask/空输入语义的缺口由 adapter 明确定义；节点数/入度改变不增加权重副本。"
+        },
+        {
+          "id": "NE-024.3",
+          "status": "completed",
+          "work": "在集合归约与分组绑定任务上检查学习、反例区分、规模外推和前反向成本，按验证结果选择。",
+          "output": "六 seed 训练尺寸及规模外推已完成；冻结能力验收未通过，求和仍为默认，候选研究转向低成本逐元素交互。",
+          "done_when": "超过全局先线性投影再求和无法区分的分组反例；精度与 MPS 成本满足已冻结预算；不固定每节点 top-k 作为接口上限。",
+          "status_reason": "冻结能力阈值未通过：set-sum MAE 0.658、grouped-binding MAE 1.200，16 组外推 MAE 3.326；注意力方案 3.46 倍参数、约 9.9 倍 MPS 前反向代价。保留为显式研究候选，等待更高效的分组交互机制。"
+        },
+        {
+          "id": "NE-024.4",
+          "status": "completed",
+          "work": "评估 PyG DeepSetsAggregation 作为低成本交互候选：逐消息非线性编码后求和，再经全局映射；保持同一 ModelNeuron 共享权重，并与 sum、Set Transformer 对齐样本、更新数、六 seed 和 sealed 阈值。先验证对现有分组反例的可辨识性，再运行冻结任务；不达标则记录失败并决定是否保留候选。",
+          "output": "单一正式配置、可复现 runner 入口、CPU/MPS 语义测试、参数/前反向成本和六 seed 任务结果。",
+          "done_when": "排列不变、mask/空集/重复语义正确，CPU/MPS 前反向通过；相对 sum 在 grouped-binding 上满足冻结 20% paired MSE 改善、两族 MAE≤0.05、16 组外推≤0.05 且单模型权重；成本如实报告，未通过不宣称能力交付。",
+          "evidence": "6 seed MPS 对照结果见 neuron_capabilities/runs/message_aggregation/training_budget_diagnostic/deep_sets_results.json 与 report.md。DeepSets 在分组绑定 MSE 改善 10.1%（95% CI 6.7%–13.5%），低于 20% 阈值；两族 MAE 与 16 组外推均远未达到 0.05。参数 2.18 倍、前反向约 3.3 倍于求和，较 Set Transformer 约快 2.9 倍。CPU/MPS 聚焦语义和梯度测试通过。保留为较低成本研究候选，不替换默认求和，不宣称能力达标。"
+        },
+        {
+          "id": "NE-024.5",
+          "status": "completed",
+          "work": "只用训练/验证数据诊断 DeepSets 8 epoch 的欠拟合可能：固定同一训练样本、初始化、优化器与随机顺序，比较累积训练到 8/16/32 epoch 的训练及验证误差；包含全局求和控制，最多一个预设 seed，不生成或读取 sealed test。报告预算及每阶段耗时。",
+          "output": "training_budget_diagnostic/underfit_probe.json 与决策记录。",
+          "done_when": "命令可复现，输出包含配置/源码指纹、实际样本数、更新数、训练/验证 set-sum 与 grouped-binding 指标及耗时；仅基于验证集判断是否延长预算，若需确认则另行冻结方案和新 sealed split。",
+          "evidence": "单 seed、固定训练/验证数据、无 sealed test。32 epoch 时 global_sum 的 set-sum 验证 MAE 从 epoch 8 的 0.4496 降至 0.1467；DeepSets 的 set-sum 验证 MAE 从 0.5048 降至 0.2380，grouped-binding 验证 MAE 从 1.4232 降至 1.0288，训练误差也持续下降，未见平台。结果见 runs/message_aggregation/training_budget_diagnostic/underfit_probe_results.json。此证据支持训练预算不足但尚不能说明更长训练是否可通过能力阈值；据此冻结 32 epoch 作为新确认候选预算，并使用全新 seed 与封存测试。"
+        },
+        {
+          "id": "NE-024.6",
+          "status": "completed",
+          "work": "按验证诊断冻结 32 epoch 训练预算，用全新 seed 组和未查看 sealed test，对 global_sum 与 PyG DeepSets 做六 seed 等样本、等更新配对确认；记录参数和 MPS 成本。候选和配置在解封前固定。",
+          "output": "training_budget_diagnostic/deep_sets_extended_config.json、deep_sets_extended_results.json 与报告更新。",
+          "done_when": "六 seed 正式运行完成且每族只在最终冻结后使用一次 sealed test；如能力 MAE/外推门槛仍未达到，如实保留失败并评估是否存在不冲突可执行的下一项。",
+          "evidence": "全新 64001–64006 六 seed、32 epoch、MPS 正式对照；结果见 runs/message_aggregation/training_budget_diagnostic/deep_sets_extended_results.json。DeepSets grouped-binding sealed MAE=1.2153，16组验证外推 MAE=3.0218；相对求和 paired MSE 改善 19.9%（95% CI 10.4%–29.4%），略低于冻结 20% 均值门槛；set-sum MAE 0.4121 比求和的 0.2183 差。两族 MAE≤0.05 与外推≤0.05 均失败。参数 15,465 vs 7,081，64条 MPS 前反向 1.34 vs 0.41ms。数据预算已提高，验证尚未达阈值，因此保留求和默认。"
+        },
+        {
+          "id": "NE-024.7",
+          "status": "completed",
+          "work": "实现 PyG DeepSets 的上下文门控求和残差：初始化严格等于全局求和，接收神经元 context 可按任务选择打开 DeepSets 交互；在新的六 seed、32 epoch 正式配置中与 global_sum 等样本对照，复用现成数据生成和统一 ModelNeuron 权重，不改任务阈值。",
+          "output": "ContextualSumResidualDeepSetsAggregator 薄适配、CPU/MPS contract tests、配置及 fresh sealed 结果/资源报告。",
+          "done_when": "CPU/MPS 置换、mask、空输入、重复和反向语义通过；无上下文/零初始化时严格复现求和；六 seed 下如实报告两族训练尺寸/外推、paired MSE CI、参数和 MPS 成本，只有通过 NE-024 冻结门槛才恢复能力交付。",
+          "evidence": "PyG DeepSets加上下文零初始化门控残差，在 CPU/MPS 通过聚合适配测试并严格匹配初始求和；全新 74001–74006 六 seed/32 epoch sealed：grouped-binding MAE 1.2657，paired MSE 改善 15.1%（95% CI 6.1%–24.2%），set-sum MAE 0.3507，16组外推 MAE 3.204；参数 15,561，MPS 64条前反向约 1.42ms。冻结能力阈值仍失败，未改默认求和。完整结果见 runs/message_aggregation/report.md 与 training_budget_diagnostic/extended_budget/contextual_deep_sets_confirmation_results.json。"
+        },
+        {
+          "id": "NE-024.8",
+          "status": "completed",
+          "work": "筛查 PyG LCMAggregation：复用上游共享 GRUCell 对称组合与树归约；适配 ModelNeuron 的无序变长消息集合，验证 CPU/MPS 前反向、排列误差、mask、空集、重复接触和真实前反向成本。只有变长语义可靠且候选在小型训练/验证对照中优于已有候选时，才按新 seed 冻结正式确认。",
+          "output": "LCM 薄适配及 contract tests、validation-only 诊断结果和是否进入正式六 seed 的明确决策。",
+          "done_when": "所有实际输入都参与聚合；batch 各集合长度不同时不把 padding 误当消息；空集语义明确，梯度/置换容差符合契约，MPS 无 fallback；记录复杂度与测得成本。正式确认只有在诊断胜出后执行，不达标按失败归档。",
+          "evidence": "在 PyG 2.8.1 CPU/MPS 小型 contract screen 中，PyG LCMAggregation 对 3 条消息换序后输出差异分别约 0.314/0.251，违反无序集合置换不变性。对称二元 GRU 操作不足以使树归约对任意配对/分组顺序不变；因此没有接入或训练，避免项目自行补做全排列/排序实现。详见 neuron_capabilities/runs/message_aggregation/report.md。"
+        },
+        {
+          "id": "NE-024.9",
+          "status": "completed",
+          "work": "筛查 PyG EquilibriumAggregation：验证 CPU/MPS 前反向、置换、变长 index 分组、mask/空集/重复和成本；首轮小预算若不确定，用正式样本量和32 epoch再做一个新 validation-only seed。仅当预算匹配验证任务明确胜过求和及已测候选时进入新 seed正式确认；不读 sealed test。",
+          "output": "EquilibriumAggregation 薄适配、CPU/MPS contract tests、validation-only 学习/成本诊断和是否进入新 seed 六 seed 正式确认的决定。",
+          "done_when": "集合契约与 MPS 梯度完全可靠，实际成本适合目标预算，验证任务明确胜过求和及已测候选；否则删除 adapter 并记录上游限制。能力指标继续采用原冻结阈值。",
+          "evidence": "PyG 2.8.1 EquilibriumAggregation CPU/MPS semantic and gradient筛查通过，但两个 validation-only 屏幕未显示有竞争力：8 epoch/512样本 set-sum val MAE 2.766 vs sum 1.701，group MAE 1.359 vs 1.341；32 epoch/2048样本 set-sum val MAE 0.415 vs sum 0.156，group MAE 1.365 vs 1.440。参数 15,662 vs 7,081，单 seed 32 epoch 耗时165.7s vs142.6s。未使用 sealed test，候选适配已移除。详见 runs/message_aggregation/report.md 与 learning_curve/equilibrium/ 结果。"
+        },
+        {
+          "id": "NE-024.10",
+          "status": "completed",
+          "work": "筛查 PyG SetTransformerAggregation 的多 seed pooling 变体：设 zero encoder blocks，四个可学习 seed 对所有消息做交叉注意力，再仅在四个 seed 间做小型 decoder；concat seed 表示后投影回 hidden_size。该设计保留全部输入、排列不变，注意力成本从全量消息两两交互转为 O(N·4)。验证置换/mask/空/重复/CPU-MPS与资源，再用训练/验证筛选。",
+          "output": "多 seed pooling 薄适配及 tests、validation-only 诊断和是否进入新 seed 正式确认的决定。",
+          "done_when": "聚合语义满足消息集合契约，资源曲线实测并优于 full Set Transformer；validation 的 set-sum 与 binding 均比求和/DeepSets更有希望；否则移除该候选。冻结阈值不变，sealed test 仅在候选/训练方案冻结后使用。",
+          "evidence": "全新 seed 87139 validation-only 32 epoch筛查见 runs/message_aggregation/training_budget_diagnostic/learning_curve/multi_seed_pool/screen_results.json。四 seed-pooling查询参数23,209、训练149.5s；求和7,081/142.9s，DeepSets15,465/139.6s。multi-seed pooling验证 binding MAE1.4965（求和1.5921），不及 DeepSets1.1413；set-sum MAE0.4784，也不及求和0.3237。适配语义测试通过，但精度和参数/成本均无足够收益，未读取 sealed test；适配已移除。"
+        },
+        {
+          "id": "NE-024.11",
+          "status": "completed",
+          "work": "从 Set Transformer 作者官方 MIT 仓库 clone ISAB 实现，记录 commit/license/source；只适配其 inducing-point self-attention block 到同一 ModelNeuron，使用固定少量诱导点但保留对全量入边的访问，避免全量消息两两注意力。先测排列/mask/变长/空集/重复/CPU-MPS和前反向成本，再用冻结训练/验证筛选。 首个 ISAB validation screen 未胜出时，可只使用训练/验证集比较更贴近上游默认的32 inducing points、单 ISAB block 变体；不触及 sealed test。",
+          "output": "本地上游 clone、许可与源码指纹记录、薄 ISAB adapter、语义测试及 validation-only 筛选报告。",
+          "done_when": "上游代码有保留的许可证与明确本地改动清单；adapter 不存在固定输入数量上限且对集合排列不敏感；验证任务较直接 DeepSets有清晰收益且相较 full SetTransformer 资源成本下降，才冻结新 seed 六 seed正式配置，否则移除。",
+          "evidence": "作者仓库commit73432c640ac78140496d6738416c54d32c686d65，MIT许可及本地mask修改见 reuse/set_transformer_source.md；ISAB/PMA语义和CPU/MPS测试通过。新seed94121 validation-only 32 epoch结果：16 inducing/2 block binding MAE1.4182、set-sum0.7850；32 inducing/1 block binding MAE1.1943、set-sum0.4925；DeepSets同批binding1.1102、set-sum0.2358。ISAB较DeepSets未提高任务指标且参数21,193–29,897，训练156–167s；未读取sealed test。保留组件仅供后续context residual复用，不作为已选候选。"
+        },
+        {
+          "id": "NE-024.12",
+          "status": "completed",
+          "work": "评估上下文门控 ISAB 残差：零初始化保持原求和，单模型共享权重，以输入任务/入度context选择性叠加官方ISAB交互。仅一颗训练/验证 seed 与既有DeepSets控制做预算匹配筛查，记录 MPS 64/256入度前反向成本；验证明确受益后才冻结全新seed sealed确认。",
+          "output": "上下文门控ISAB薄adapter、CPU/MPS语义/精确初值测试、validation-only比较和资源测量。",
+          "done_when": "消息集合语义和求和精确初值通过；在验证集保留求和能力并优于DeepSets分组绑定，MPS成本明显低于full Set Transformer；否则移除ISAB adapter，保留负结论。",
+          "evidence": "作者官方 ISAB/PMA 在CPU/MPS语义测试通过；16/32 inducing直接候选与上下文门控候选的 validation-only 32 epoch结果分别见 learning_curve/induced_set/。上下文 ISAB binding MAE1.0821略优DeepSets1.1102，但set-sum MAE0.3373劣于DeepSets0.2358，参数21,289、训练157.6s也高于DeepSets15,465/139.3s，没形成足够收益；未读sealed test，按计划移除ISAB adapter。作者源码、MIT许可和commit记录保留。"
+        },
+        {
+          "id": "NE-024.13",
+          "status": "completed",
+          "work": "用 PyG 官方 DeepSetsAggregation 筛选更宽逐消息/全局 MLP（expansion=8，相对已测 expansion=2）；固定同一 seed、样本、优化器和32 epoch，仅比较求和、窄DeepSets、宽DeepSets的 train/validation 与参数、MPS耗时，不读 sealed test。若宽模型没有明显验证收益则删除该变体并评估是否已无适合的开源通用聚合器。",
+          "output": "learning_curve/deep_sets/wide_screen_results.json 与容量收益决策。",
+          "done_when": "结果可复现且只基于训练/验证；宽候选的分组绑定误差和求和误差有清晰改善并记录成本，否则移除扩张配置，不使用 sealed test 做超参选择。",
+          "evidence": "同一训练/验证 seed 94121、32 epoch 全集结果见 training_budget_diagnostic/learning_curve/deep_sets/wide_screen_results.json。扩容8将 binding val MAE 从窄 DeepSets 1.1102降至0.9267（MSE3.2336→3.0460），但 set-sum MAE从0.2358升至0.4109；参数增至40,425，32 epoch耗时140.4s（窄模型15,465/139.6s）。未读sealed test，存在跨任务权衡，未冻结为候选。"
+        },
+        {
+          "id": "NE-024.14",
+          "status": "completed",
+          "work": "筛选 expansion=8 的上下文门控 DeepSets 残差：初始严格为求和，context根据任务族/入度决定加入宽 DeepSets交互；在同一已查看训练/验证样本与32 epoch预算下与global_sum、窄DeepSets、宽DeepSets对照。只以验证集确认其能否保住set-sum并提升binding，不接触sealed test。",
+          "output": "宽上下文门控候选薄适配语义测试、validation-only结果及容量/成本决策。",
+          "done_when": "若两任务验证误差兼顾且成本可接受，再另用全新seed预注册正式确认；若仍有明显求和回退或分组收益不足，删除宽候选并将该架构方向记录为未解决。原冻结能力门槛不改。",
+          "evidence": "同 seed94121验证筛查见 learning_curve/deep_sets/wide_screen_results.json：expansion8直接DeepSets binding MAE0.9267（窄1.1102），set-sum0.4109（窄0.2358），参数40,425。context residual复用同一train/validation见 contextual_wide/screen_results.json：binding MAE1.3094、set-sum0.2426，参数40,521；对sum控制MSE改善约10.7%但binding明显不如直接宽模型，set-sum MAE略劣。未读sealed test，无候选同时达到能力阈值；不继续宽残差确认。",
+          "status_reason": "容量扩大改善了分组绑定，但跨任务权衡仍在；context门控虽恢复求和MSE，却牺牲绑定收益且参数/成本很高，未形成可确认候选。"
+        },
+        {
+          "id": "NE-024.15",
+          "status": "completed",
+          "work": "比较正式训练预算下的 full Set Transformer 与现有上下文求和残差候选：同一训练/验证 seed、样本、32 epoch；包含sum/DeepSets控制，观察full self-attention是否在更长训练后达到更强 binding 学习，以及 context gate 是否能保住 sum。记录64/256入度 MPS前反向成本；不读sealed test。",
+          "output": "validation-only full-attention 32 epoch结果与是否值得一轮新seed正式确认的决策。",
+          "done_when": "验证误差有清晰优势且资源成本与任务预算兼容，才按新seed冻结确认；否则停止该机制方向，保留负结果，不降低既有阈值。",
+          "evidence": "32 epoch validation-only seed94121：full SetTransformer MAE set-sum0.4414、binding0.1481；contextual sum residual set-sum0.1030、binding0.2884；DeepSets0.2358/1.1102，求和0.1782/1.4480。context residual清晰改善两族。参数24,489，MPS fwd+bwd约3.94ms@64、4.02ms@256，对比求和0.89/0.87ms。成本有约4.5x时延，MAE尚未达0.05，先做更长预算validation curve再选正式确认预算；无sealed test。"
+        },
+        {
+          "id": "NE-024.16",
+          "status": "completed",
+          "work": "固定seed94121训练/验证划分，对global_sum与contextual_sum_residual SetTransformer累积训练至32/64/128 epoch，跟踪两族训练及验证MAE/MSE、更新数、总样本和耗时；仅根据validation判断是否继续增长预算，完全不生成/读取sealed test。",
+          "output": "learning_curve/full_attention/extended_budget_results.json 与训练预算决策。",
+          "done_when": "完成 32/64/128 epoch validation-only 曲线，并对照既有同 seed 32 epoch 结果检查复现性；若设备不支持确定性训练，则明确记录具体算子限制和禁止的结论范围，不解封 sealed test。",
+          "evidence": "配置与validation-only曲线见 training_budget_diagnostic/learning_curve/full_attention/extended_budget_config.json、extended_budget_results.json。global_sum重复32 epoch验证结果基本一致，但contextual SetTransformer同seed 32 epoch在此前screen_results中为set-sum/binding MAE 0.1030/0.2884，本轮为0.2872/0.8437，轨迹显著不同；128 epoch set-sum MAE降至0.0309但binding回升到0.7098，未达到双任务要求。进一步启用torch.use_deterministic_algorithms(True)执行MPS前向/反向/更新，反向在index_put_with_accumulate_mps报无确定性实现；此前scatter_reduce_mps也无确定性实现。故单seed曲线仅为探索证据，禁止作为可复现能力或正式确认依据，不访问sealed test。"
+        },
+        {
+          "id": "NE-024.17",
+          "status": "completed",
+          "work": "解决或界定 MPS 注意力训练不可复现问题：把固定配置和固定 seed 重复训练作为验证；检查任务条件多输出解码（共用同一 ModelNeuron 输出投影，不增添任务专属模型/权重）是否能降低 set-sum 与 grouped-binding 梯度冲突；若 MPS 无法确定性训练，改用可复现 CPU 结果作为架构决策依据并单独记录 MPS 仅作性能运行的限制。",
+          "output": "重复性/确定性诊断，任务条件输出解码的 validation-only 对照，以及更新后的能力结论。",
+          "done_when": "至少有一条可信、可复现的训练评估路径；通过既有任务绝对误差、绑定相对收益、未见组外推和成本门槛才可使用新候选；未通过则保留求和默认并准确报告能力缺口。禁止读取已有 sealed test。",
+          "evidence": "CPU validation-only结果与曲线见 training_budget_diagnostic/learning_curve/full_attention/cpu_deterministic/。torch.use_deterministic_algorithms(True)下同seed两次小样本 smoke 的候选训练/验证指标逐项相同。全样本32 epoch时共享ModelNeuron输出通道的contextual SetTransformer残差 set-sum/binding MAE为0.1093/1.1162，对比sum0.0557/1.4523；binding MSE改善约26.2%，但绝对误差不合格。延长到128 epoch后残差set-sum/binding MAE0.0851/0.7075；仍远高于0.05。全程仅训练/验证，未读sealed test；生产默认继续sum。"
+        },
+        {
+          "id": "NE-024.18",
+          "status": "completed",
+          "work": "复核 grouped-binding 的输入表征和模型交互结构：验证随机重标号后的 group Fourier 特征是否唯一、稳定并能泛化到未见组；盘点可直接适配的开源分组/关系感知集合聚合；提出单 ModelNeuron、共享权重、可变入度且严格置换等变/不变的最小候选，并用合成任务的解析对照或validation-only低成本筛查检验表达能力。",
+          "output": "数据/表示审查结论、开源方案对照、一个有明确计算复杂度和接口语义的下一候选及拒绝/保留依据。",
+          "done_when": "候选必须能区分组内与组间关系、保持任意消息排列语义、支持变入度且共享模型权重；不满足理论/小样本contract则不进入长训练。通过后才配置新的validation-only训练，仍不读取sealed test。",
+          "evidence": "复核发现现有grouped-binding生成器以4组sin/cos频率编码组ID，整体周期为32；ID 0与32、1与33编码几乎精确碰撞，无法支持任意组数。PyG GraphMultisetTransformer是可复用多代表元注意力池化，但不修复组身份碰撞且要求sorted index。结果与来源链接见runs/message_aggregation/report.md。确定了下一步使用ModelNeuron可选整数关系元数据、共享模型内部按组聚合的候选。"
+        },
+        {
+          "id": "NE-024.19",
+          "status": "completed",
+          "work": "为消息契约增加可选整数 group_ids 元数据，在同一 ModelNeuron 内实现开源适配优先的关系分组聚合；禁止用周期特征承载身份。支持任意整数标签（按单样本稠密重编号，不按标签值分配内存）、变入度、mask/空集、重复接触和任意消息置换。更新 grouped-binding 数据生成/输入路径并保留全部既有能力对照。",
+          "output": "关系元数据输入契约、可变组数聚合适配、CPU/MPS 语义与梯度测试、旧周期编码碰撞的回归测试。",
+          "done_when": "任意不重复整数组标签只作为等价类身份且重标号不改变输出；置换不变；没有固定容量/按最大ID分配的路径；CPU/MPS contract和梯度通过。随后再做低成本validation-only训练，sealed test保持封存。",
+          "evidence": "新建 GroupRoleDeepSetsAggregator：每组按edge type汇总后由共享MLP编码，整组相加；ModelNeuron.step增加可选int64 incoming_group_ids。消息任务输入移除周期特征，改opaque int64标签。ID 2^60、负标签、置换/重标号、空集/mask、重复输入与反向 CPU/MPS测试通过；固定入度无上限，无按最大ID分配内存，代价O(N²)。另将任务输出通道选择改为掩码乘加，使训练在torch.use_deterministic_algorithms(True)下可运行MPS。聚焦测试45 passed。seed94121/32epoch训练范围内binding/set-sum验证MAE0.0458/0.0429，但16组外推binding MAE0.2467。两次确定性MPS train/validation/extrapolation指标完全一致；性能约2.44/2.52ms@64/256、13,321参数。数据与报告见runs/message_aggregation/report.md。"
+        },
+        {
+          "id": "NE-024.20",
+          "status": "completed",
+          "work": "仅用确定性CPU validation-only数据，将训练组数扩至2/4/8/16，并以32组作为外推，确认分组关系泛化是否随覆盖训练组数改善；与global_sum在同seed相同数据下比较两任务误差、排列不变性、参数及64/256联系数成本。未达门槛就停止该候选并找新的关系组合方式，不读取sealed test。",
+          "output": "训练组数覆盖扩大后的可复现validation结果和泛化/成本决策。",
+          "done_when": "测得训练组数覆盖扩展是否改善关系泛化；若更宽训练范围仍损害两任务或32组外推，则保留负结果并规划新的表示/训练机制，不调 sealed test。",
+          "evidence": "确定性CPU seed94121、32epoch训练/验证组数2/4/8/16、32组独立validation外推见training_budget_diagnostic/learning_curve/full_attention/cpu_deterministic/relation/final/wide_group_counts/results.json。GroupRoleDeepSets set-sum/binding验证MAE0.0934/0.0602；binding MSE 0.01445对比sum 6.2078，但32组外推MAE0.4278。扩大组数覆盖没有满足双任务/外推门槛，sealed test未读取。"
+        },
+        {
+          "id": "NE-024.21",
+          "status": "completed",
+          "work": "把已验证的可选edge group ID从NeuronGraphTopology贯通到ModelNeuronGraph：拓扑筛边、node ID重映射、边添加/删除/重类型、缓存签名、candidate edges和batch扩展都保留组身份；明确无元数据兼容行为。",
+          "output": "端到端图执行中group_id语义与拓扑变更合同、测试。",
+          "done_when": "图路径分组结果与直接ModelNeuron.step一致；边重排/拓扑重映射后仍保持身份语义；非分组旧路径不回退；CPU/MPS测试通过。",
+          "evidence": "NeuronGraphTopology.edge_group_ids和LinkMutation.group_id贯通静态拓扑、candidate_group_ids、重映射、filter_context、追加因果节点及边增删/改型/改强度；Graph将目标神经元的组标签传入同一ModelNeuron。缺少关系身份会报错。直接step与图路径一致；CPU/MPS contract passed，torch deterministic MPS两步图更新和反向通过。测试在models_training/contract_scopes_stage/neuron/graph/test_neuron_graph_group_ids.py。"
+        },
+        {
+          "id": "NE-024.22",
+          "status": "completed",
+          "work": "针对关系模型出现的任务覆盖冲突，比较固定角色分组汇总与完全共享的逐组编码/输出组合（保持单份ModelNeuron权重），并先用解析可解性检查确认输入信息充分；用确定性CPU训练/验证测定同时覆盖set-sum、2/4/8/16组binding及32组外推的误差。不开封sealed test。",
+          "output": "新的共享关系计算结构或负结果、validation-only能力/成本证据。",
+          "done_when": "两项训练范围MAE≤0.05、绑定较sum的MSE至少改善20%、32组外推MAE≤0.05，且复杂度成本可接受；否则删除未验证候选并保留明确能力缺口。",
+          "evidence": "确定性CPU seed94121、32epoch、训练/验证binding组数2/4/8/16、32组外推的context条件GroupRoleDeepSets筛查见.../wide_group_counts/contextual/results.json。set-sum/binding验证MAE0.1149/0.0546，32组外推0.4127；对比不带context版本无实质泛化提升，阈值未过。无sealed test。"
+        },
+        {
+          "id": "NE-024.23",
+          "status": "completed",
+          "work": "测试显式跨角色乘性交互：每组先按关系类型汇总，再将不同角色组表示逐元素相乘作为通用二阶关系特征，与原角色汇总一起送入共享组编码器；对照不带乘积的group-role基线。确定性CPU覆盖训练组数2/4/8/16、验证及32组外推；测64/256入度成本。",
+          "output": "二阶关系聚合组件及validation-only双任务/外推/成本结果。",
+          "done_when": "两项任务误差与32组外推同时达0.05阈值且成本可接受才进入新seed正式确认；否则保留测得的负结果，不解封sealed test。",
+          "evidence": "按相同ModelNeuron核心初始化后的确定性CPU对照见.../wide_group_counts/pairwise/fair_init_results.json。显式跨角色乘积将binding验证MAE降至0.0492，但set-sum0.1138、32组外推0.3935，未通过。新增同seed各候选共享核心逐参数完全相同的回归测试；此前单seed对照有初始化混杂，已记录为探索线索并由公平初始化结果取代。"
+        },
+        {
+          "id": "NE-024.24",
+          "status": "completed",
+          "work": "在公平初始化求和关系基线之上加入零初始化、上下文门控的pairwise关系残差，检查其是否改善多任务训练范围拟合并保持原求和路径；以确定性CPU validation-only测量训练组数2/4/8/16和32组外推。",
+          "output": "求和保持关系残差候选及训练范围/未见组数验证结果。",
+          "done_when": "同seed公平初始化，报告两任务验证误差、关系外推与排列不变性；若外推不达阈值，后续不得将候选视为通用关系能力。",
+          "evidence": "公平初始化的128 epoch关系残差验证结果见training_budget_diagnostic/learning_curve/full_attention/cpu_deterministic/relation/final/wide_group_counts/pairwise/residual/budget/combined/results.json。训练范围set-sum/binding MAE为0.0314/0.0307，优于求和控制0.0755/1.6535；32组外推MAE为0.9147，未通过。该步骤实现与测量已完成，关系泛化能力未验收。"
+        },
+        {
+          "id": "NE-024.25",
+          "status": "completed",
+          "work": "验证组数规模泛化：使用公平初始化的求和残差候选，把grouped-binding训练/验证组数扩至2/4/8/16/32，64组作为validation-only外推；设置足够的消息容量并测64/128/256入度成本。保持set-sum任务混训，确定性CPU跑训练曲线，检查任务输出和残差门控；不读sealed test。",
+          "output": "更宽组数覆盖的确定性训练/验证与64组外推结果、成本和是否需要继续扩大覆盖的判断。",
+          "done_when": "set-sum与binding验证MAE≤0.05且64组外推MAE≤0.05、排列误差≤1e-5、成本符合实用范围才进入新的seed确认；否则不声称任意组泛化，保留明确范围和能力缺口。",
+          "evidence": "公平初始化确定性CPU 32/64/128epoch，训练/验证组数至32、64组外推(128 contacts)结果见.../wider/capacity_context_results.json。128epoch关系模型set-sum/binding验证MAE0.0619/0.1131，64组外推MAE0.8878；容量归一化修正前结果也未通过。当前候选不能声称64组泛化。无sealed test。"
+        },
+        {
+          "id": "NE-024.26",
+          "status": "completed",
+          "work": "检验未过外推门槛是否来自单神经元隐藏容量：在公平核心初始化和容量归一化下，提高共享ModelNeuron及组关系编码的hidden_size至64，训练组数2/4/8/16/32、validation同分布、64组外推；使用确定性CPU预算曲线并评估成本。不允许改变单模型/共享权重约定，不读取sealed test。",
+          "output": "hidden_size扩展的validation-only两任务/64组外推/成本对照及容量判断。",
+          "done_when": "两任务validation MAE≤0.05且64组外推MAE≤0.05，排列误差≤1e-5、成本可接受才进入全新seed正式确认；否则接受hidden32/64都未形成可用通用关系聚合器的结论，重新设计消息交互。",
+          "evidence": "公平初始化、容量aware归一化、确定性CPU hidden64组关系对照见.../wider/hidden64/results.json。128epoch下训练范围set-sum/binding MAE0.0794/0.0787、64组外推MAE1.516；hidden32对照为0.0619/0.1131、64组0.888。参数59,849，64/256前反向约0.37/0.73ms，明显高于hidden32成本且无泛化收益。sealed test未访问。"
+        },
+        {
+          "id": "NE-024.27",
+          "status": "completed",
+          "work": "审查基础ModelNeuron的信息路径而非继续加聚合器宽度：确认关系组输入到聚合、sqrt(degree)归一化、tanh、GRU状态和按任务输出通道的映射是否丢失加性/乘性交互或造成高入度饱和；用解析任务 oracle 和可控合成对照逐段定位，提出保留单模型共享权重、动态入度的最小核心改动。",
+          "output": "逐层信息/尺度诊断、可证伪的结构假设，以及下一组validation-only设计或基于证据停止该路径。",
+          "done_when": "明确具体瓶颈且有单元级反例/支持证据；如需改核心模型，先添加CPU/MPS语义与尺度测试，再安排validation-only训练，不读取sealed test。",
+          "evidence": "解析到ModelNeuron仅经tanh/GRU有界状态读出，不能表示随入度持续增长的纯求和。新增零初始化aggregate_output_projection直读头，乘回sqrt(degree)归一化量，将未归一化聚合输出送至模型输出；初始化严格不改变既有输出。CPU/MPS解析测试用一份权重精确处理3和128条全1消息并保持状态有界。详见runs/message_aggregation/report.md。训练收益待验证。"
+        },
+        {
+          "id": "NE-024.28",
+          "status": "completed",
+          "work": "在aggregate_output_projection核心修复后，公平初始化训练sum与关系残差模型；确定性CPU覆盖训练组数2/4/8/16/32、validation同分布、64组外推，hidden32/容量128，跑32/64/128 epoch并比较上一轮无直读头曲线。确保zero-init输出头按预期训练，记录两任务误差、重复性、排列误差和64/128/256消息前反向成本。",
+          "output": "核心直读头修复后的可复现validation-only预算曲线与外推判断。",
+          "done_when": "两任务validation MAE≤0.05、64组外推MAE≤0.05、排列误差≤1e-5且性能可接受，才安排新seed正式确认；否则保留解析/工程修复和未解决的关系泛化缺口，不读sealed test。",
+          "evidence": "fair-init deterministic CPU hidden32/capacity128、训练组数至32、64组外推曲线见.../wide_group_counts/readout32/results.json。aggregate_output_projection令求和训练范围验证MAE0.0217；128epoch sum residual set-sum/binding MAE0.0343/0.0499，64组外推0.2746（无直读头对照0.0619/0.1131/0.8878）。两任务训练范围改善但64组外推仍失败。参数15,890；CPU约0.34ms@64/0.55ms@256。无sealed test。"
+        },
+        {
+          "id": "NE-024.29",
+          "status": "completed",
+          "work": "验证在训练中覆盖更多组数能否推进关系外推：公平初始化、hidden32/capacity256、sum与求和保持pairwise关系残差对照，binding训练/验证组数2/4/8/16/32/64，128组validation-only外推，确定性CPU 32/64/128epoch。记录模型参数、排列误差和64/128/256消息成本。不读取sealed test。",
+          "output": "更宽组数训练覆盖下的确定性validation曲线与128组外推边界。",
+          "done_when": "set-sum/binding验证MAE≤0.05、128组外推MAE≤0.05、排列误差≤1e-5且资源成本可接受；若失败则停止扩充规模调参，回到可证明的群组组合/通用性设计，不解封sealed test。",
+          "evidence": "确定性CPU公平初始化hidden32/capacity256训练组数2/4/8/16/32/64、128组外推的预算曲线见.../readout32/wider_coverage/budget256/results.json。128epoch范围内MAE0.1393/0.0844、外推0.326；256epoch降至0.0028/0.0222、外推0.141。误差仍明显下降，不能就此判定结构失败，冻结同切分延长至512 epoch。无sealed test。"
+        },
+        {
+          "id": "NE-024.30",
+          "status": "completed",
+          "work": "使用NE-024.29完全相同的公平初始化、容量256、数据seed/训练与验证切分和模型结构，将sum residual关系候选确定性CPU预算延长至512 epoch；验证set-sum/binding及128组外推误差是否继续改善并记录CPU成本。禁止任何sealed test访问。",
+          "output": "32/64/128/256/512 epoch validation-only预算曲线与最后一轮继续/停止决策。",
+          "done_when": "若128组外推MAE与两训练任务均达0.05且排列误差/成本合格，才可另开新seed正式确认；若512仍未过线或持续明显改善但成本超预算，则如实保留未完成能力与边界，不以训练拟合代替外推。",
+          "evidence": "同切分、同公平初始化、hidden32/capacity256的确定性CPU 256/512预算见.../wider_coverage/budget512/results.json。512 epoch训练范围set-sum/binding验证MAE0.0053/0.0280，128组外推0.1581；256 epoch为0.0028/0.0222、外推0.1406。加预算未改善且略有回退，停止该规模预算扩展；sealed test未读取。"
+        },
+        {
+          "id": "NE-024.31",
+          "status": "completed",
+          "work": "回到NE-024原预注册边界，公平初始化、aggregate linear readout开启后，训练binding组数2/4/8并以16组validation-only外推；增加按组数分层验证结果，和sum/关系残差同seed、确定性CPU 32/64/128 epoch对照。仅当原16组门槛过线才讨论更远外推，不能用128组实验掩盖原始验收范围。",
+          "output": "原16组外推范围下可审查的逐组数validation结果和是否通过原任务门槛。",
+          "done_when": "set-sum及2/4/8训练binding任务MAE≤0.05，16组外推binding MAE≤0.05，排列误差≤1e-5且MPS成本实测通过；否则将NE-024明确记录为未完成能力并停止本轮无目标调参。sealed test保持封存。",
+          "evidence": "公平初始化hidden32、zero-init aggregate readout、训练组数2/4/8、16组独立validation外推，确定性CPU曲线见.../readout32/holdout16/budget256/results.json。16组外推MAE 32/64/128/256epoch为0.142/0.114/0.078/0.165；256 epoch训练范围binding/set-sum验证0.0481/0.0047，未见组恶化。排列误差<1e-5，CPU成本约0.34ms@64、0.55ms@256；MPS需再确认。16组门槛不通过，停止此变体预算调参。无sealed test。"
+        },
+        {
+          "id": "NE-024.32",
+          "status": "completed",
+          "work": "替换逐通道Hadamard角色乘积为可学习低秩双线性交互：对同组不同edge type汇总向量分别做共享线性投影，再逐通道相乘并经共享组编码/求和；保持zero-init sum residual、可变组身份和同一ModelNeuron权重。先测解析可表示性与CPU/MPS梯度，再用公平核心初值对2/4/8训练、16组validation-only外推做32/64/128 epoch确定性对照。",
+          "output": "低秩bilinear关系候选、精确能力/置换合同和16组验证曲线/成本。",
+          "done_when": "set-sum与binding训练范围MAE≤0.05且16组外推MAE≤0.05、排列误差≤1e-5、性能成本可接受，才进入新seed确认；否则保留负结果并按NE-024缺口停止本轮聚合器筛选。不读取sealed test。",
+          "evidence": "低秩bilinear角色交互validation-only结果见.../holdout16/bilinear/final_results.json。公平初始化hidden32、相同ModelNeuron训练set-sum/binding，16组独立验证：MAE0.01135/0.00893、16组外推MAE0.01364，最大误差0.04689；训练/16组置换偏差4.77e-7/9.54e-7。CPU成本0.370ms@64/0.587ms@256，参数17,938。MPS deterministic_algorithms=True两次同seed更新的输出/loss/state_dict逐项完全一致；成本2.674ms@64、2.744ms@256，求和基线2.754/2.740ms。validation通过，未读sealed test。"
+        },
+        {
+          "id": "NE-024.33",
+          "status": "completed",
+          "work": "冻结低秩bilinear聚合器、zero-init sum residual与线性aggregate readout配置，使用六个全新seed做同一共享ModelNeuron的正式能力确认。预先冻结2/4/8训练binding组、set-sum任务、16组validation外推和独立sealed split、训练预算及参数/成本；记录两任务MAE/MSE、paired binding MSE改善95%区间、最大误差、置换误差、参数与MPS成本。运行后不再据sealed结果调参。",
+          "output": "六seed验证与sealed确认、paired指标区间、成本、NewEra当前神经元能力边界结论。",
+          "done_when": "所有seed的validation/封存评估两任务MAE≤0.05、16组外推MAE≤0.05、paired binding MSE平均改善≥20%且区间下界>0、最大绝对误差≤0.05、排列偏差≤1e-5，MPS成本可接受；通过后才完成NE-024。若失败则保留validation屏幕结果和sealed负结果，不能降阈值或重复看封存集。",
+          "evidence": "冻结六seed正式确认config/results见training_budget_diagnostic/formal_confirmation/。260000–260005独立训练和sealed splits；封存set-sum/binding平均MAE0.0238/0.0240、置换约1.8e-6/7.2e-7，binding paired MSE改善99.94%（95% t区间约99.80%–100.07%）；但16组validation外推MAE均值0.0594、范围0.0069–0.2206，超过0.05；封存样本最大误差亦超限。按预注册规则确认失败。封存结果不用于调参或重训。"
+        },
+        {
+          "id": "NE-024.34",
+          "status": "completed",
+          "work": "仅以新的validation数据查明16组外推seed方差：固定已通过单seed门槛的低秩bilinear模型和公平初始化，不接触/重放六seed sealed set；使用新seed组（如270000起）验证训练样本量、hidden32与任务样本配比对16组误差均值/方差的影响，输出按seed与组数拆分的MAE/MSE/最大误差。只比较预注册的一种改动（更大训练样本量），不按sealed数值选择参数。",
+          "output": "新seed validation-only 16组seed稳定性诊断和是否值得新正式确认的决策。",
+          "done_when": "新validation seed集所有16组外推MAE≤0.05且跨seed区间稳定，才允许另起全新sealed split的第二次正式确认；否则标记NE-024能力未完成，停止该架构调参，不降低阈值。",
+          "evidence": "全新validation-only样本量诊断见training_budget_diagnostic/formal_confirmation/validation_robustness/config.json与results.json。固定bilinear、hidden32、公平初始化、128 epoch，seed 270000–270003，对比每任务1024/2048训练样本，不生成或读取sealed test。16组MAE：1024样本均值0.1294、标准差0.0912、最大0.2649；2048样本均值0.0730、标准差0.0966、最大0.2138，且2048下仅2/4 seed≤0.05。样本翻倍降低均值但没有改善seed稳定性，冻结门槛失败；不据此调参，停止该架构调参，NE-024保持未完成。"
+        },
+        {
+          "id": "NE-024.35",
+          "status": "completed",
+          "work": "不调整NE-024.34已停止的bilinear学习候选，修复关系聚合器随入度增长的平方级临时内存瓶颈：为常见工作负载保留有界向量化路径，对高入度切换为稳定排序与可确定反向的分段求和；按CPU/MPS实测设置pair-workspace预算。",
+          "output": "高入度线性workspace分组聚合实现、稠密参考输出/梯度对照、CPU/MPS高入度和确定性验证及成本测量。",
+          "done_when": "低/高入度路径语义与梯度一致；不依赖最大group ID分配、不设固定入度上限；高入度临时内存不再构造N×N张量；MPS确定性反向与相关聚焦测试通过，并报告混合路径的性能取舍。",
+          "evidence": "GroupRoleDeepSetsAggregator在CPU pair budget 256²、MPS 3000²内保留原向量化路径，超出后按opaque group ID稳定排序并使用自定义分段累加/逆置换反向，workspace O(N·channels)，无入度上限。CPU N=16,384 unique groups前反向通过；MPS N=4,097确定性反向通过。高路径与稠密参考输出一致，消息梯度在3e-6容差内，参数梯度在5e-5绝对/1e-5相对容差内。CPU测量 segmented 与 dense(ms)：N=64 0.231/0.120，256 0.262/0.333，1024 0.563/1.189，4096 1.281/19.903；MPS N=64 4.551/0.917、256 4.507/1.269、1024 2.702/1.620、2048 7.945/6.297、4096 5.460/17.928。以上表明高入度内存/延迟改善，但小入度必须保留稠密快路径。相关神经元/聚合任务129 passed，ruff通过。此工程改进不代表NE-024关系泛化验收通过。"
+        },
+        {
+          "id": "NE-024.36",
+          "status": "completed",
+          "work": "为grouped-binding任务设计一个不同于已停止候选的新结构：共享ModelNeuron先按精确整数group ID形成每组角色汇总，使用低秩角色投影的逐元素乘积作为显式二阶绑定特征，直接线性读出后跨组求和，不再经过通用逐组MLP；求和残差仍保留。依据2024 permutation-invariant tensor sum-decomposition结果及role-filler tensor-product表征提出该假设，但不把理论代表性等同于训练泛化。公平初始化，hidden32/2048样本/128epoch，用四个全新validation seed对2/4/8训练、16组外推，并与global_sum比较两任务MAE/MSE、逐组误差、置换和参数成本；sealed test完全不访问。",
+          "output": "结构假设、确定性CPU/MPS实现合同测试及新seed validation-only结果/继续或停止决策。",
+          "done_when": "候选通过group ID重标号/消息置换和CPU/MPS确定性梯度合同；四个validation seed均满足set-sum、训练组binding、16组外推MAE≤0.05，置换偏差≤1e-5，并相对求和改善binding MSE；不通过则如实记录并停止该候选，不调整本轮配置或访问sealed test。",
+          "evidence": "实现和冻结validation筛查见neuron_capabilities/runs/message_aggregation/training_budget_diagnostic/formal_confirmation/structural_candidates/exact_bilinear_group_sum/config.json与results.json。直接线性读出每组低秩角色乘积并跨组求和，去掉逐组通用MLP；参数10,578。四个新seed 280000–280003，hidden32、2048样本/任务、128 epoch；训练范围两族MAE均≤0.05，binding validation MSE较同seed sum改善>99.9%，置换误差<4e-6。但16组外推MAE逐seed为0.1085/0.00427/0.0519/0.00279，均值0.0419、标准差0.0499，2/4失败。按预注册规则停止候选，不访问sealed set。参考Deep Sets及Tabaghi & Wang ALT 2024的sum-decomposition/可识别向量多重集，以及Tensor Product Decomposition Networks的role-filler绑定；这些理论不保证有限宽度训练或无界组数外推。详见report.md。"
+        },
+        {
+          "id": "NE-024.37",
+          "status": "in_progress",
+          "work": "只在NE-024.36低秩双线性线性读出结构上，将压缩投影交互替换为PyTorch官方nn.Bilinear完整二阶角色映射；保持消息接口、组身份、共享ModelNeuron、求和残差、训练配比与hidden32不变。冻结新seed 290000–290003、2048样本/任务、128epoch，对2/4/8训练和16组独立validation外推做同seedglobal_sum对照，报告两任务MAE/MSE、逐组误差、排列差异、参数、CPU/MPS前反向成本；sealed test不访问。",
+          "output": "full-rank tensor role interaction候选及新seed validation-only能力/资源决策。",
+          "done_when": "四个新validation seed均达到set-sum、训练binding、16组外推MAE≤0.05、置换偏差≤1e-5，且binding MSE相较sum改善；CPU/MPS语义/反向和成本合格。任何门槛失败都停止候选，不按该批validation复调、不读取sealed test。",
+          "evidence": "全新CPU validation-only配置/结果见neuron_capabilities/runs/message_aggregation/training_budget_diagnostic/formal_confirmation/structural_candidates/full_bilinear_group_sum/。四个seed 290000–290003，公平初始化、hidden32、2048样本/任务、128epoch；set-sum/binding验证MAE逐seed0.00208/0.00170、0.01138/0.00217、0.00347/0.00592、0.00195/0.00361；16组外推MAE 0.00286/0.00577/0.01493/0.01411，4/4均≤0.05；binding validation MSE较同seed求和改善>99.998%，排列偏差<2.4e-6，参数40,274。聚焦CPU/MPS语义和反向测试通过。CPU四seed训练耗时约30分钟；ROCm主机上的同步计时和峰值资源仍待测，故本步骤保持进行中。"
+        }
+      ],
+      "acceptance": [
+        "任意实际资源预算内的入度可处理；若使用诱导点/压缩，输入仍全量可访问且压缩损失公开。",
+        "单一共享权重下通过集合与绑定两族；不把可交换求和任务的成功等同于全部关系计算能力。",
+        "选择由任务结果和成本决定；未产生净收益的聚合组件删除。"
+      ],
+      "decision_rule": "先适配现成组件后补任务必需的 contact/group 语义；不因“树突”类比复制形态、膜电位或离子通道。",
+      "evidence": "消息集合契约与组绑定最小反例见 neuron_capabilities/specification/message_set_contract.md。PyG 2.8.1 adapter 支持单集合、masked padded batch、空集合显式零语义并注册在同一 ModelNeuron；CPU/MPS 聚焦测试 23 passed，ruff 通过。六 seed 最终比较见 neuron_capabilities/runs/message_aggregation/report.md：上下文门控 Set Transformer 残差在训练尺寸的 grouped-binding MSE 改善 24.7%（paired 95% CI 3.9%–45.4%），但 set-sum MAE 0.658、binding MAE 1.200、16组外推 MAE 3.326，均未达到冻结容差；相对求和为 3.46x 参数、约 9.9x MPS 前反向。直接替换在 set-sum 更差。生产默认继续全局求和；保留注意力为实验选项。NE-024 能力交付未验收，待找到更有效的分组交互机制后恢复 .3；NE-026/027 不得将非线性聚合视为已验证能力。 NE-024.3 的测量步骤已完成但能力门槛失败；NE-024.4 预注册一个候选：PyG 官方 DeepSetsAggregation（MIT PyG，官方文档定义为 per-message MLP→sum→global MLP），预计以 O(N) 交互避免 Set Transformer 的两两注意力成本。PyG 文档：https://pytorch-geometric.readthedocs.io/en/stable/generated/torch_geometric.nn.aggr.DeepSetsAggregation.html。 NE-024.4 新证据：官方 PyG DeepSetsAggregation 薄适配语义测试 CPU/MPS 通过；六 seed 对照在分组绑定上相对求和仅改善 10.1%（95% CI 6.7%–13.5%），低于冻结 20% 阈值，MAE 与 16 组外推仍不合格。完整数据见 runs/message_aggregation/report.md 与 training_budget_diagnostic/deep_sets_results.json。下一轮应先用训练/验证数据诊断冻结 8 epoch 预算是否欠拟合；不读取已查看测试调参。 NE-024.5 validation-only 曲线见 training_budget_diagnostic/underfit_probe_results.json：32 epoch 下误差仍下降，故冻结更长预算。NE-024.6 使用全新 seed/封存测试验证了训练预算提升带来的 grouped-binding MSE 改善，但 set-sum、绝对误差和 16 组外推仍不合格；下一候选保留原始求和并以上下文门控方式加入非线性残差。 NE-024.5 validation-only 预算曲线显示训练到32 epoch仍在改善。NE-024.6全新 seed六 seed确认：DeepSets grouped-binding MAE 1.2153、16组外推3.0218、MSE改善19.9%，略低于冻结20%平均门槛；set-sum仍劣于求和。NE-024.7上下文门控DeepSets同样未通过（group MAE1.2657、15.1% MSE改善、外推3.204）。负结果和成本见 runs/message_aggregation/report.md。下一项筛查官方 PyG LCMAggregation，不能降低原能力阈值。 NE-024.8 已筛查 PyG 2.8.1 LCMAggregation：上游对称二元 merge 未保证树归约整体置换不变（CPU/MPS counterexample），因此拒绝接入；来源与实测结果见 runs/message_aggregation/report.md。下一步检查 PyG EquilibriumAggregation 是否满足无序集合契约及 MPS 成本。 NE-024.9 官方 PyG EquilibriumAggregation 两档 validation-only 筛查未胜出：32 epoch下 set-sum 更差，binding 仅小幅改善且参数/训练成本更高；CPU/MPS适配可行但已移除候选，没有封存测试。下一候选为 PyG SetTransformerAggregation 的四 seed pooling、零 full encoder variant，验证 O(N·4) 交互能否保留更多关系信息并控制成本。 NE-024.10 PyG 四 seed pooling 在32 epoch validation-only 未改善 binding（MAE1.4965，对比 DeepSets1.1413）且参数23,209、总训练149.5s高于求和基线；已移除适配、未解封测试。下一步使用作者官方 Set Transformer ISAB 源码进行 O(N·m) 交互筛选。 NE-024.11 已 clone 作者官方 MIT Set Transformer（commit 73432c640ac78140496d6738416c54d32c686d65），mask-aware ISAB/PMA在CPU/MPS通过。16 inducing/2 blocks和32 inducing/1 block validation-only均未胜过DeepSets且耗时/参数更高；未解封测试。完整结果和适配记录在 runs/message_aggregation/report.md 与 reuse/set_transformer_source.md。下一步只筛选求和精确保留的contextual residual。 NE-024.12 官方 ISAB source 已按MIT保留许可与commit。适配解决了 mask/变长/空输入且 CPU/MPS contract通过；16/32 inducing及context residual验证精度/成本未胜过DeepSets，代码已移除。验证屏幕结果和实际数值已写 report.md。下一步在同一 PyG DeepSets 机制下筛选扩展容量，以判断限制是否来自当前 hidden size。 NE-024.13 PyG DeepSets expansion8 验证筛查改善group-binding（MAE0.9267 vs expansion2 1.1102），却使set-sum退化（0.4109 vs0.2358），参数40,425。下一步只检查上下文门控能否缓解任务冲突，仍不解封 sealed test。 NE-024.13–.14筛查显示宽DeepSets在binding上略有收益但损伤set-sum；上下文门控可部分保留set-sum却使binding收益回落。未读取封存测试。下一步在32epoch预算下复核full Set Transformer候选及context residual，判断attention的绑定优势能否持续、成本是否合理。 NE-024.15 在32 epoch验证中 full Set Transformer明显强于sum/DeepSets，context残差在两任务均改进；但MAE0.103/0.288仍高于阈值且64/256入度时延约为求和4.5倍。先测至128epoch的单seed训练/验证曲线再冻结六seed正式预算。 NE-024.16 validation-only曲线已完成，但重复32 epoch结果不一致；MPS确定性算法检查定位到反向index_put_with_accumulate无确定性实现。该曲线不能作正式能力证据，转入NE-024.17处理可复现性和条件输出解码。 NE-024.17确定性CPU和共享任务输出通道筛查已完成：binding相对误差下降但绝对误差仍远超冻结门槛；生产默认仍为sum。下步NE-024.18复核输入关系表示并选择有表达依据的关系聚合候选。 NE-024.18审查发现group ID四频正余弦表示周期为32并产生身份碰撞；NE-024.19将身份提升为独立整数关系元数据并在共享ModelNeuron内分组。 NE-024.19精确组身份元数据及关系聚合实现完成；MPS确定性可用且同seed重复指标一致，但16组外推仍不合格。NE-024.20先扩大训练组数检验泛化，NE-024.21将该元数据贯通NeuronGraph。 NE-024.20扩大训练组数至16、外推至32后未过线（set-sum/binding MAE0.0934/0.0602，32组0.4278）。新结构保留了训练范围内binding MSE收益但仍有set-sum冲突。NE-024.21拓扑贯通待NE-024.22关系模型筛选后进行。 NE-024.21拓扑组身份传递已完成；NE-024.22的context条件变体没有弥合set-sum和32组外推误差，下一步测试显式跨角色乘性交互。 公平初始化复核后，pairwise任务及求和残差128epoch可拟合训练组数，但32组外推仍差（MAE0.9147）。下一项把训练覆盖扩至32组、外推64组，量化泛化边界。 NE-024.25扩至32训练组、64组外推仍失败；capacity-aware context normalization已修复但未改变结论。NE-024.26将测试共享模型hidden_size扩容，确认是否为表示容量所限。 NE-024.26 hidden64筛查未改善能力，参数和成本上升；停止盲目扩容，NE-024.27回审ModelNeuron投影/度归一化/状态更新/输出路径。 NE-024.27识别有界GRU状态无法独自表示无界和，并增加零初始化聚合直读头；解析合同证明可无界加法。NE-024.28验证其多任务与关系外推收益。 NE-024.28增加aggregate_output_projection使求和能力与训练组范围精度明显改善，64组外推MAE仍0.275。NE-024.29扩展训练组覆盖至64、仅验证128组外推，检查泛化前沿。 NE-024.29中sum residual在256epoch仍明显学习（训练范围两任务MAE0.0028/0.0222、128组外推0.141），故NE-024.30同切分延长到512作为最终预算曲线。 NE-024.30确定性512epoch曲线未继续改善，128组外推仍0.158；停止加预算。NE-024.31回到协议原16组外推门槛，按组数拆分验证，决定该层是否交付。 NE-024.31原16组外推在256epoch仍未通过且出现过拟合；下一项测试低秩双线性跨角色交互，避免继续调同一变体。 NE-024.32低秩bilinear候选首次通过公平初始化原16组validation门槛，MPS确定性与成本通过；仅开启新seed正式确认，冻结配置不再调参。 NE-024.33六seed正式确认总体测试误差合格但16组validation外推seed方差超阈，按冻结规则失败；封存结果不用于调参。NE-024.34只能用新validation seed检验样本量和泛化稳定性。 NE-024.35以有界稠密/高入度排序分段混合实现消除了无界N×N workspace；CPU/MPS确定性与高入度路径测试通过，129项相关测试通过。该工程修复不改变NE-024尚未满足的16组泛化验收结论。 NE-024.36新的显式二阶角色绑定候选四seed训练范围指标达标、16组外推仅2/4达标（均值0.0419，标准差0.0499），按冻结门槛失败；候选停止，sealed未访问。",
+      "review_after": "NE-024.34与NE-024.36的seed稳定性门槛均未通过；低秩bilinear+MLP和显式二阶线性读出候选均停止。NE-024.35修复了高入度内存/性能实现，但不构成关系泛化能力。NE-024根能力验收仍失败，NE-026/027/028继续依赖NE-024；需另立有明确结构依据的新候选与验证计划后继续。"
+    },
+    {
+      "id": "NE-026",
+      "title": "把有效路由扩展为可持续演化的通信",
+      "stage": "learning",
+      "priority": "P1",
+      "status": "planned",
+      "depends_on": [
+        "NE-024"
+      ],
+      "inputs": [
+        "src/newera/neuron/graph/topology.py",
+        "src/newera/neuron/graph/policy.py"
+      ],
+      "reuse": [
+        "pytorch",
+        "pyg"
+      ],
+      "steps": [
+        {
+          "id": "NE-026.1",
+          "status": "planned",
+          "work": "沿用已学会任务的策略，先测拓扑/状态持久化、消息延迟、节点加入/移除及全图资源预算。",
+          "output": "动态任务样例与现有 topology/controller 的最小扩展。",
+          "done_when": "没有身份错配、跨 batch 泄漏或被删接触残留；连线动作与传递时序明确定义。"
+        },
+        {
+          "id": "NE-026.2",
+          "status": "planned",
+          "work": "每次只增加一种任务条件的结构操作能力；分别做 strength、类型、增删边的作用干预。",
+          "output": "渐进式 hard rollout 训练与操作效用报告。",
+          "done_when": "任务变化确实需要通信变化；不把结构不变或合法空图本身判失败；动作不因阈值抖动无意义震荡。"
+        },
+        {
+          "id": "NE-026.3",
+          "status": "planned",
+          "work": "比较固定图与任务条件图在样本效率/迁移上的净收益；动态权重、STDP 或外部在线参数更新留作后续独立议题。",
+          "output": "两种通信方案的固定预算决定和失败边界。",
+          "done_when": "收益来自通信而非更多参数或更多训练样本；一个神经元模型一份权重继续成立。"
+        }
+      ],
+      "acceptance": [
+        "在 32/128 步 rollout 上按任务条件维持质量；操作正确性、边效用、churn 和成本分别报告。",
+        "资源预算显式失败；不通过静默剪边/备用模型维持指标。",
+        "未证实持续通信适应收益时，固定结构仍是可选实验方案，能力目标保持待验证。"
+      ],
+      "decision_rule": "一次只验证一项结构能力，先保留单一共享模型权重；线上快权重/细胞生理可塑性不属于本轮。",
+      "evidence": "本任务承接 NE-022 的有效策略；与其单样本训练诊断不重复。"
+    },
+    {
+      "id": "NE-027",
+      "title": "用同一份训练权重验证多能力和未见组合",
+      "stage": "capabilities",
+      "priority": "P1",
+      "status": "planned",
+      "depends_on": [
+        "NE-024",
+        "NE-026"
+      ],
+      "inputs": [
+        "src/newera/capabilities/contracts.py",
+        "src/newera/neuron/composition.py"
+      ],
+      "reuse": [
+        "pytorch",
+        "clrs"
+      ],
+      "steps": [
+        {
+          "id": "NE-027.1",
+          "status": "planned",
+          "work": "在集合/绑定/记忆三个族混合训练同一个共享核心，记录采样平衡、任务上下文和各头容量。",
+          "output": "一份真实的混合任务 checkpoint 与每族指标；单任务结果仅作诊断控制。",
+          "done_when": "评估三个能力使用相同核心权重摘要；不将每任务单独训练的结果拼成全能性证明。"
+        },
+        {
+          "id": "NE-027.2",
+          "status": "planned",
+          "work": "冻结 adapters 和训练规则，测试两个未见规则组合；引入一项 CLRS 数据任务作为独立来源扩展。",
+          "output": "组合留出/规模留出的独立测试及 CLRS 薄数据 adapter 或明确未采纳结论。",
+          "done_when": "公开可见任务指令与 task context 合法；测试标签、完整轨迹 hints 或测试专用求解器不参与推理。"
+        },
+        {
+          "id": "NE-027.3",
+          "status": "planned",
+          "work": "对消息数、记忆跨度、输出通道各扩一个维度，并做等参数/等计算强控制与混合训练遗忘检查。",
+          "output": "能力矩阵更新、干扰/迁移结果与可扩展维度界限。",
+          "done_when": "至少三个能力族和两个组合任务达标；失败项单列；训练同一权重的负迁移不能被平均分掩盖。"
+        }
+      ],
+      "acceptance": [
+        "同一共享核心 checkpoint 具备多种能力，逐神经元运行状态独立。",
+        "采用自然适合任务的强控制；不刻意选择对 MLP 不利的任务或弱训练基线来制造优势。",
+        "扩展输入规模/记忆/精度可量化；没有可比较生物实验时，称为模型能力扩展，不声称已证明全面胜过真实单细胞。"
+      ],
+      "decision_rule": "三个最小能力族先成功再扩展；任何多模态/大型语言模型接入均需另立有价值且预算明确的工作项。",
+      "evidence": "v9 是分任务训练，不能据此证明同一份权重具备跨任务通用能力。"
+    },
+    {
+      "id": "NE-028",
+      "title": "确定规模、鲁棒性和部署成本的实测边界",
+      "stage": "evidence",
+      "priority": "P1",
+      "status": "planned",
+      "depends_on": [
+        "NE-027"
+      ],
+      "inputs": [
+        "src/newera/neuron/composition.py",
+        "project/configs/models_training/learning/neuron_comparisons/"
+      ],
+      "reuse": [
+        "pytorch"
+      ],
+      "steps": [
+        {
+          "id": "NE-028.1",
+          "status": "planned",
+          "work": "复用各前置任务已经采集的成本，按节点数/入度/消息宽度/记忆长度分别扩展，每轴一个基准和两个扩展点。",
+          "output": "CPU/MPS 质量-时延-峰值内存曲线；每项注明软/硬拓扑与 batch。",
+          "done_when": "预热、同步、样本数和分位数算法固定；只比较同环境/精度/有效 batch 的结果；超过预算显式报告。"
+        },
+        {
+          "id": "NE-028.2",
+          "status": "planned",
+          "work": "对输入噪声、重复/丢失/延迟消息、节点/边突变和任务分布漂移测能力保持。",
+          "output": "共享 checkpoint 的鲁棒性评估及失效样例。",
+          "done_when": "任务质量、空图塌缩和状态污染分别测；指标不把无定义样本记为成功。"
+        },
+        {
+          "id": "NE-028.3",
+          "status": "planned",
+          "work": "按结果只修一个已测到的主要瓶颈，再复查受影响曲线与恢复行为。",
+          "output": "最小性能/稳定性修复及 before/after 同预算对照。",
+          "done_when": "优化不改变模型语义或漏掉候选输入；MAC 小计与真实总 FLOPs 的可计数范围明确。"
+        }
+      ],
+      "acceptance": [
+        "常用范围可复现运行；边界失败能区分表达、学习、数据与硬件问题。",
+        "任何容量/效率宣传限定在实测范围；CPU/MPS 性能不是跨平台普遍结论。"
+      ],
+      "decision_rule": "成本检查从 NE-030 开始逐片执行；本任务负责集成后的系统扩展，不成为最后才发现 MPS 不可用的阶段。",
+      "evidence": "v9 仅覆盖 4–64 个记忆神经元的合成前向微基准，参数量不变；广泛扩展与鲁棒性尚未验证。"
+    },
+    {
+      "id": "NE-014",
+      "title": "在可用远端提交上确认 CI 闭环",
+      "stage": "engineering",
+      "priority": "P2",
+      "status": "deferred",
+      "depends_on": [],
+      "inputs": [
+        ".github/workflows/",
+        "src/newera/gates/"
+      ],
+      "reuse": [
+        "pytorch"
+      ],
+      "steps": [
+        {
+          "id": "NE-014.1",
+          "status": "deferred",
+          "work": "在用户授权且远端可触发的提交上查看/执行已有工作流，处理真实失败。",
+          "output": "一次 CI 运行记录及必要修复。",
+          "done_when": "远端运行真实完成；缺少触发条件时标为待外部条件，不阻塞本地模型任务。",
+          "evidence": "远端仓库存在 origin，但当前没有可触发本工作流的用户授权提交；按约束不擅自 push。留待后续已有提交触发后查看真实运行。"
+        },
+        {
+          "id": "NE-014.2",
+          "status": "done",
+          "work": "检查 CI 和本地命令使用相同有效检查，移除重复、无故障覆盖价值的检查。",
+          "output": "最小一致的本地/CI 配置。",
+          "done_when": "实际失败可行动；模型能力指标失败不混同于代码静态检查失败。",
+          "evidence": "工作流与本地可复现命令已核对：uv run ruff check src/newera/neuron src/newera/capabilities src/newera/gates project/tests/models_training/contract_scopes_stage；uv run pytest -q；uv run python -m unittest discover -s src/newera/gates -p test_*.py；uv run newera-gate --stage explore。CI 的 pytest testpaths 仅含 project/tests，因此单独运行 gates unittest 有覆盖价值；门禁不替代模型能力指标验收。uv run newera-gate --stage explore 本轮通过。"
+        }
+      ],
+      "acceptance": [
+        "本地统一门禁与远端 CPU 工作流有真实记录；MPS 检查在本机完成。",
+        "不为触发 CI 擅自发布、push 或发送消息。"
+      ],
+      "decision_rule": "本任务独立于模型关键路径；远端暂不可用时继续本地工作。",
+      "evidence": "本地门禁与 CI 检查组成已对齐，NE-014.2 完成。gh 只读查询远端仓库 Actions 显示 actions/workflows total_count=0，查找 gates.yml 返回404；当前远端没有可观察工作流运行。NE-014.1 仍待用户授权将项目工作流提交到远端并触发；本地不擅自 push。"
+    }
+  ],
+  "next_up": [
+    "NE-024"
+  ],
+  "external_dependencies": [
+    "本轮 roadmap 改进只查阅官方开源来源，没有安装新依赖或运行候选兼容性实验。选型步骤使用 uv 管理环境，优先当前 Apple MPS。",
+    "真实数据、CLRS 数据和新源码的版本/许可/依赖在采用前确认，不阻塞基于当前合成数据的 NE-030 与 NE-022。",
+    "远端 CI 需现有仓库有可触发提交；NE-014 不阻塞本地模型开发。"
+  ],
+  "review_policy": "一次完成一个可运行切片；记录失败原因和下一决策，不以文档数量作为进度。完成任务移至 project/docs/research/plans/archive/completed_and_retired_tasks.json；不覆盖旧实验原始结果。"
+}

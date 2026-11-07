@@ -1,0 +1,173 @@
+{
+  "experiment_id": "message-aggregation-sum-preserving-pairwise-relation",
+  "device": "cpu",
+  "deterministic_algorithms": true,
+  "torch": "2.15.0",
+  "config_sha256": "03862e3be86c38bab77ed84c256f9e3d0284ead693c8e9f11ebd50e9da7a1c46",
+  "source_sha256": "f3b0e72fa417a68f2438b1fc609caea8572e977047639906524d0bb637d92f13",
+  "comparison_source_sha256": "f6cfecd0e077e6ee77a57766c49d77c96fcaca31bb6713ef1b8d7eff31596119",
+  "seed": 94121,
+  "train_sample_count": 4096,
+  "validation_sample_count_per_family": 256,
+  "sealed_test_generated_or_read": false,
+  "candidates": {
+    "global_sum": {
+      "parameter_count": 7081,
+      "checkpoints": [
+        {
+          "epoch": 32,
+          "optimizer_steps": 4096,
+          "samples_seen": 131072,
+          "elapsed_seconds": 2.96921100000327,
+          "train": {
+            "set_sum": {
+              "sample_count": 2048,
+              "mae": 0.15930349002519506,
+              "normalized_mae": 0.04301743246198528,
+              "mse": 0.1747118158583491,
+              "max_absolute_error": 11.876863479614258,
+              "zero_baseline_mae": 3.703231013751747,
+              "oracle_mae": 0.0
+            },
+            "grouped_binding": {
+              "sample_count": 2048,
+              "mae": 1.9542809267641132,
+              "normalized_mae": 0.9559585964881046,
+              "mse": 7.291576683921387,
+              "max_absolute_error": 12.475558280944824,
+              "zero_baseline_mae": 2.0443154483295984,
+              "oracle_mae": 0.0
+            }
+          },
+          "validation": {
+            "set_sum": {
+              "sample_count": 256,
+              "mae": 0.14658480550860986,
+              "normalized_mae": 0.042206760348604364,
+              "mse": 0.04308625725059001,
+              "max_absolute_error": 1.6547412872314453,
+              "zero_baseline_mae": 3.4730172204144765,
+              "oracle_mae": 0.0
+            },
+            "grouped_binding": {
+              "sample_count": 256,
+              "mae": 1.6548575117485598,
+              "normalized_mae": 0.9454486722284053,
+              "mse": 6.207849036787598,
+              "max_absolute_error": 11.219017028808594,
+              "zero_baseline_mae": 1.7503409337368794,
+              "oracle_mae": 0.0
+            }
+          },
+          "validation_permutation_max_abs_delta": {
+            "set_sum": 9.5367431640625e-07,
+            "grouped_binding": 3.5762786865234375e-07
+          },
+          "size_extrapolation_validation": {
+            "grouped_binding": {
+              "sample_count": 256,
+              "mae": 4.317171496426454,
+              "normalized_mae": 0.9977489852807522,
+              "mse": 28.990416195872335,
+              "max_absolute_error": 15.472209930419922,
+              "zero_baseline_mae": 4.326911437761737,
+              "oracle_mae": 0.0
+            }
+          }
+        }
+      ],
+      "optimizer_steps": 4096,
+      "total_training_seconds": 3.0340073749976,
+      "forward_backward_cost": {
+        "parameter_count": 7081,
+        "64": {
+          "median_forward_backward_ms": 0.1314999972237274,
+          "p95_forward_backward_ms": 0.13420799223240465
+        },
+        "256": {
+          "median_forward_backward_ms": 0.13249999028630555,
+          "p95_forward_backward_ms": 0.1401250046910718
+        }
+      }
+    },
+    "sum_residual_group_role_pairwise": {
+      "parameter_count": 15593,
+      "checkpoints": [
+        {
+          "epoch": 32,
+          "optimizer_steps": 4096,
+          "samples_seen": 131072,
+          "elapsed_seconds": 7.165146665996872,
+          "train": {
+            "set_sum": {
+              "sample_count": 2048,
+              "mae": 0.1482660613482949,
+              "normalized_mae": 0.04003694633084378,
+              "mse": 0.15845455904707895,
+              "max_absolute_error": 11.44192886352539,
+              "zero_baseline_mae": 3.703231013751747,
+              "oracle_mae": 0.0
+            },
+            "grouped_binding": {
+              "sample_count": 2048,
+              "mae": 0.11683677800920123,
+              "normalized_mae": 0.05715203008648595,
+              "mse": 0.027326325828974526,
+              "max_absolute_error": 1.8399658203125,
+              "zero_baseline_mae": 2.0443154483295984,
+              "oracle_mae": 0.0
+            }
+          },
+          "validation": {
+            "set_sum": {
+              "sample_count": 256,
+              "mae": 0.13491054353653453,
+              "normalized_mae": 0.03884534252912056,
+              "mse": 0.047711781946994436,
+              "max_absolute_error": 1.0251998901367188,
+              "zero_baseline_mae": 3.4730172204144765,
+              "oracle_mae": 0.0
+            },
+            "grouped_binding": {
+              "sample_count": 256,
+              "mae": 0.11333358963020146,
+              "normalized_mae": 0.0647494367787198,
+              "mse": 0.026959262395224566,
+              "max_absolute_error": 1.0778989791870117,
+              "zero_baseline_mae": 1.7503409337368794,
+              "oracle_mae": 0.0
+            }
+          },
+          "validation_permutation_max_abs_delta": {
+            "set_sum": 2.86102294921875e-06,
+            "grouped_binding": 2.86102294921875e-06
+          },
+          "size_extrapolation_validation": {
+            "grouped_binding": {
+              "sample_count": 256,
+              "mae": 0.7812184696085751,
+              "normalized_mae": 0.1805487541969869,
+              "mse": 1.0241872889214894,
+              "max_absolute_error": 4.414873123168945,
+              "zero_baseline_mae": 4.326911437761737,
+              "oracle_mae": 0.0
+            }
+          }
+        }
+      ],
+      "optimizer_steps": 4096,
+      "total_training_seconds": 7.308950624996214,
+      "forward_backward_cost": {
+        "parameter_count": 15593,
+        "64": {
+          "median_forward_backward_ms": 0.2852910110959783,
+          "p95_forward_backward_ms": 0.29108299349900335
+        },
+        "256": {
+          "median_forward_backward_ms": 0.535375002073124,
+          "p95_forward_backward_ms": 0.5630000086966902
+        }
+      }
+    }
+  }
+}

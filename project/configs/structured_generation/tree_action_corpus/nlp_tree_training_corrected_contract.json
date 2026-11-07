@@ -1,0 +1,132 @@
+{
+  "version": "nlp-tree-training-v12",
+  "preflight": {
+    "task_ledger": "nlptodo.json",
+    "required_dependencies": [
+      "NLP-065-AST-FAILURE-ANALYSIS",
+      "NLP-069-CORPUS-AND-REPLAY-CONTRACTS",
+      "NLP-066-HIERARCHICAL-STRUCTURE-PLANNER",
+      "NLP-067-TYPED-LEXICAL-PROJECTION",
+      "NLP-070-ROLLOUT-TRAINING-RUNTIME",
+      "NLP-062-PARSED-AST-CONDITIONING",
+      "NLP-071-TYPED-OUTPUT-AND-VERIFIER-CONTRACTS",
+      "NLP-072-BENCHMARK-AND-SEARCH-PLUMBING",
+      "NLP-073-BOUNDED-COMPETENCE-AND-BUDGETS",
+      "NLP-074-IMPLEMENTATION-INTEGRATION"
+    ],
+    "train_actions": ".data/nlp/multilingual_supplement_v11/train_actions.jsonl",
+    "train_actions_sha256": "a3c0ddda263aed87c10d96e7483b2560367b53ee9dac2f275dcaa2dc7c27455d",
+    "validation_manifest": "outputs/reports/nlp_multilingual_supplement_verification_v11.json",
+    "validation_manifest_sha256": "494a811f961a9c4cffc141caf35d4eaf35ee76f2d14c15204a417e0aaca39e6a",
+    "grammar": "project/configs/structured_generation/transition_grammar_ast/ast_grammar_transition/nlp_ast_transition_grammar_cpp_extended.json",
+    "grammar_sha256": "9d2d8bf85701173dfdaf2f9ee33f24344e9eaa74ebdd361d53224c367106cd17",
+    "seeds": [
+      17,
+      29,
+      43
+    ],
+    "gpu_count": 1,
+    "gpu_lock": "outputs/.locks/nlp_gpu_training.lock",
+    "queue": "project/configs/other/general/gpu_queue/nlp_gpu_experiment_queue_corrective_registration.json",
+    "legacy_training_corpus": ".data/nlp/tree_action_v1/corpus.jsonl",
+    "legacy_grammar": "project/configs/structured_generation/transition_grammar_ast/ast_grammar_transition/nlp_ast_transition_grammar_base.json",
+    "legacy_training_corpus_sha256": "ddd88fa919f088c9030703f26fc35a64048dd99d8dfe1baac198203b02ec9b3c",
+    "legacy_grammar_sha256": "4573117bb3c6a59c1198604f85ad513a52f5e110854dbb8014339cbe43403cd8",
+    "experiment_config": "project/configs/structured_generation/structure_matched_strict/ast_strict/nlp_strict_ast_corrective_run.json",
+    "attempt_marker": "outputs/reports/nlp_strict_ast_training_attempt_v12.json",
+    "output_dir": "outputs/train/nlp_hierarchical_tree_v12",
+    "implementation_freeze": "project/configs/other/contracts_runtime/freeze_implementation/nlp_implementation_freeze_corrected.json"
+  },
+  "execution": {
+    "implementation_device": "cpu",
+    "training_enabled": false,
+    "gpu_experiments": "deferred_until_NLP-074",
+    "train_split_only_for_rollout": true,
+    "validation_role": "selection_and_audit_only",
+    "test_role": "unread_until_final_freeze"
+  },
+  "data_filter": {
+    "max_nodes": 256,
+    "oversize_train_policy": "exclude_and_report",
+    "validation_policy": "fail_if_over_cap"
+  },
+  "curriculum": {
+    "warmup_steps": 100,
+    "decay_steps": 1000,
+    "initial_teacher_probability": 1.0,
+    "final_teacher_probability": 0.25,
+    "schedule": "linear_after_warmup",
+    "rollout_negative_policy": "train_only_terminal_success_or_failure_viability_label_plus_shared_transition_mask",
+    "unaligned_teacher_next_label": "masked"
+  },
+  "objective": {
+    "normalization": "mean_over_valid_masked_items_per_head",
+    "weights": {
+      "action": 1.0,
+      "node_kind": 1.0,
+      "edge_field": 1.0,
+      "parent": 1.0,
+      "leaf_node": 1.0,
+      "leaf_class": 1.0,
+      "copy_mode": 1.0,
+      "lexical": 1.0,
+      "gap": 1.0,
+      "copy_start": 1.0,
+      "copy_length": 1.0,
+      "node_budget": 1.0,
+      "blueprint_node": 1.0,
+      "blueprint_edge": 1.0,
+      "blueprint_parent": 1.0,
+      "blueprint_presence": 1.0,
+      "viability": 0.25
+    },
+    "endpoint_supervision": "categorical_teacher_action_at_t0",
+    "free_running_consistency": "masked_by_rollout_alignment",
+    "validity_penalty": "shared_transition_mask"
+  },
+  "scope_schedule": [
+    {
+      "stage": "structure",
+      "scopes": [
+        "prompt",
+        "blueprint",
+        "tree_action_heads"
+      ]
+    },
+    {
+      "stage": "lexical",
+      "scopes": [
+        "typed_lexical_heads",
+        "copy_heads"
+      ]
+    },
+    {
+      "stage": "joint",
+      "scopes": [
+        "all"
+      ]
+    }
+  ],
+  "optimizer": {
+    "name": "ScheduleFreeAdamW",
+    "warmup_steps": 100,
+    "gradient_clip_norm": 1.0,
+    "log_actual_hyperparameters": true
+  },
+  "claims": {
+    "implementation_only": true,
+    "trained_quality": false,
+    "capability_qualification": false
+  },
+  "model": {
+    "hidden_size": 128,
+    "decoder_layers": 4,
+    "decoder_heads": 8,
+    "batch_rows": 8,
+    "epochs": 10,
+    "learning_rate": 0.0007,
+    "warmup_steps": 100,
+    "gradient_clip_norm": 1.0,
+    "training_schedule": "teacher_forced_then_train_only_free_running_rollout_with_viability_supervision"
+  }
+}

@@ -1,0 +1,130 @@
+{
+  "schema_version": "newera-modelized-neuron-shared-weights-v10",
+  "run_id": "modelized-neuron-shared-weights-graph-validation",
+  "task": {
+    "name": "permuted_keyed_memory_with_registry",
+    "key_space": 64,
+    "identity_namespace": 19,
+    "training_memory_neurons": 16,
+    "evaluation_memory_neurons": [
+      4,
+      16,
+      32,
+      64
+    ],
+    "tasks": [
+      "single_link_retrieval",
+      "two_link_composition"
+    ],
+    "training_examples": 1024,
+    "validation_examples": 128,
+    "test_examples": 128,
+    "slot_permutation": "Every frame independently places stable identities and readout in random slots; padding identity is -1.",
+    "targets": "Single-link routes 0.60 times the queried value. Two-link adds 0.35 times the cyclic successor value.",
+    "data_separation": "Fresh training, validation, test, and rollout seeds not used by v5-v7. Validation selects the action threshold. The sealed test split is evaluated once after strategy and threshold selection."
+  },
+  "model": {
+    "hidden_size": 32,
+    "edge_types": 2,
+    "predict_edge_strengths": true,
+    "strength_update_threshold": 0.05,
+    "candidate_set": "All present memory identities sorted by persistent registry ID to the current readout identity; candidate shape is fixed by memory_count.",
+    "hard_link_threshold": 0.5,
+    "neuron_parameter_sharing": "One ModelNeuron module and one neuron weight set are reused at every stable neuron identity; recurrent state remains identity-specific.",
+    "aggregation": "Incoming messages are aggregated inside the shared ModelNeuron; aggregation is not an independently parameterized model.",
+    "external_parameters": "Link proposal policy and scalar task readout are separate graph-level/task-level components and are not per-neuron weights.",
+    "max_edges": 512
+  },
+  "training": {
+    "seeds": [
+      7001,
+      7013,
+      7027,
+      7039,
+      7057,
+      7069
+    ],
+    "steps": 1200,
+    "batch_size": 24,
+    "optimizer": "AdamW",
+    "learning_rate": 0.004,
+    "device": "mps",
+    "threads": 1,
+    "hard_action_training_fraction": 0.0,
+    "topology_gradient": "Task-loss-only soft candidate route training; hard actions are evaluated after training. No edge/action labels or sparsity penalty.",
+    "edge_sparsity_weight": 0.0,
+    "implementation_note": "MPS hot path uses stable-ID fixed-shape candidates, skips redundant value validation for generated in-contract inputs, and remaps minibatch edge indices with tensor operations.",
+    "batch_implementation": "per_sample_gradient_accumulation; one graph per ModelNeuronGraph forward",
+    "checkpoint_interval_steps": 100,
+    "progress_interval_steps": 100
+  },
+  "validation_selection": {
+    "edge_f1_weight": 0.5,
+    "operation_recall_weight": 0.5,
+    "rule": "Maximize weighted mean of edge F1 and macro recall for operation classes present in validation; tie-break by lower validation MSE, then higher confidence threshold.",
+    "thresholds": [
+      0.2,
+      0.3,
+      0.5,
+      0.75
+    ]
+  },
+  "evolution": {
+    "sequences_per_seed_task": 2,
+    "steps_per_sequence": 32,
+    "seed_base": 4000000,
+    "topology_policy": "Each rollout fixes a neuron identity cohort for all frames, varies queries and slot permutations, carries hard topology between frames, and remaps by persisted identity."
+  },
+  "decision_rules": {
+    "maximum_oracle_label_error": 0.000001,
+    "minimum_edge_f1": 0.8,
+    "minimum_operation_recall": 0.75,
+    "maximum_strength_mae": 0.2,
+    "maximum_permutation_relative_mse_drift": 0.02,
+    "relative_error_denominator_epsilon": 1e-12,
+    "minimum_permutation_identity_edge_jaccard": 0.95,
+    "maximum_permutation_empty_graph_fraction": 0.01,
+    "minimum_relative_mse_improvement": 0.2,
+    "quality_ci": "Paired per-seed relative MSE delta; 95% two-sided t interval upper bound must be below zero.",
+    "interpretation": "Fixed before the new test set is evaluated. Validation may select only the action confidence threshold."
+  },
+  "controls": {
+    "parameter_matched": "Stable-identity-canonicalized flat MLP with nearest integer hidden width to graph parameter count.",
+    "linear_mac_matched": "Stable-identity-canonicalized flat MLP with nearest integer hidden width to graph Linear MAC count.",
+    "linear_mac_contract": "Counts Linear output elements times input width, batch size one. Multiply-add FLOPs subtotal is 2x this count; scatter, reductions, pointwise operations, activations, optimizer, memory traffic and backend fusion are excluded.",
+    "identity_canonicalization": "Decode task key bits and scatter valid neurons into canonical identity slots; registry IDs remain separate from input feature identity."
+  },
+  "cost_accounting": {
+    "memory_sampling_interval_microseconds": 2000,
+    "scale_warmup_calls": 3,
+    "scale_measured_calls": 9,
+    "flops_scope": "Report exact Linear MAC subtotal and 2x multiply-add subtotal. Do not claim total FLOPs: installed PyTorch MPS build exposes CPU profiler activity only, while sparse index_add/scatter, nonlinear and optimizer operations are not covered by the Linear subtotal.",
+    "profiler_probe": "torch.profiler.supported_activities() captured at runtime."
+  },
+  "diagnostics": {
+    "single_sample_overfit_steps": 20,
+    "gradient_coverage": "Capture connected, finite, nonzero parameter gradients on the first microbatch before the optimizer update."
+  },
+  "limitations": [
+    "Synthetic key-value retrieval/composition does not establish language or broad capability claims.",
+    "The neuron model has one shared parameter set across all graph positions; independent state is not a per-neuron weight set.",
+    "Pool sizes cover 4 to 64 memory neurons and do not establish asymptotic scaling.",
+    "Identity persistence is a local atomic JSON contract; concurrent writers and remote stores are outside this test.",
+    "Host and MPS memory are sampled and may miss transient peaks.",
+    "Total MPS FLOPs are not exactly countable in this PyTorch build; Linear MAC and multiply-add subtotals are reported separately.",
+    "A batch is represented as gradient accumulation across independent one-graph forwards; it is not graph-batched/vectorized.",
+    "The evaluation oracle is an upper-bound control derived from labels and is not an inference adapter or deployable model."
+  ],
+  "accounting": {
+    "source_files": [
+      "src/newera/neuron/composition.py",
+      "src/newera/neuron/graph/layer.py",
+      "src/newera/neuron/graph/policy.py",
+      "src/newera/neuron/graph/topology.py",
+      "project/scripts/experiments/training/neurons/run_modelized_neuron_graph_validation.py",
+      "project/scripts/experiments/training/neurons/graph/run_neuron_graph_sparse_evolution.py",
+      "src/newera/capabilities/evaluation/checkpoint.py",
+      "src/newera/capabilities/evaluation/runner.py"
+    ]
+  }
+}

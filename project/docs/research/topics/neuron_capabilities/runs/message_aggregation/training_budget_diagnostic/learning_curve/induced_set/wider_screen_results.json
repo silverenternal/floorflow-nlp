@@ -1,0 +1,120 @@
+{
+  "experiment_id": "message-aggregation-induced-set-wider-screen",
+  "device": "mps",
+  "torch": "2.15.0",
+  "config_sha256": "75ab8d84f94f7a45c90d2eb74d8dca883f4a72a66db4ac77adc67a243c6aa47c",
+  "source_sha256": "e2357e80e12166ba81e5c714fa59194281f977160f569da447fc232ee1ecf01a",
+  "comparison_source_sha256": "ec447a83d506ccfac9595cd6cebe422068b2f3b305b0462b12c57d860db928f4",
+  "seed": 94121,
+  "train_sample_count": 4096,
+  "validation_sample_count_per_family": 256,
+  "sealed_test_generated_or_read": false,
+  "candidates": {
+    "global_sum": {
+      "parameter_count": 7081,
+      "checkpoints": [
+        {
+          "epoch": 32,
+          "optimizer_steps": 4096,
+          "samples_seen": 131072,
+          "elapsed_seconds": 137.59551033399475,
+          "train": {
+            "set_sum": {
+              "sample_count": 2048,
+              "mae": 0.18533303763979347,
+              "normalized_mae": 0.05004630738713554,
+              "mse": 0.5334999427360942,
+              "max_absolute_error": 17.010059356689453,
+              "zero_baseline_mae": 3.703231013751747,
+              "oracle_mae": 0.0
+            },
+            "grouped_binding": {
+              "sample_count": 2048,
+              "mae": 1.5035381833649808,
+              "normalized_mae": 0.9178274716803174,
+              "mse": 4.364079243739812,
+              "max_absolute_error": 11.182984352111816,
+              "zero_baseline_mae": 1.6381490310072877,
+              "oracle_mae": 0.0
+            }
+          },
+          "validation": {
+            "set_sum": {
+              "sample_count": 256,
+              "mae": 0.17817047992139123,
+              "normalized_mae": 0.05130135228645023,
+              "mse": 0.2920319260682205,
+              "max_absolute_error": 5.874619483947754,
+              "zero_baseline_mae": 3.4730172204144765,
+              "oracle_mae": 0.0
+            },
+            "grouped_binding": {
+              "sample_count": 256,
+              "mae": 1.4479811732308008,
+              "normalized_mae": 0.9205734208130608,
+              "mse": 4.158266989575263,
+              "max_absolute_error": 7.999087333679199,
+              "zero_baseline_mae": 1.572912209383503,
+              "oracle_mae": 0.0
+            }
+          }
+        }
+      ],
+      "optimizer_steps": 4096,
+      "total_training_seconds": 142.3256200839969
+    },
+    "pyg_induced_set_transformer_wide": {
+      "parameter_count": 21193,
+      "checkpoints": [
+        {
+          "epoch": 32,
+          "optimizer_steps": 4096,
+          "samples_seen": 131072,
+          "elapsed_seconds": 151.74814908400003,
+          "train": {
+            "set_sum": {
+              "sample_count": 2048,
+              "mae": 0.5062153104172467,
+              "normalized_mae": 0.1366955797619548,
+              "mse": 0.8091283804326319,
+              "max_absolute_error": 15.765909194946289,
+              "zero_baseline_mae": 3.703231013751747,
+              "oracle_mae": 0.0
+            },
+            "grouped_binding": {
+              "sample_count": 2048,
+              "mae": 1.1563964523920731,
+              "normalized_mae": 0.7059165133962275,
+              "mse": 2.940572409693836,
+              "max_absolute_error": 9.385283470153809,
+              "zero_baseline_mae": 1.6381490310072877,
+              "oracle_mae": 0.0
+            }
+          },
+          "validation": {
+            "set_sum": {
+              "sample_count": 256,
+              "mae": 0.49248110997723415,
+              "normalized_mae": 0.14180209274011618,
+              "mse": 0.5825682178167203,
+              "max_absolute_error": 5.5869598388671875,
+              "zero_baseline_mae": 3.4730172204144765,
+              "oracle_mae": 0.0
+            },
+            "grouped_binding": {
+              "sample_count": 256,
+              "mae": 1.1943443185300566,
+              "normalized_mae": 0.7593203939831933,
+              "mse": 3.1226320067536686,
+              "max_absolute_error": 7.900091171264648,
+              "zero_baseline_mae": 1.572912209383503,
+              "oracle_mae": 0.0
+            }
+          }
+        }
+      ],
+      "optimizer_steps": 4096,
+      "total_training_seconds": 156.49687975000415
+    }
+  }
+}

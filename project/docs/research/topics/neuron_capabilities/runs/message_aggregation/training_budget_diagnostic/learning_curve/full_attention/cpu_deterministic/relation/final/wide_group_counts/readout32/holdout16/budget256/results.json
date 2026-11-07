@@ -1,0 +1,264 @@
+{
+  "experiment_id": "message-aggregation-16-group-long-budget",
+  "device": "cpu",
+  "deterministic_algorithms": true,
+  "torch": "2.15.0",
+  "config_sha256": "51e1fd99a9d42fdd42ea859939852e82c5fdee488be53047e08fe3f72bcce0e6",
+  "source_sha256": "094bf592cbd6c59639e6816e0922e88e86bfa8c00d2115ca0e7663a7c692a4ff",
+  "comparison_source_sha256": "c0b77dd169ed53960ef235f32d54bd1cb97aa0d6a67cd076e56c9d30ef464243",
+  "seed": 94121,
+  "train_sample_count": 4096,
+  "validation_sample_count_per_family": 256,
+  "sealed_test_generated_or_read": false,
+  "candidates": {
+    "sum_residual_group_role_pairwise": {
+      "parameter_count": 15890,
+      "checkpoints": [
+        {
+          "epoch": 128,
+          "optimizer_steps": 16384,
+          "samples_seen": 524288,
+          "elapsed_seconds": 29.3631680420076,
+          "train": {
+            "set_sum": {
+              "sample_count": 2048,
+              "mae": 0.035130279097984385,
+              "normalized_mae": 0.009486386068687047,
+              "mse": 0.002770104968279607,
+              "max_absolute_error": 0.2402782440185547,
+              "zero_baseline_mae": 3.703231013751747,
+              "oracle_mae": 0.0
+            },
+            "grouped_binding": {
+              "sample_count": 2048,
+              "mae": 0.027328581228175608,
+              "normalized_mae": 0.01668259768244128,
+              "mse": 0.0012467471715499904,
+              "max_absolute_error": 0.1499934196472168,
+              "zero_baseline_mae": 1.6381490310072877,
+              "oracle_mae": 0.0
+            }
+          },
+          "validation": {
+            "set_sum": {
+              "sample_count": 256,
+              "mae": 0.033393683821486775,
+              "normalized_mae": 0.009615179454106337,
+              "mse": 0.002568917797762223,
+              "max_absolute_error": 0.17462158203125,
+              "zero_baseline_mae": 3.4730172204144765,
+              "oracle_mae": 0.0
+            },
+            "grouped_binding": {
+              "sample_count": 256,
+              "mae": 0.025824118427408393,
+              "normalized_mae": 0.016418029101274545,
+              "mse": 0.0011367997284842503,
+              "max_absolute_error": 0.11521255970001221,
+              "zero_baseline_mae": 1.572912209383503,
+              "oracle_mae": 0.0
+            }
+          },
+          "validation_permutation_max_abs_delta": {
+            "set_sum": 1.9073486328125e-06,
+            "grouped_binding": 9.5367431640625e-07
+          },
+          "size_extrapolation_validation": {
+            "grouped_binding": {
+              "sample_count": 256,
+              "mae": 0.07802024214470293,
+              "normalized_mae": 0.02751216549320012,
+              "mse": 0.008365125069002399,
+              "max_absolute_error": 0.20821857452392578,
+              "zero_baseline_mae": 2.835845188703388,
+              "oracle_mae": 0.0
+            }
+          },
+          "validation_by_size": {
+            "set_sum": {
+              "4": {
+                "sample_count": 256,
+                "mae": 0.008901161309040617,
+                "normalized_mae": 0.0055367944291635,
+                "mse": 0.00012983846202880986,
+                "max_absolute_error": 0.023487567901611328,
+                "zero_baseline_mae": 1.6076380336889997,
+                "oracle_mae": 0.0
+              },
+              "16": {
+                "sample_count": 256,
+                "mae": 0.02391278476716252,
+                "normalized_mae": 0.008105925442881152,
+                "mse": 0.0009587556970328374,
+                "max_absolute_error": 0.14262104034423828,
+                "zero_baseline_mae": 2.950037591101136,
+                "oracle_mae": 0.0
+              },
+              "64": {
+                "sample_count": 256,
+                "mae": 0.08039240521611646,
+                "normalized_mae": 0.012307891486547219,
+                "mse": 0.008785458360149758,
+                "max_absolute_error": 0.19809341430664062,
+                "zero_baseline_mae": 6.53177721821703,
+                "oracle_mae": 0.0
+              }
+            },
+            "grouped_binding": {
+              "2": {
+                "sample_count": 256,
+                "mae": 0.017307216163317207,
+                "normalized_mae": 0.01904516285134827,
+                "mse": 0.0006721763512444855,
+                "max_absolute_error": 0.1647024154663086,
+                "zero_baseline_mae": 0.9087460316513898,
+                "oracle_mae": 0.0
+              },
+              "4": {
+                "sample_count": 256,
+                "mae": 0.02436021536414046,
+                "normalized_mae": 0.01625065330312242,
+                "mse": 0.0009607976218837279,
+                "max_absolute_error": 0.20548629760742188,
+                "zero_baseline_mae": 1.4990299103519646,
+                "oracle_mae": 0.0
+              },
+              "8": {
+                "sample_count": 256,
+                "mae": 0.03684795874869451,
+                "normalized_mae": 0.0186934513434205,
+                "mse": 0.002054155867512696,
+                "max_absolute_error": 0.14120164513587952,
+                "zero_baseline_mae": 1.9711693721910706,
+                "oracle_mae": 0.0
+              }
+            }
+          }
+        },
+        {
+          "epoch": 256,
+          "optimizer_steps": 32768,
+          "samples_seen": 1048576,
+          "elapsed_seconds": 59.07714045800094,
+          "train": {
+            "set_sum": {
+              "sample_count": 2048,
+              "mae": 0.004632002698372162,
+              "normalized_mae": 0.0012508003635666994,
+              "mse": 3.357418191305194e-05,
+              "max_absolute_error": 0.0429534912109375,
+              "zero_baseline_mae": 3.703231013751747,
+              "oracle_mae": 0.0
+            },
+            "grouped_binding": {
+              "sample_count": 2048,
+              "mae": 0.04997472152354021,
+              "normalized_mae": 0.03050682238160655,
+              "mse": 0.0035871860520236775,
+              "max_absolute_error": 0.16361427307128906,
+              "zero_baseline_mae": 1.6381490310072877,
+              "oracle_mae": 0.0
+            }
+          },
+          "validation": {
+            "set_sum": {
+              "sample_count": 256,
+              "mae": 0.004692790076660458,
+              "normalized_mae": 0.0013512141687856104,
+              "mse": 3.2461302316965596e-05,
+              "max_absolute_error": 0.020318984985351562,
+              "zero_baseline_mae": 3.4730172204144765,
+              "oracle_mae": 0.0
+            },
+            "grouped_binding": {
+              "sample_count": 256,
+              "mae": 0.048128586655366234,
+              "normalized_mae": 0.030598393456574446,
+              "mse": 0.003394435191742812,
+              "max_absolute_error": 0.14771762490272522,
+              "zero_baseline_mae": 1.572912209383503,
+              "oracle_mae": 0.0
+            }
+          },
+          "validation_permutation_max_abs_delta": {
+            "set_sum": 9.5367431640625e-07,
+            "grouped_binding": 2.384185791015625e-07
+          },
+          "size_extrapolation_validation": {
+            "grouped_binding": {
+              "sample_count": 256,
+              "mae": 0.16484289872460067,
+              "normalized_mae": 0.058128313696831434,
+              "mse": 0.02861177477364683,
+              "max_absolute_error": 0.26617884635925293,
+              "zero_baseline_mae": 2.835845188703388,
+              "oracle_mae": 0.0
+            }
+          },
+          "validation_by_size": {
+            "set_sum": {
+              "4": {
+                "sample_count": 256,
+                "mae": 0.0041154396521960734,
+                "normalized_mae": 0.0025599292663862246,
+                "mse": 2.2530543237962883e-05,
+                "max_absolute_error": 0.01245260238647461,
+                "zero_baseline_mae": 1.6076380336889997,
+                "oracle_mae": 0.0
+              },
+              "16": {
+                "sample_count": 256,
+                "mae": 0.004245120027917437,
+                "normalized_mae": 0.001439005401396562,
+                "mse": 2.6490620235241285e-05,
+                "max_absolute_error": 0.016585350036621094,
+                "zero_baseline_mae": 2.950037591101136,
+                "oracle_mae": 0.0
+              },
+              "64": {
+                "sample_count": 256,
+                "mae": 0.005906655627768487,
+                "normalized_mae": 0.0009042953288876588,
+                "mse": 5.410790079516054e-05,
+                "max_absolute_error": 0.023586273193359375,
+                "zero_baseline_mae": 6.53177721821703,
+                "oracle_mae": 0.0
+              }
+            },
+            "grouped_binding": {
+              "2": {
+                "sample_count": 256,
+                "mae": 0.021959784331556875,
+                "normalized_mae": 0.024164930097852703,
+                "mse": 0.0006955406428930078,
+                "max_absolute_error": 0.12064170837402344,
+                "zero_baseline_mae": 0.9087460316513898,
+                "oracle_mae": 0.0
+              },
+              "4": {
+                "sample_count": 256,
+                "mae": 0.04429345828248188,
+                "normalized_mae": 0.029548081713781146,
+                "mse": 0.0023333059346550993,
+                "max_absolute_error": 0.10530948638916016,
+                "zero_baseline_mae": 1.4990299103519646,
+                "oracle_mae": 0.0
+              },
+              "8": {
+                "sample_count": 256,
+                "mae": 0.08249774915748276,
+                "normalized_mae": 0.041852186991816774,
+                "mse": 0.007615571965927463,
+                "max_absolute_error": 0.18526647984981537,
+                "zero_baseline_mae": 1.9711693721910706,
+                "oracle_mae": 0.0
+              }
+            }
+          }
+        }
+      ],
+      "optimizer_steps": 32768,
+      "total_training_seconds": 59.26204329200846
+    }
+  }
+}

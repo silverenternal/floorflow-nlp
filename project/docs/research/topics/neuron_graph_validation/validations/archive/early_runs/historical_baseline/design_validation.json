@@ -1,0 +1,359 @@
+{
+  "candidate_search": [
+    {
+      "budget": 32,
+      "candidate_count": 32,
+      "candidate_index_bytes": 512,
+      "median_search_ms": 0.030333001632243395,
+      "profiled_positive_cpu_allocation_bytes": 9016,
+      "sequence_length": 32
+    },
+    {
+      "budget": 128,
+      "candidate_count": 128,
+      "candidate_index_bytes": 2048,
+      "median_search_ms": 0.0321669940603897,
+      "profiled_positive_cpu_allocation_bytes": 31384,
+      "sequence_length": 32
+    },
+    {
+      "budget": 256,
+      "candidate_count": 256,
+      "candidate_index_bytes": 4096,
+      "median_search_ms": 0.0320410035783425,
+      "profiled_positive_cpu_allocation_bytes": 61208,
+      "sequence_length": 32
+    },
+    {
+      "budget": 32,
+      "candidate_count": 32,
+      "candidate_index_bytes": 512,
+      "median_search_ms": 0.03133299469482154,
+      "profiled_positive_cpu_allocation_bytes": 10584,
+      "sequence_length": 64
+    },
+    {
+      "budget": 128,
+      "candidate_count": 128,
+      "candidate_index_bytes": 2048,
+      "median_search_ms": 0.03133300197077915,
+      "profiled_positive_cpu_allocation_bytes": 32952,
+      "sequence_length": 64
+    },
+    {
+      "budget": 256,
+      "candidate_count": 256,
+      "candidate_index_bytes": 4096,
+      "median_search_ms": 0.03266699786763638,
+      "profiled_positive_cpu_allocation_bytes": 62776,
+      "sequence_length": 64
+    },
+    {
+      "budget": 32,
+      "candidate_count": 32,
+      "candidate_index_bytes": 512,
+      "median_search_ms": 0.02987500192830339,
+      "profiled_positive_cpu_allocation_bytes": 13720,
+      "sequence_length": 128
+    },
+    {
+      "budget": 128,
+      "candidate_count": 128,
+      "candidate_index_bytes": 2048,
+      "median_search_ms": 0.03312499757157639,
+      "profiled_positive_cpu_allocation_bytes": 36088,
+      "sequence_length": 128
+    },
+    {
+      "budget": 256,
+      "candidate_count": 256,
+      "candidate_index_bytes": 4096,
+      "median_search_ms": 0.0347500026691705,
+      "profiled_positive_cpu_allocation_bytes": 65912,
+      "sequence_length": 128
+    },
+    {
+      "budget": 32,
+      "candidate_count": 32,
+      "candidate_index_bytes": 512,
+      "median_search_ms": 0.031458999728783965,
+      "profiled_positive_cpu_allocation_bytes": 19992,
+      "sequence_length": 256
+    },
+    {
+      "budget": 128,
+      "candidate_count": 128,
+      "candidate_index_bytes": 2048,
+      "median_search_ms": 0.0318750026053749,
+      "profiled_positive_cpu_allocation_bytes": 42360,
+      "sequence_length": 256
+    },
+    {
+      "budget": 256,
+      "candidate_count": 256,
+      "candidate_index_bytes": 4096,
+      "median_search_ms": 0.035583994758781046,
+      "profiled_positive_cpu_allocation_bytes": 72184,
+      "sequence_length": 256
+    },
+    {
+      "budget": 32,
+      "candidate_count": 32,
+      "candidate_index_bytes": 512,
+      "median_search_ms": 0.0322499981848523,
+      "profiled_positive_cpu_allocation_bytes": 32536,
+      "sequence_length": 512
+    },
+    {
+      "budget": 128,
+      "candidate_count": 128,
+      "candidate_index_bytes": 2048,
+      "median_search_ms": 0.032834002922754735,
+      "profiled_positive_cpu_allocation_bytes": 54904,
+      "sequence_length": 512
+    },
+    {
+      "budget": 256,
+      "candidate_count": 256,
+      "candidate_index_bytes": 4096,
+      "median_search_ms": 0.038209000194910914,
+      "profiled_positive_cpu_allocation_bytes": 84728,
+      "sequence_length": 512
+    }
+  ],
+  "code_sha256": {
+    "project/scripts/experiments/training/neurons/graph/run_neuron_graph_validation.py": "ea721fd0e27371e29bbeeb3ea0fe21e5bc48afdcf401323faaa312e92d5dd0cd",
+    "src/newera/neuron/graph/layer.py": "82c4c86ba92c69f65e4e9e23b6166005a7936dd130b693961bc37286ec25e907",
+    "src/newera/neuron/graph/topology.py": "b9c820a2f03033d10083fd5329b576c729f1db897c9e74c1c176f5c08cba05d2",
+    "src/newera/nlp_flow/components/research/training/objectives/training_losses.py": "e46a713bf593eee070af6443c34d15beffca728537fc116bc46f818caaf96865",
+    "src/newera/nlp_flow/model/components/architecture/foundation/model.py": "fe16c1c928c83e3909debc4ae0e3ce95d4f83f889aaa8a7b7d6a64e28b605b67"
+  },
+  "config_sha256": "659d19fe31d69dd0261a2eb971836bc784966d1966a613274ad2fea63f505fe2",
+  "device": "cpu",
+  "limitations": [
+    "Synthetic algorithmic task only; no natural-language capability claim.",
+    "Two seeds and 80 updates are a screening experiment, not a confirmatory study.",
+    "CPU latency is machine-specific; the profiler allocation sum is not peak process memory.",
+    "The graph uses token-position nodes and the model parameter counts are not matched."
+  ],
+  "model_latency": [
+    {
+      "batch_size": 8,
+      "condition": "transformer_control",
+      "median_forward_ms": 0.27047899857279845,
+      "sequence_length": 32,
+      "tokens_per_second": 946469.046953006
+    },
+    {
+      "batch_size": 8,
+      "condition": "graph",
+      "median_forward_ms": 0.8068755014392082,
+      "sequence_length": 32,
+      "tokens_per_second": 317273.2342763881
+    },
+    {
+      "batch_size": 8,
+      "condition": "transformer_control",
+      "median_forward_ms": 0.49343749924446456,
+      "sequence_length": 64,
+      "tokens_per_second": 1037618.7476305667
+    },
+    {
+      "batch_size": 8,
+      "condition": "graph",
+      "median_forward_ms": 1.1451459977251943,
+      "sequence_length": 64,
+      "tokens_per_second": 447104.5622279395
+    },
+    {
+      "batch_size": 8,
+      "condition": "transformer_control",
+      "median_forward_ms": 1.216000000567874,
+      "sequence_length": 128,
+      "tokens_per_second": 842105.2627646303
+    },
+    {
+      "batch_size": 8,
+      "condition": "graph",
+      "median_forward_ms": 1.9852499972330406,
+      "sequence_length": 128,
+      "tokens_per_second": 515804.0556238302
+    }
+  ],
+  "platform": "macOS-27.2-arm64-arm-64bit-Mach-O",
+  "python": "3.13.15",
+  "run_id": "neuron-graph-design-validation-v1",
+  "schema_version": "newera-neuron-graph-validation-result-v1",
+  "torch": "2.15.0",
+  "training_cases": [
+    {
+      "graph_budget_16": {
+        "condition": "graph_budget_16",
+        "initial_validation_cross_entropy": 3.4767673015594482,
+        "initial_validation_next_token_accuracy": 0.027217742055654526,
+        "parameter_count": 14960,
+        "seed": 11,
+        "steps": 80,
+        "train_wall_seconds": 0.46461099999578437,
+        "training_data_sha256": "6b21f7f3bd366245946a6a997b30aa59620236cae54b68d21b8076dc05a875cb",
+        "validation_cross_entropy": 2.8480112552642822,
+        "validation_data_sha256": "21c78489bf5e75caef5dd1f4ae8d3aea8b3a7f88bcc05ad325aaa4e4ca4f23b2",
+        "validation_next_token_accuracy": 0.4067540466785431
+      },
+      "transformer_control": {
+        "condition": "transformer_control",
+        "initial_validation_cross_entropy": 3.4764184951782227,
+        "initial_validation_next_token_accuracy": 0.02822580561041832,
+        "parameter_count": 10352,
+        "seed": 11,
+        "steps": 80,
+        "train_wall_seconds": 0.18588966700190213,
+        "training_data_sha256": "6b21f7f3bd366245946a6a997b30aa59620236cae54b68d21b8076dc05a875cb",
+        "validation_cross_entropy": 2.6671335697174072,
+        "validation_data_sha256": "21c78489bf5e75caef5dd1f4ae8d3aea8b3a7f88bcc05ad325aaa4e4ca4f23b2",
+        "validation_next_token_accuracy": 0.41481855511665344
+      }
+    },
+    {
+      "graph_budget_64": {
+        "condition": "graph_budget_64",
+        "initial_validation_cross_entropy": 3.4767673015594482,
+        "initial_validation_next_token_accuracy": 0.027217742055654526,
+        "parameter_count": 14960,
+        "seed": 11,
+        "steps": 80,
+        "train_wall_seconds": 0.583938666000904,
+        "training_data_sha256": "6b21f7f3bd366245946a6a997b30aa59620236cae54b68d21b8076dc05a875cb",
+        "validation_cross_entropy": 2.855172872543335,
+        "validation_data_sha256": "21c78489bf5e75caef5dd1f4ae8d3aea8b3a7f88bcc05ad325aaa4e4ca4f23b2",
+        "validation_next_token_accuracy": 0.3946572542190552
+      },
+      "transformer_control": {
+        "condition": "transformer_control",
+        "initial_validation_cross_entropy": 3.4764184951782227,
+        "initial_validation_next_token_accuracy": 0.02822580561041832,
+        "parameter_count": 10352,
+        "seed": 11,
+        "steps": 80,
+        "train_wall_seconds": 0.17473175000486663,
+        "training_data_sha256": "6b21f7f3bd366245946a6a997b30aa59620236cae54b68d21b8076dc05a875cb",
+        "validation_cross_entropy": 2.6671335697174072,
+        "validation_data_sha256": "21c78489bf5e75caef5dd1f4ae8d3aea8b3a7f88bcc05ad325aaa4e4ca4f23b2",
+        "validation_next_token_accuracy": 0.41481855511665344
+      }
+    },
+    {
+      "graph_budget_256": {
+        "condition": "graph_budget_256",
+        "initial_validation_cross_entropy": 3.4767673015594482,
+        "initial_validation_next_token_accuracy": 0.027217742055654526,
+        "parameter_count": 14960,
+        "seed": 11,
+        "steps": 80,
+        "train_wall_seconds": 1.0864932089971262,
+        "training_data_sha256": "6b21f7f3bd366245946a6a997b30aa59620236cae54b68d21b8076dc05a875cb",
+        "validation_cross_entropy": 2.854194164276123,
+        "validation_data_sha256": "21c78489bf5e75caef5dd1f4ae8d3aea8b3a7f88bcc05ad325aaa4e4ca4f23b2",
+        "validation_next_token_accuracy": 0.3785282373428345
+      },
+      "transformer_control": {
+        "condition": "transformer_control",
+        "initial_validation_cross_entropy": 3.4764184951782227,
+        "initial_validation_next_token_accuracy": 0.02822580561041832,
+        "parameter_count": 10352,
+        "seed": 11,
+        "steps": 80,
+        "train_wall_seconds": 0.17474287499499042,
+        "training_data_sha256": "6b21f7f3bd366245946a6a997b30aa59620236cae54b68d21b8076dc05a875cb",
+        "validation_cross_entropy": 2.6671335697174072,
+        "validation_data_sha256": "21c78489bf5e75caef5dd1f4ae8d3aea8b3a7f88bcc05ad325aaa4e4ca4f23b2",
+        "validation_next_token_accuracy": 0.41481855511665344
+      }
+    },
+    {
+      "graph_budget_16": {
+        "condition": "graph_budget_16",
+        "initial_validation_cross_entropy": 3.4724948406219482,
+        "initial_validation_next_token_accuracy": 0.0317540317773819,
+        "parameter_count": 14960,
+        "seed": 23,
+        "steps": 80,
+        "train_wall_seconds": 0.44574041700252565,
+        "training_data_sha256": "aaba7cacadaafecc409d669dc1c4338c15c6228cda382cee84e7142babf266b4",
+        "validation_cross_entropy": 2.7750627994537354,
+        "validation_data_sha256": "7505e5f6c1fc9438a4f464477ebb32f939f632d94e194c632fdfad006923532c",
+        "validation_next_token_accuracy": 0.3911290466785431
+      },
+      "transformer_control": {
+        "condition": "transformer_control",
+        "initial_validation_cross_entropy": 3.473073959350586,
+        "initial_validation_next_token_accuracy": 0.033266130834817886,
+        "parameter_count": 10352,
+        "seed": 23,
+        "steps": 80,
+        "train_wall_seconds": 0.17560695900465362,
+        "training_data_sha256": "aaba7cacadaafecc409d669dc1c4338c15c6228cda382cee84e7142babf266b4",
+        "validation_cross_entropy": 2.7872753143310547,
+        "validation_data_sha256": "7505e5f6c1fc9438a4f464477ebb32f939f632d94e194c632fdfad006923532c",
+        "validation_next_token_accuracy": 0.39768144488334656
+      }
+    },
+    {
+      "graph_budget_64": {
+        "condition": "graph_budget_64",
+        "initial_validation_cross_entropy": 3.4724948406219482,
+        "initial_validation_next_token_accuracy": 0.0317540317773819,
+        "parameter_count": 14960,
+        "seed": 23,
+        "steps": 80,
+        "train_wall_seconds": 0.5843243749986868,
+        "training_data_sha256": "aaba7cacadaafecc409d669dc1c4338c15c6228cda382cee84e7142babf266b4",
+        "validation_cross_entropy": 2.792165994644165,
+        "validation_data_sha256": "7505e5f6c1fc9438a4f464477ebb32f939f632d94e194c632fdfad006923532c",
+        "validation_next_token_accuracy": 0.3876008093357086
+      },
+      "transformer_control": {
+        "condition": "transformer_control",
+        "initial_validation_cross_entropy": 3.473073959350586,
+        "initial_validation_next_token_accuracy": 0.033266130834817886,
+        "parameter_count": 10352,
+        "seed": 23,
+        "steps": 80,
+        "train_wall_seconds": 0.17614337499981048,
+        "training_data_sha256": "aaba7cacadaafecc409d669dc1c4338c15c6228cda382cee84e7142babf266b4",
+        "validation_cross_entropy": 2.7872753143310547,
+        "validation_data_sha256": "7505e5f6c1fc9438a4f464477ebb32f939f632d94e194c632fdfad006923532c",
+        "validation_next_token_accuracy": 0.39768144488334656
+      }
+    },
+    {
+      "graph_budget_256": {
+        "condition": "graph_budget_256",
+        "initial_validation_cross_entropy": 3.4724948406219482,
+        "initial_validation_next_token_accuracy": 0.0317540317773819,
+        "parameter_count": 14960,
+        "seed": 23,
+        "steps": 80,
+        "train_wall_seconds": 1.082280124996032,
+        "training_data_sha256": "aaba7cacadaafecc409d669dc1c4338c15c6228cda382cee84e7142babf266b4",
+        "validation_cross_entropy": 2.8208816051483154,
+        "validation_data_sha256": "7505e5f6c1fc9438a4f464477ebb32f939f632d94e194c632fdfad006923532c",
+        "validation_next_token_accuracy": 0.39969757199287415
+      },
+      "transformer_control": {
+        "condition": "transformer_control",
+        "initial_validation_cross_entropy": 3.473073959350586,
+        "initial_validation_next_token_accuracy": 0.033266130834817886,
+        "parameter_count": 10352,
+        "seed": 23,
+        "steps": 80,
+        "train_wall_seconds": 0.17688429199915845,
+        "training_data_sha256": "aaba7cacadaafecc409d669dc1c4338c15c6228cda382cee84e7142babf266b4",
+        "validation_cross_entropy": 2.7872753143310547,
+        "validation_data_sha256": "7505e5f6c1fc9438a4f464477ebb32f939f632d94e194c632fdfad006923532c",
+        "validation_next_token_accuracy": 0.39768144488334656
+      }
+    }
+  ],
+  "training_steps": 80
+}

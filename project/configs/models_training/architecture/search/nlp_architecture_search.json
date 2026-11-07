@@ -1,0 +1,93 @@
+{
+  "version": "nlp-architecture-search-v1",
+  "status": "matched_validation_search",
+  "purpose": "Select the smallest architecture on a validation quality plateau instead of comparing a few hand-picked configurations.",
+  "base_config": "project/configs/models_training/architecture/definitions/nlp_model_architecture_capability.json",
+  "search_space": {
+    "hidden_size": [288, 320, 352],
+    "dynamic_max_steps": [4, 6, 8],
+    "dynamic_parallel_lanes": [2, 4],
+    "dynamic_parallel_top_k": [1, 2],
+    "unified_planner_dim": [96, 128],
+    "unified_generated_expert_mode": ["disabled", "online"],
+    "enable_runtime_competence": [false, true],
+    "enable_json_schema_key_head": [false, true],
+    "enable_task_metadata": [false, true],
+    "unified_cell_rank": [12, 16],
+    "unified_top_k": [2, 3],
+    "unified_generated_basis_count": [2, 4],
+    "unified_generated_rank": [12, 16]
+  },
+  "controls": [
+    {
+      "id": "e-disabled",
+      "unified_generated_expert_mode": "disabled",
+      "enable_runtime_competence": false
+    },
+    {
+      "id": "runtime-competence-off",
+      "enable_runtime_competence": false
+    },
+    {
+      "id": "schema-key-head-off",
+      "enable_json_schema_key_head": false
+    }
+  ],
+  "measurement": {
+    "max_parameters": 23000000,
+    "max_training_flops_per_token": 138000000,
+    "max_inference_flops": 7000000000,
+    "candidate_limit": 12,
+    "sequence_length": 128,
+    "batch_size": 2,
+    "expected_depth_fraction": 0.65,
+    "seed": 20261102
+  },
+  "halving": {
+    "token_budgets": [8192, 16384, 32768],
+    "keep_fraction": 0.5,
+    "quality_plateau": 0.02
+  },
+  "training": {
+    "train": [
+      ".data/nlp/chat_instructions_v1/train.jsonl",
+      ".data/nlp/mixed_v1/corpus_v1/train.jsonl"
+    ],
+    "validation": [
+      ".data/nlp/chat_instructions_v1/validation.jsonl"
+    ],
+    "tokenizer": ".data/nlp/tokenizer_v1/tokenizer.json",
+    "text_mode": "chat",
+    "device": "cuda:1",
+    "precision": "bf16",
+    "batch_size": 2,
+    "sequence_length": 128,
+    "train_batches": 256,
+    "validation_batches": 8,
+    "learning_rate": 0.0003,
+    "weight_decay": 0.01,
+    "optimizer": "schedule_free_adamw",
+    "emergence_loss_weight": 0.05,
+    "dynamic_depth_weight": 0.02,
+    "dynamic_target_depth": 3.0,
+    "seed": 20261102
+  },
+  "protocol": {
+    "selection_split": "validation",
+    "same_seed": true,
+    "same_batches": true,
+    "same_token_budget": true,
+    "test_read_during_search": false,
+    "best_of_n_at_inference": false,
+    "quality_metric": "negative_validation_loss",
+    "promotion_requires": [
+      "executable_success",
+      "strict_json_validity",
+      "ast_parse_validity"
+    ]
+  },
+  "report": "outputs/reports/nlp_architecture_search_probe_v1.json",
+  "freeze": {
+    "selected_config": "project/configs/models_training/architecture/search/nlp_architecture_search_selected_probe.json"
+  }
+}

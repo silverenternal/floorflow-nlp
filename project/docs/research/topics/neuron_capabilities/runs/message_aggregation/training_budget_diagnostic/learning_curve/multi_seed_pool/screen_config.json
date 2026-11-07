@@ -1,0 +1,19 @@
+{
+  "experiment_id": "message-aggregation-multiseed-pool-screen",
+  "device": "mps",
+  "seed": 87139,
+  "train_sizes": {
+    "set_sum": [4, 16, 64],
+    "grouped_binding": [2, 4, 8]
+  },
+  "samples_per_family": 2048,
+  "validation_samples_per_family": 256,
+  "epoch_checkpoints": [32],
+  "batch_size": 32,
+  "capacity": 64,
+  "hidden_size": 32,
+  "learning_rate": 0.001,
+  "weight_decay": 0.0001,
+  "candidates": ["global_sum", "pyg_deep_sets", "pyg_multiseed_pool"],
+  "evaluation_scope": "training_and_validation_only_no_sealed_test"
+}

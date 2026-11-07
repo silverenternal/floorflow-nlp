@@ -1,0 +1,55 @@
+{
+  "experiment_id": "message-aggregation-fair-init-sum-residual-comparison",
+  "device": "cpu",
+  "seed": 94121,
+  "train_sizes": {
+    "set_sum": [
+      4,
+      16,
+      64
+    ],
+    "grouped_binding": [
+      2,
+      4,
+      8,
+      16
+    ]
+  },
+  "samples_per_family": 2048,
+  "validation_samples_per_family": 256,
+  "epoch_checkpoints": [
+    32,
+    64,
+    128
+  ],
+  "batch_size": 32,
+  "capacity": 64,
+  "hidden_size": 32,
+  "learning_rate": 0.001,
+  "weight_decay": 0.0001,
+  "candidates": [
+    "global_sum",
+    "sum_residual_group_role_pairwise"
+  ],
+  "evaluation_scope": "training_and_validation_only_no_sealed_test; deterministic CPU execution; shared ModelNeuron task-conditioned output channel",
+  "deterministic_algorithms": true,
+  "validation_sizes": {
+    "set_sum": [
+      4,
+      16,
+      64
+    ],
+    "grouped_binding": [
+      2,
+      4,
+      8,
+      16
+    ]
+  },
+  "cost_widths": [],
+  "extrapolation_sizes": {
+    "grouped_binding": [
+      32
+    ]
+  }
+}

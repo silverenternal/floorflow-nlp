@@ -1,0 +1,222 @@
+{
+  "schema_version": "newera-checkpoint-evaluation-v1",
+  "run_id": "ne030-cpu-smoke",
+  "task": "single_link_retrieval",
+  "seed": 901,
+  "device": "cpu",
+  "checkpoint": "project/docs/research/topics/neuron_graph_validation/validations/modelized_neuron_training_baseline/smoke/results_checkpoints/single_link_retrieval/seed_901/modelized_neuron_graph.pt",
+  "checkpoint_sha256": "3a8222955e9122c8d31e88fc2a61578ce939b6302bf6f44434502accdbfd11e6",
+  "training_step": 3,
+  "samples_seen": 6,
+  "validation_selected_threshold": 0.2,
+  "threshold_trials": [
+    {
+      "threshold": 0.2,
+      "selection_score": 0.16666666666666666,
+      "edge_f1": 0.0,
+      "operation_macro_recall": 0.3333333333333333,
+      "mse": 0.4714084006845951
+    },
+    {
+      "threshold": 0.3,
+      "selection_score": 0.08333333333333333,
+      "edge_f1": 0.16666666666666666,
+      "operation_macro_recall": 0.0,
+      "mse": 0.49717414751648903
+    },
+    {
+      "threshold": 0.5,
+      "selection_score": 0.08333333333333333,
+      "edge_f1": 0.16666666666666666,
+      "operation_macro_recall": 0.0,
+      "mse": 0.49717414751648903
+    },
+    {
+      "threshold": 0.75,
+      "selection_score": 0.08333333333333333,
+      "edge_f1": 0.16666666666666666,
+      "operation_macro_recall": 0.0,
+      "mse": 0.49717414751648903
+    }
+  ],
+  "validation_metrics": {
+    "mse": 0.4714084006845951,
+    "mae": 0.6621483489871025,
+    "edge_f1": 0.0,
+    "empty_edge_graph_count": 4,
+    "evaluated_graph_count": 4,
+    "edge_precision": null,
+    "edge_precision_numerator": 0,
+    "edge_precision_denominator": 0,
+    "edge_recall": 0.0,
+    "edge_recall_numerator": 0,
+    "edge_recall_denominator": 4,
+    "strength_mae": null,
+    "operation_scores": {
+      "add": {
+        "expected_count": 0,
+        "predicted_count": 0,
+        "correct_count": 0,
+        "precision": null,
+        "recall": null
+      },
+      "remove": {
+        "expected_count": 4,
+        "predicted_count": 8,
+        "correct_count": 4,
+        "precision": 0.5,
+        "recall": 1.0
+      },
+      "retype": {
+        "expected_count": 3,
+        "predicted_count": 0,
+        "correct_count": 0,
+        "precision": null,
+        "recall": 0.0
+      },
+      "set_strength": {
+        "expected_count": 1,
+        "predicted_count": 0,
+        "correct_count": 0,
+        "precision": null,
+        "recall": 0.0
+      }
+    }
+  },
+  "test_metrics": {
+    "mse": 0.11909672431647778,
+    "mae": 0.33865779638290405,
+    "edge_f1": 0.0,
+    "empty_edge_graph_count": 4,
+    "evaluated_graph_count": 4,
+    "edge_precision": null,
+    "edge_precision_numerator": 0,
+    "edge_precision_denominator": 0,
+    "edge_recall": 0.0,
+    "edge_recall_numerator": 0,
+    "edge_recall_denominator": 4,
+    "strength_mae": null,
+    "operation_scores": {
+      "add": {
+        "expected_count": 0,
+        "predicted_count": 0,
+        "correct_count": 0,
+        "precision": null,
+        "recall": null
+      },
+      "remove": {
+        "expected_count": 4,
+        "predicted_count": 8,
+        "correct_count": 4,
+        "precision": 0.5,
+        "recall": 1.0
+      },
+      "retype": {
+        "expected_count": 2,
+        "predicted_count": 0,
+        "correct_count": 0,
+        "precision": null,
+        "recall": 0.0
+      },
+      "set_strength": {
+        "expected_count": 2,
+        "predicted_count": 0,
+        "correct_count": 0,
+        "precision": null,
+        "recall": 0.0
+      }
+    }
+  },
+  "test_predictions": [
+    {
+      "prediction": -0.34401124715805054,
+      "label": -0.06757905334234238
+    },
+    {
+      "prediction": -0.3727358877658844,
+      "label": 0.04379403963685036
+    },
+    {
+      "prediction": -0.36615657806396484,
+      "label": -0.09685244411230087
+    },
+    {
+      "prediction": -0.3637222647666931,
+      "label": 0.028642676770687103
+    }
+  ],
+  "test_predicted_actions": [
+    [
+      {
+        "operation": "remove",
+        "source": 5348024557502489,
+        "target": 5348024557502529,
+        "edge_type": null,
+        "strength": 1.0
+      },
+      {
+        "operation": "remove",
+        "source": 5348024557502491,
+        "target": 5348024557502529,
+        "edge_type": null,
+        "strength": 1.0
+      }
+    ],
+    [
+      {
+        "operation": "remove",
+        "source": 5348024557502472,
+        "target": 5348024557502529,
+        "edge_type": null,
+        "strength": 1.0
+      },
+      {
+        "operation": "remove",
+        "source": 5348024557502474,
+        "target": 5348024557502529,
+        "edge_type": null,
+        "strength": 1.0
+      }
+    ],
+    [
+      {
+        "operation": "remove",
+        "source": 5348024557502524,
+        "target": 5348024557502529,
+        "edge_type": null,
+        "strength": 1.0
+      },
+      {
+        "operation": "remove",
+        "source": 5348024557502526,
+        "target": 5348024557502529,
+        "edge_type": null,
+        "strength": 1.0
+      }
+    ],
+    [
+      {
+        "operation": "remove",
+        "source": 5348024557502479,
+        "target": 5348024557502529,
+        "edge_type": null,
+        "strength": 1.0
+      },
+      {
+        "operation": "remove",
+        "source": 5348024557502481,
+        "target": 5348024557502529,
+        "edge_type": null,
+        "strength": 1.0
+      }
+    ]
+  ],
+  "gradient_coverage": {
+    "parameter_tensor_count": 20,
+    "gradient_connected_count": 20,
+    "finite_gradient_count": 20,
+    "nonzero_gradient_count": 20,
+    "disconnected_parameters": [],
+    "nonfinite_gradient_parameters": []
+  }
+}

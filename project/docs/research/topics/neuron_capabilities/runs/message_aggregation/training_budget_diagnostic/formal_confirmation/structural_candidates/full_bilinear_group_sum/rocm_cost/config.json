@@ -1,0 +1,14 @@
+{
+  "experiment_id": "message-aggregation-full-bilinear-rocm-device-cost",
+  "device": "cuda",
+  "candidate": "full_bilinear_group_role_sum",
+  "hidden_size": 32,
+  "seed": 310000,
+  "deterministic_algorithms": true,
+  "widths": [
+    64,
+    256,
+    1024,
+    4096
+  ]
+}

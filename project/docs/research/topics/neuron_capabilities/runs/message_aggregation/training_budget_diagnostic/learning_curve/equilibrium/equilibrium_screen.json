@@ -1,0 +1,19 @@
+{
+  "experiment_id": "message-aggregation-equilibrium-screen",
+  "device": "mps",
+  "seed": 8173,
+  "train_sizes": {
+    "set_sum": [4, 16, 64],
+    "grouped_binding": [2, 4, 8]
+  },
+  "samples_per_family": 512,
+  "validation_samples_per_family": 128,
+  "epoch_checkpoints": [8],
+  "batch_size": 32,
+  "capacity": 64,
+  "hidden_size": 32,
+  "learning_rate": 0.001,
+  "weight_decay": 0.0001,
+  "candidates": ["global_sum", "pyg_equilibrium"],
+  "evaluation_scope": "training_and_validation_only_no_sealed_test"
+}

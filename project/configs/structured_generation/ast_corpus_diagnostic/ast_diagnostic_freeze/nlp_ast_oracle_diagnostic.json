@@ -1,0 +1,51 @@
+{
+  "version": "nlp-ast-oracle-diagnostic-v12",
+  "status": "registered",
+  "diagnostic_id": "nlp-ast-oracle-live-v12",
+  "queue": "project/configs/other/general/conversation_capability_open/nlp_gpu_oracle_queue.json",
+  "device_index": 1,
+  "minimum_free_memory_mib": 24000,
+  "seeds": [
+    17,
+    29,
+    43
+  ],
+  "manifest": "project/configs/structured_generation/transition_grammar_ast/cfm_eval_fast/nlp_legacy60_eval_manifest.json",
+  "manifest_sha256": "9d920dc11715da5458304bceb88a497ef0ab2a5e5ae5f8783b9ee71a5c220e4c",
+  "corpus": ".data/nlp/tree_action_v1/corpus.jsonl",
+  "corpus_sha256": "ddd88fa919f088c9030703f26fc35a64048dd99d8dfe1baac198203b02ec9b3c",
+  "grammar": "project/configs/structured_generation/transition_grammar_ast/ast_grammar_transition/nlp_ast_transition_grammar_base.json",
+  "training_report": "outputs/reports/nlp_strict_ast_training_v12.json",
+  "checkpoints": {
+    "17": "outputs/train/nlp_hierarchical_tree_v12/seed_17.pt",
+    "29": "outputs/train/nlp_hierarchical_tree_v12/seed_29.pt",
+    "43": "outputs/train/nlp_hierarchical_tree_v12/seed_43.pt"
+  },
+  "checkpoint_sha256": {
+    "17": "a86ab7c804f3a21d047d19bba74953ea875c6d635faa85cd7ec6b725c61469a2",
+    "29": "187ca6608cbe616bcc0eb8adb863e7f7e9a67604b10038a5906f7a56a75fb664",
+    "43": "a9a568cbe484bcf8bf2921be8910fb110d0b26d10d7567e92dd2ad010664b979"
+  },
+  "test_content_allowed": false,
+  "controls": [
+    "target_free_baseline_trace",
+    "teacher_topology_teacher_lexical",
+    "teacher_topology_candidate_lexical",
+    "candidate_topology_teacher_lexical",
+    "candidate_topology_candidate_lexical"
+  ],
+  "budget": {
+    "max_wall_hours": 8,
+    "max_wall_seconds": 28800,
+    "max_wall_seconds_per_seed": 10800,
+    "max_attempts": 1,
+    "failure_policy": "retain_failure_and_stop_without_retry_or_best_of_n",
+    "minimum_free_memory_mib": 24000
+  },
+  "attempt_marker": "outputs/reports/nlp_ast_oracle_diagnostic_attempt_v12.json",
+  "lock_path": "outputs/.locks/nlp_gpu_training.lock",
+  "preflight_report": "outputs/reports/nlp_ast_oracle_diagnostic_preflight_v12.json",
+  "output": "outputs/reports/nlp_ast_oracle_decomposition_v12.json",
+  "runner_path": "project/scripts/experiments/research/run_nlp_ast_oracle_decomposition.py",
+  "runner_sha256": "02699d25e2ccc70fe8d50e41936d41e9e4777488e49e2174b42c1b38c873b55a"
+}

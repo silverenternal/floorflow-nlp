@@ -1,0 +1,63 @@
+{
+  "schema_version": "newera-neuron-graph-validation-v3",
+  "run_id": "neuron-graph-design-validation-v3-matched-controls-mps",
+  "purpose": "Evaluate parameter-matched and unmodified controls, segment-preserving topology perturbations, distance-binned gradient transport, and Apple MPS runtime/memory diagnostics.",
+  "task": {
+    "name": "modular_second_order_recurrence",
+    "rule": "x[t] = (x[t-1] + x[t-2]) mod vocab_size",
+    "sequence_length": 32,
+    "vocab_size": 32,
+    "training_examples": 32,
+    "validation_examples": 64,
+    "independent_data_seeds": true
+  },
+  "training": {
+    "seeds": [11, 23, 37, 41, 53, 67],
+    "steps": 80,
+    "optimizer": "AdamW",
+    "learning_rate": 0.003,
+    "batching": "full batch",
+    "device": "cpu",
+    "threads": 1,
+    "segment_count": 2,
+    "candidate_budgets": [16, 64, 256],
+    "parameter_matched_intermediate_size": 112
+  },
+  "conditions": [
+    {"name": "transformer_control", "enable_neuron_graph": false},
+    {"name": "graph_budget_16", "enable_neuron_graph": true, "candidate_budget": 16},
+    {"name": "graph_budget_64", "enable_neuron_graph": true, "candidate_budget": 64},
+    {"name": "graph_budget_256", "enable_neuron_graph": true, "candidate_budget": 256}
+  ],
+  "topology_perturbations": {
+    "matched_rewire": true,
+    "drop_fractions": [0.25, 0.5]
+  },
+  "memory_sampling_interval_microseconds": 2000,
+  "search_benchmark": {
+    "sequence_lengths": [32, 64, 128, 256, 512],
+    "candidate_budgets": [32, 128, 256],
+    "warmup_calls": 3,
+    "measured_calls": 15,
+    "device": "mps"
+  },
+  "model_latency": {
+    "sequence_lengths": [32, 64, 128],
+    "batch_size": 8,
+    "candidate_budget": 64,
+    "warmup_calls": 3,
+    "measured_calls": 10,
+    "device": "mps"
+  },
+  "limitations": [
+    "Synthetic algorithmic task only; no natural-language capability claim.",
+    "Six seeds and 80 updates remain a screening experiment, not a confirmatory study.",
+    "Training remains CPU-based; Apple MPS is measured for inference and candidate search only.",
+    "MPS exposes live allocated/driver memory here but not a per-model peak allocator statistic; these snapshots are not peak device memory.",
+    "MPS current/driver allocation peaks are sampled every 2 ms and can miss shorter spikes.",
+    "Host RSS peak is sampled every 2 ms and may miss shorter spikes; phase deltas include runtime state and are not isolated tensor allocations.",
+    "CPU profiler allocation sum and whole-process peak RSS are not per-model peak memory.",
+    "The parameter-matched control widens the Transformer feed-forward layer; parameter count matches but FLOPs and inductive bias do not.",
+    "Synthetic packed recurrence uses two independent causal segments; no natural-language capability claim."
+  ]
+}
